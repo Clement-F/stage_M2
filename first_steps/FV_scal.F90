@@ -22,24 +22,32 @@ program FiniteVolume
 
 
 !  declaration Riemann problem
-   real :: ud = 1, ug = -1
+   real :: ud = -1, ug = 2
 ! print *, 'declarer les valeurs gauche et droite du probleme de Riemann'
 ! read *, ud,ug 
 
 !  domaine spatial
-   integer, parameter   :: nx=100,  L=2
+   integer, parameter   :: nx=10,  L=2
    real, parameter      :: dx = real(L)/nx
-   real, dimension(nx) :: X = (/ ((i+0.5)*dx, i = 1,nx)  /)
+   real, dimension(nx)  :: X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
 
 !  domaine temporelle
-   integer, parameter   :: nt=10,   T=1
-   real,                :: t=0., dt_ref = real(T)/nt, dt
+   integer, parameter   :: nt=100,   T=1
+   real                 :: t_=0.0,  dt=0.0
 
 !  Flux Numeriques
-   real, dimension(nx)  :: FG,FD
+   real, dimension(nx)  :: FG(0:nx-1),FD(0:nx-1)
 
 !  Solution scalaire
-   real, dimension(nx)  :: U
+   real, dimension(nx)  :: U(0:nx-1)
+
+!  diverses valeurs numériques nécessaire
+   real     :: vitesse=0., cfl=1.
+   integer  :: n =0
+
+! =======================================================================================
+! =======================================================================================
+! =======================================================================================
 
 !  INIT
    where(X<real(L)/2)
@@ -48,14 +56,52 @@ program FiniteVolume
       U = ug
    end where
 
-!  diverses valeurs numériques nécessaire
-   real                 :: vitesse
+   ! print *, "init"
 
 
 !  boucle while sur le temps 
-   do while (t<real(T))
-      vitesse = max(abs(flux(U)))
+   do while (t_<real(T) .and. n<nt)
+      n = n +1
+
+      do i=1,nx
+         if(   abs(flux((U(i))))>vitesse )   vitesse = abs(flux((U(i))))
+      end do
+
+      ! print *, "vitesse max found : ", vitesse, ";"
+
+      if(vitesse >0) then
+         dt = min(cfl * dx /(2* vitesse), T-t_)
+      else
+         dt = cfl*dx 
+      end if
+      
+      ! print *, "dt : ", dt, ";"
+      print *, "loop : ",n," time :",t_," ; ","dt : ",dt, ";"
+
+      do i=0,nx-1
+         
+        if(i==0) then   
+               FG(0) = godunov(U(0),U(0))
+        else   
+               FG(i) = godunov(U(i-1),U(i))
+        end if
+        
+        if(i==nx-1) then   
+               FD(nx-1) = godunov(U(nx-1),U(nx-1))
+        else   
+               FD(i)  = godunov(U(i),U(i+1)) 
+        end if
+      end do
+
+      ! print *, "flux :"
+      ! print '(f8.2)', FG
+      ! print '(f8.2)', FD
+
+      U = U - ((dt/dx)* (FD-FG) )
+      t_ = t_ +dt
+
    end do
 
+print '(f10.2)',U 
 
 end program FiniteVolume
