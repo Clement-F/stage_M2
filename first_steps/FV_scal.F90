@@ -53,6 +53,10 @@ program FiniteVolume
    real     :: vitesse=0., cfl=1.
    integer  :: n =0
 
+!  file parameter
+   integer, parameter   :: numfile_sol=1, numfile_data=2
+   character(len=14)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt'
+   character(len=nx +6) :: save_format = '(100(f8.4, 4x))'
 ! =======================================================================================
 ! =======================================================================================
 ! =======================================================================================
@@ -84,7 +88,9 @@ program FiniteVolume
       end if
       
       ! print *, "dt : ", dt, ";"
-      print *, "loop : ",n," time :",t_," ; ","dt : ",dt, ";"
+      if(mod(n,10) ==0)  print *, "loop : ",n," time :",t_," ; ","dt : ",dt, ";"
+
+      open(unit=numfile_sol, file=nomfile_sol, form ='formatted', status ='old')
 
       do i=0,nx-1
          
@@ -106,10 +112,12 @@ program FiniteVolume
       ! print '(f8.2)', FD
 
       U = U - ((dt/dx)* (FD-FG) )
+      write(unit=numfile_sol, fmt=save_format) U
+      
       t_ = t_ +dt
 
    end do
 
-print '(f10.2)',U 
+print save_format,U 
 
 end program FiniteVolume
