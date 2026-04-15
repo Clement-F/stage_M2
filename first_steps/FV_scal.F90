@@ -19,10 +19,10 @@ program FiniteVolume
 
 
    interface
-      function rusanov(u_,v_)
+      function godunov(u_,v_)
       real, intent (in) :: u_,v_
-      real              :: rusanov
-      end function rusanov
+      real              :: godunov
+      end function godunov
    end interface
 
 ! loop int   
@@ -40,7 +40,7 @@ program FiniteVolume
    real, dimension(nx)  :: X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
 
 !  domaine temporelle
-   integer, parameter   :: nt=1000,   T=1.5
+   integer, parameter   :: nt=500,   T=1.5
    real                 :: t_=0.0,  dt=0.0
 
 !  Flux Numeriques
@@ -89,15 +89,15 @@ program FiniteVolume
       do i=0,nx-1
          
         if(i==0) then   
-               FG(0) = rusanov(U(0),U(0))
+               FG(0) = godunov(U(0),U(0))
         else   
-               FG(i) = rusanov(U(i-1),U(i))
+               FG(i) = godunov(U(i-1),U(i))
         end if
         
         if(i==nx-1) then   
-               FD(nx-1) = rusanov(U(nx-1),U(nx-1))
+               FD(nx-1) = godunov(U(nx-1),U(nx-1))
         else   
-               FD(i)  = rusanov(U(i),U(i+1)) 
+               FD(i)  = godunov(U(i),U(i+1)) 
         end if
       end do
 

@@ -21,7 +21,7 @@ function godunov(u_,v_)
    real              :: godunov
    real              :: flux
 
-   if(u_>v_) then
+   if(u_<v_) then
       godunov = min(flux(u_), flux(v_))
       if(u_*v_<=0) godunov =0
    else 
