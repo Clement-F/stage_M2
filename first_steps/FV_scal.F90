@@ -30,7 +30,7 @@ program FiniteVolume
 
 
 !  declaration Riemann problem
-   real :: ud = 1, ug = -2
+   real :: ud = -1, ug = 2
 ! print *, 'declarer les valeurs gauche et droite du probleme de Riemann'
 ! read *, ud,ug 
 
