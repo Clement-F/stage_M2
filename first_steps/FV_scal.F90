@@ -19,10 +19,10 @@ program FiniteVolume
 
 
    interface
-      function Roe(u_,v_)
+      function godunov(u_,v_)
       real, intent (in) :: u_,v_
-      real              :: Roe
-      end function Roe
+      real              :: godunov
+      end function godunov
    end interface
 
 ! loop int   
@@ -33,7 +33,7 @@ program FiniteVolume
    real :: ud = 1, ug = -2
 
 !  domaine spatial
-   integer, parameter   :: nx=1000,  L=1
+   integer, parameter   :: nx=8000,  L=1
    real, parameter      :: dx = real(L)/nx
    real, dimension(nx)  :: X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
 
@@ -75,7 +75,7 @@ program FiniteVolume
 ! print *, 'declarer les valeurs gauche et droite du probleme de Riemann'
 ! read *, ud,ug 
 
-   write(save_format, '( "(" i5 "(f8.4, 4x, f8.4 /) )" )') nx 
+   write(save_format, '( "(" i5 "(f10.6, 1x, f12.8 /) )" )') nx 
 
    print *,save_format
 
@@ -108,11 +108,11 @@ program FiniteVolume
       do i=0,nx
          
         if(i==0) then   
-               F(0)  = Roe(U(0),U(0))
+               F(0)  = godunov(U(0),U(0))
         else if (i==nx) then   
-               F(nx) = Roe(U(nx-1),U(nx-1))
+               F(nx) = godunov(U(nx-1),U(nx-1))
         else   
-               F(i)  = Roe(U(i-1),U(i))
+               F(i)  = godunov(U(i-1),U(i))
         end if
         
       end do

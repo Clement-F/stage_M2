@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 with open('file_data.txt') as f:
     lines = f.readlines()
 
-nt = int(lines[0][6:11])
-nx = int(lines[1][6:11])
+nt = int(lines[0][5:11])
+nx = int(lines[1][5:11])
 sm = int(lines[2][12:16])
 
 T=[]
@@ -27,21 +27,25 @@ def sol_exacte(x,t):
     else : return 0.5
 
 U = np.zeros((sm,nx))
+err = np.zeros((sm,nx))
+err_L2 = np.zeros(sm)
 
 for k in range(sm):
     print(k)
     for i in range(1,(nx)):
-        X[i] = lines[k*(nx+1) + i][1:10]
-        U_t[k][i] = lines[k*(nx+1) +i][10:21]
-        
+        print (k*(nx+1) + i)
+        X[i] = lines[k*(nx+1) + i][3:12]
+        U_t[k][i] = lines[k*(nx+1) +i][12:24]
         U[k][i] = sol_exacte(X[i],T[k])
         
+        err[k][i] = abs(U_t[k][i] - U[k][i])**2
+                        
         
-        # erreur pour burgers 
-        
-        
-    
-    plt.plot(X,np.abs(U_t[k]- U[k]),'r')
+    err_L2[k] = np.sqrt(sum(err[k][:])) * 1/nx
+    plt.plot(X,err[k],'r')
     plt.plot(X,U[k],'g')
     plt.plot(X,U_t[k],'b')
     plt.show()
+
+print(max(err_L2))
+    
