@@ -1,24 +1,47 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+with open('file_data.txt') as f:
+    lines = f.readlines()
+
+nt = int(lines[0][6:11])
+nx = int(lines[1][6:11])
+sm = int(lines[2][12:16])
+
+T=[]
+for k in range(3,3+sm):
+    T.append(float(lines[k][14:22]))
+
 with open('file_sol.txt') as f:
     lines = f.readlines()
 
-nt = len(lines)
-nx = len(lines[0])
-U_t = np.zeros((nt,int(nx/12)))
+U_t = np.zeros((sm,nx))
+X   = np.zeros(nx)
+dec = 0
 
-for k in range(0,nt):
-    U_t[k,0]= (float(lines[k][1:9]))
+def sol_exacte(x,t):
+    if(x<0.3-t/2): return 0
+    elif(x<0.7-t): return -1
+    a = (x-0.7)/t
+    if( (-1<a) and (a<0.5)): return a 
+    else : return 0.5
 
-    for i in range(9,nx,8+4):
-        # print(i,(lines[k][i:i+8+4]) )
-        # print(i,float(lines[k][i:i+8+4]) )
+U = np.zeros((sm,nx))
 
-        U_t[k,int((i-1)/(8+4))] =(float(lines[k][i:i+8+4]))
-
-X = np.linspace(0,1,int(nx/12))
-
-for i in range(0,nt,10):
-    plt.plot(X,U_t[i])
+for k in range(sm):
+    print(k)
+    for i in range(1,(nx)):
+        X[i] = lines[k*(nx+1) + i][1:10]
+        U_t[k][i] = lines[k*(nx+1) +i][10:21]
+        
+        U[k][i] = sol_exacte(X[i],T[k])
+        
+        
+        # erreur pour burgers 
+        
+        
+    
+    plt.plot(X,np.abs(U_t[k]- U[k]),'r')
+    plt.plot(X,U[k],'g')
+    plt.plot(X,U_t[k],'b')
     plt.show()
