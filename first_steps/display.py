@@ -31,12 +31,11 @@ err = np.zeros((sm,nx))
 err_L2 = np.zeros(sm)
 
 for k in range(sm):
-    print(k)
     for i in range(1,(nx)):
-        print (k*(nx+1) + i)
-        X[i] = lines[k*(nx+1) + i][3:12]
-        U_t[k][i] = lines[k*(nx+1) +i][12:24]
-        U[k][i] = sol_exacte(X[i],T[k])
+        X[i] = lines[k*(nx+1) + i][3:11]
+        U_t[k][i]   = lines[k*(nx+1) +i][11:23]
+        U[k][i]     = lines[k*(nx+1) +i][23:35]
+        #U[k][i] = sol_exacte(X[i],T[k])
         
         err[k][i] = abs(U_t[k][i] - U[k][i])**2
                         

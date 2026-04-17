@@ -25,20 +25,28 @@ program FiniteVolume
       end function godunov
    end interface
 
+
+   interface
+      function Newton_search(x,t)
+      real, intent (in) :: x,t
+      real              :: Newton_search
+      end function Newton_search
+   end interface
+
 ! loop int   
    integer:: i,j,k
 
-
-!  declaration Riemann problem
-   real :: ud = 1, ug = -2
+!  constants
+   real, parameter      :: pi = acos(-1.)
 
 !  domaine spatial
-   integer, parameter   :: nx=8000,  L=1
+   integer, parameter   :: nx=10000,  L=1
    real, parameter      :: dx = real(L)/nx
    real, dimension(nx)  :: X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
 
 !  domaine temporelle
-   integer, parameter   :: nt=500,   T=1
+   integer, parameter   :: nt=500
+   real,parameter       :: T= 1.
    real                 :: t_=0.0,  dt=0.0
 
 !  Flux Numeriques
@@ -46,7 +54,7 @@ program FiniteVolume
    real, dimension(nx+1):: F(0:nx)
 
 !  Solution scalaire
-   real, dimension(nx)  :: U(0:nx-1)
+   real, dimension(nx)  :: U(0:nx-1), U_ex(0:nx-1)
 
 !  diverses valeurs numériques nécessaire
    real     :: vitesse=0., cfl=1.
@@ -55,8 +63,8 @@ program FiniteVolume
 !  file parameter
    integer, parameter   :: numfile_sol=1, numfile_data=2
    integer              :: n_imp=0
-   real,dimension (2,nx):: sol
-   real                 :: t_imp=real(T)/10
+   real,dimension (3,nx):: sol
+   real                 :: t_imp=T/real(10)
    character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt'
    character(len=32)    :: str,save_format
 ! =======================================================================================
@@ -64,18 +72,18 @@ program FiniteVolume
 ! =======================================================================================
 
 !  INIT
-   where(X<0.3) U=0
-   where(X>0.7) U=0.5
-   where(X>0.3 .and. X<0.7) U=-1
+   ! where(X<0.3) U=0
+   ! where(X>0.7) U=0.5
+   ! where(X>0.3 .and. X<0.7) U=-1
 
-   ! U = sin(2*3.1415 *X)
+   U = sin(2*pi*X)
 
    ! print *, "init"
    
 ! print *, 'declarer les valeurs gauche et droite du probleme de Riemann'
 ! read *, ud,ug 
 
-   write(save_format, '( "(" i5 "(f10.6, 1x, f12.8 /) )" )') nx 
+   write(save_format, '("(" i5 "(f10.6, f12.8, f12.8 /))")') nx 
 
    print *,save_format
 
@@ -120,10 +128,19 @@ program FiniteVolume
       U(:) = U(:) - ((dt/dx)* (F(1:nx)-F(0:nx-1)) )
 
       if(t_>   n_imp*t_imp)  then
+
+         print *, "exact sol calcul"
+         do i=0,nx-1
+            U_ex(i) = Newton_search(X(i),t_)
+         end do
+
+         print *, "exact sol calculated"
+
          print *, "loop : ",n,", n_imp",n_imp,", time :",t_," ; ","dt : ",dt, ";"
          n_imp = n_imp +1
          sol(1,:)=X
          sol(2,:)=U
+         sol(3,:)=U_ex
          write(unit=numfile_sol,  fmt=save_format) sol
          write(unit=numfile_data, fmt='("time_save =" f10.6)')  t_
       end if

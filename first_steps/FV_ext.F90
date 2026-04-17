@@ -15,6 +15,15 @@ function flux_p(u_) result(f)
    return
 end function flux_p
 
+
+function flux_pp(u_) result(f)
+   implicit none
+   real, intent(in)  :: u_
+   real              :: f
+   f = 1
+   return
+end function flux_pp
+
 function godunov(u_,v_)
    implicit none
    real, intent(in)  :: u_,v_
@@ -62,3 +71,60 @@ function Roe(u_,v_)
     end if
    return
 end function Roe
+
+function U_init(x) result(U)
+    implicit none
+    real, intent(in)    :: x
+    real                :: U
+
+    U = sin(2*3.1415* x)
+    return 
+end function U_init
+
+
+function U_init_p(x) result(U)
+    implicit none
+    real, intent(in)    :: x
+    real                :: U
+
+    U = 2*3.1415* cos(2*3.1415* x)
+    return 
+end function U_init_p
+
+function Newton_search(x,t) result(u)
+    implicit none
+    real, intent(in)    :: x,t
+    real                :: U_init, U_init_p
+    real                :: flux_p, flux_pp
+    real                :: xk, err, u, epsi = 1e-10
+    real,parameter      :: pi = acos(-1.)
+    integer             :: n=0
+
+    n = 0
+    err = abs(flux_p(U_init(xk))*t+ xk-x)
+    ! print *, err, epsi
+    xk = x
+
+    do while(err>epsi .and. n<50)
+        ! print *, n, err
+        xk = xk -   (flux_p(U_init(xk))*t + xk-x)/(flux_pp(U_init(xk))*U_init_p(xk)*t +1)
+        err =    abs(flux_p(U_init(xk))*t + xk-x)
+        ! if(t>1./(2*pi)) then
+            if(x<0.5 .and. xk>0.5) then 
+                xk =0.5 - 1e-6
+                ! print *, "rectification gauche "
+            end if
+            if(x>0.5 .and. xk<0.5) then
+                xk =0.5 + 1e-6
+                ! print *, "rectification droite "
+            end if
+        ! end if
+        n = n+1
+    end do
+    
+    ! print *, n, err
+
+    u = U_init(xk)
+    return
+
+end function Newton_search
