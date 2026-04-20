@@ -17,6 +17,13 @@ program FiniteVolume
       end function flux_p
    end interface
 
+   interface
+      function U_init(x_)
+      real,dimension(:), intent (in) :: x_
+      real              :: U_init
+      end function U_init
+   end interface
+
 
    interface
       function godunov(u_,v_)
@@ -91,7 +98,7 @@ program FiniteVolume
    t_imp=T/real(10)
 
 
-   U = sin(2*pi*X)
+   U = U_init(X)
 
    ! print *, "init"
    
@@ -145,9 +152,7 @@ program FiniteVolume
          print *, "exact sol calcul"
          do i=0,nx-1
             ! U_ex(i) = Newton_search(X(i),t_)
-            ! print *, X(i)
             call pied_charact(X(i),t_,U_ex(i))
-            ! print *, U_ex(i)
          end do
 
          print *, "exact sol calculated"

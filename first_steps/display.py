@@ -34,7 +34,7 @@ for k in range(sm):
     for i in range(1,(nx)):
         X[i] = lines[k*(nx+1) + i][3:11]
         U_t[k][i]   = lines[k*(nx+1) +i][11:23]
-        U[k][i]     = lines[k*(nx+1) +i][23:35]
+        U[k][i]     = lines[k*(nx+1) +i][23:35] 
         #U[k][i] = sol_exacte(X[i],T[k])
         
         err[k][i] = abs(U_t[k][i] - U[k][i])**2

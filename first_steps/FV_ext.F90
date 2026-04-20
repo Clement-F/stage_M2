@@ -3,7 +3,8 @@ function flux(u_) result(f)
    implicit none
    real, intent(in)  :: u_
    real              :: f
-   f = 0.5 * u_**2
+   ! f = 0.5 * u_**2
+   f = 4*u_**2 /(4*u_**2 + (1-u_)**2)
    return
 end function flux
 
@@ -11,7 +12,8 @@ function flux_p(u_) result(f)
    implicit none
    real, intent(in)  :: u_
    real              :: f
-   f = u_
+   ! f = u_
+   f = 8*u_* (4*u_**2 + (1-u_)**2 - u_*(4*u_-(1-u_)))/(4*u_**2 + (1-u_)**2)**2 
    return
 end function flux_p
 
@@ -71,9 +73,13 @@ function U_init(x) result(U)
     implicit none
     real, intent(in)    :: x
     real                :: U
+    
 
-    U = sin(2*3.1415* x)
-    return 
+   !  U = sin(2*3.1415* x)
+   U = 0
+   if (X<0.5) U =1
+
+   return 
 end function U_init
 
 
@@ -82,7 +88,8 @@ function U_init_p(x) result(U)
     real, intent(in)    :: x
     real                :: U
 
-    U = 2*3.1415* cos(2*3.1415* x)
+   !  U = 2*3.1415* cos(2*3.1415* x)
+   U = 0
     return 
 end function U_init_p
 
@@ -104,7 +111,7 @@ function Newton_search(x,t) result(u)
         ! print *, n, err
         xk = xk -   (flux_p(U_init(xk))*t + xk-x)/(flux_pp(U_init(xk))*U_init_p(xk)*t +1)
         err =    abs(flux_p(U_init(xk))*t + xk-x)
-        ! if(t>1./(2*pi)) then
+        if(t>1./(2*pi)) then
             if(x<0.5 .and. xk>0.5) then 
                 xk =0.5 - 1e-6
                 ! print *, "rectification gauche "
@@ -113,11 +120,10 @@ function Newton_search(x,t) result(u)
                 xk =0.5 + 1e-6
                 ! print *, "rectification droite "
             end if
-        ! end if
+        end if
         n = n+1
     end do
     
-    ! print *, n, err
 
     u = U_init(xk)
     return
@@ -149,11 +155,9 @@ function dicho (fct,xd,xf)
    a=xd; b=xf; 
 
    n =0
-   ! print*, 'new guess'
    do while(abs(fct(c))>1e-6 .and. n<100 )
       c=(a+b)/2.
       t = sign(1.,fct(c)*fct(a))
-      ! print *,t
       if(t <0) then 
          b=c
       else 
@@ -186,7 +190,6 @@ subroutine pied_charact(x,t,sol)
       real  :: flux_p, U_init
       real  :: g
       g = flux_p(U_init(x_))*t + x_ -x
-      ! print *,'g=',g
       return 
    end function g
 
