@@ -35,24 +35,25 @@ program FiniteVolume
 
 ! loop int   
    integer:: i,j,k
+   character(len=20) :: c1
 
 !  constants
    real, parameter      :: pi = acos(-1.)
 
 !  domaine spatial
-   integer              :: nx,  L
-   real                 :: dx 
-   real, dimension(:), allocatable   :: X
+   integer              :: nx
+   real                 :: dx, L
+   real, dimension(:), Pointer   :: X
 !  domaine temporelle
    integer, parameter   :: nt=500
    real       :: T
    real                 :: t_=0.0,  dt=0.0
 
 !  Flux Numeriques
-   real, dimension(:),allocatable   :: F
+   real, dimension(:),Pointer   :: F
 
 !  Solution scalaire
-   real, dimension(:),allocatable   :: U, U_ex
+   real, dimension(:),Pointer   :: U, U_ex
 
 !  diverses valeurs numériques nécessaire
    real     :: vitesse=0., cfl=1.
@@ -61,7 +62,7 @@ program FiniteVolume
 !  file parameter
    integer, parameter   :: numfile_sol=1, numfile_data=2, numfile_param=3
    integer              :: n_imp=0
-   real,dimension (:,:),allocatable :: sol
+   real,dimension (:,:),Pointer :: sol
    real                 :: t_imp
    character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt', nomfile_param = 'param.txt'
    character(len=32)    :: str,save_format
@@ -76,16 +77,17 @@ program FiniteVolume
    
    open(unit=numfile_param, file=nomfile_param, form ='formatted', status ='old')
 
-   read(numfile_param,  end=999), nx
-   read(numfile_param,  end=999), L
-   read(numfile_param,  end=999), T
+   read(numfile_param,  *) nx;   print *, nx
+   read(numfile_param,  *) L;    print *, L
+   read(numfile_param,  *) T;    print *, T
 
    dx = real(L)/nx
-   allocate(X (nx))
-   X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
-   allocate(F (nx))
-   allocate(U (nx),  U_ex (nx))
+
+   allocate(X(nx));   X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
+   allocate(F(nx))
+   allocate(U(nx),  U_ex(nx))
    allocate(sol (3,nx))
+
    t_imp=T/real(10)
 
 
