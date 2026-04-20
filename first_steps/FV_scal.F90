@@ -40,32 +40,30 @@ program FiniteVolume
    real, parameter      :: pi = acos(-1.)
 
 !  domaine spatial
-   integer, parameter   :: nx=10000,  L=1
-   real, parameter      :: dx = real(L)/nx
-   real, dimension(nx)  :: X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
-
+   integer              :: nx,  L
+   real                 :: dx 
+   real, dimension(:), allocatable   :: X
 !  domaine temporelle
    integer, parameter   :: nt=500
-   real,parameter       :: T= 1.
+   real       :: T
    real                 :: t_=0.0,  dt=0.0
 
 !  Flux Numeriques
-   real, dimension(nx)  :: FG(0:nx-1),FD(0:nx-1)
-   real, dimension(nx+1):: F(0:nx)
+   real, dimension(:),allocatable   :: F
 
 !  Solution scalaire
-   real, dimension(nx)  :: U(0:nx-1), U_ex(0:nx-1)
+   real, dimension(:),allocatable   :: U, U_ex
 
 !  diverses valeurs numériques nécessaire
    real     :: vitesse=0., cfl=1.
    integer  :: n =0
 
 !  file parameter
-   integer, parameter   :: numfile_sol=1, numfile_data=2
+   integer, parameter   :: numfile_sol=1, numfile_data=2, numfile_param=3
    integer              :: n_imp=0
-   real,dimension (3,nx):: sol
-   real                 :: t_imp=T/real(10)
-   character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt'
+   real,dimension (:,:),allocatable :: sol
+   real                 :: t_imp
+   character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt', nomfile_param = 'param.txt'
    character(len=32)    :: str,save_format
 ! =======================================================================================
 ! =======================================================================================
@@ -75,6 +73,21 @@ program FiniteVolume
    ! where(X<0.3) U=0
    ! where(X>0.7) U=0.5
    ! where(X>0.3 .and. X<0.7) U=-1
+   
+   open(unit=numfile_param, file=nomfile_param, form ='formatted', status ='old')
+
+   read(numfile_param,  end=999), nx
+   read(numfile_param,  end=999), L
+   read(numfile_param,  end=999), T
+
+   dx = real(L)/nx
+   allocate(X (nx))
+   X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
+   allocate(F (nx))
+   allocate(U (nx),  U_ex (nx))
+   allocate(sol (3,nx))
+   t_imp=T/real(10)
+
 
    U = sin(2*pi*X)
 
