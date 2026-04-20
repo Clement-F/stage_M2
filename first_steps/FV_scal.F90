@@ -77,15 +77,15 @@ program FiniteVolume
    
    open(unit=numfile_param, file=nomfile_param, form ='formatted', status ='old')
 
-   read(numfile_param,  *) nx;   print *, nx
-   read(numfile_param,  *) L;    print *, L
-   read(numfile_param,  *) T;    print *, T
+   read(numfile_param,  *) nx;   
+   read(numfile_param,  *) L;   
+   read(numfile_param,  *) T;    
 
    dx = real(L)/nx
 
    allocate(X(nx));   X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
-   allocate(F(nx))
-   allocate(U(nx),  U_ex(nx))
+   allocate(F(0:nx))
+   allocate(U(0:nx-1),  U_ex(0:nx-1))
    allocate(sol (3,nx))
 
    t_imp=T/real(10)
@@ -99,8 +99,6 @@ program FiniteVolume
 ! read *, ud,ug 
 
    write(save_format, '("(" i5 "(f10.6, f12.8, f12.8 /))")') nx 
-
-   print *,save_format
 
    open(unit=numfile_data, file=nomfile_data, form ='formatted', status ='old')
    
@@ -146,7 +144,10 @@ program FiniteVolume
 
          print *, "exact sol calcul"
          do i=0,nx-1
-            U_ex(i) = Newton_search(X(i),t_)
+            ! U_ex(i) = Newton_search(X(i),t_)
+            ! print *, X(i)
+            call pied_charact(X(i),t_,U_ex(i))
+            ! print *, U_ex(i)
          end do
 
          print *, "exact sol calculated"

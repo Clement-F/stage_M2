@@ -52,16 +52,11 @@ function rusanov(u_,v_)
    return
 end function rusanov
 
-
-
-
 function Roe(u_,v_)
    implicit none
    real, intent(in)  :: u_,v_
    real              :: Roe
    real              :: flux, flux_p
-
-! 0.5*(f(u)+f(v))-0.5*(np.abs(f_p(u))*(v-u)*(u==v)+np.sign(v-u)*np.abs(f(v)-f(u))*(u!=v))
 
     Roe = 0.5*(flux(u_)+flux(v_))
     if(abs(u_-v_)<10e-10) then
@@ -128,3 +123,71 @@ function Newton_search(x,t) result(u)
     return
 
 end function Newton_search
+
+function dicho (fct,xd,xf)
+
+   real, intent(in) :: xd,xf
+   real :: dicho
+
+   interface
+   function fct(x);   real,intent(in) :: x; real fct; end function fct
+   end interface
+
+   real :: a,b,c
+   real :: t
+   integer :: n = 0
+
+   if(abs(fct(xf))<1e-6) then 
+      dicho = xf
+      return
+   else if(abs(fct(xd))<1e-6) then
+      dicho = xd
+      return
+   end if
+
+
+   a=xd; b=xf; 
+
+   n =0
+   ! print*, 'new guess'
+   do while(abs(fct(c))>1e-6 .and. n<100 )
+      c=(a+b)/2.
+      t = sign(1.,fct(c)*fct(a))
+      ! print *,t
+      if(t <0) then 
+         b=c
+      else 
+         a=c
+      end if
+      n = n+1
+   end do
+
+   dicho = c
+   return
+
+end function dicho
+
+subroutine pied_charact(x,t,sol)
+
+   real, intent(in) :: x,t
+   real, intent(out):: sol
+   real  :: U_init
+   ! print *,'pied caract'
+   if(t<1./(2*pi)-1e-2) then
+      if(x<=0.5)  sol = U_init(dicho(g,0.,0.5))
+      if(x>0.5)   sol = U_init(dicho(g,0.5,1.))
+   else       
+      if(x<=0.5)  sol = U_init(dicho(g,0.,0.5-1e-3))
+      if(x>0.5)   sol = U_init(dicho(g,0.5+1e-3,1.))
+   end if
+   contains
+   function g(x_)
+      real,intent(in) :: x_
+      real  :: flux_p, U_init
+      real  :: g
+      g = flux_p(U_init(x_))*t + x_ -x
+      ! print *,'g=',g
+      return 
+   end function g
+
+end subroutine pied_charact
