@@ -30,9 +30,9 @@ U = np.zeros((sm,nx))
 err = np.zeros((sm,nx))
 err_L2 = np.zeros(sm)
 
-for k in range(sm):
-    for i in range(1,(nx)):
-        X[i] = lines[k*(nx+1) + i][3:11]
+for k in range(0,sm):
+    for i in range(0,(nx)):
+        X[i] = lines[k*(nx+1) + i][1:11]
         U_t[k][i]   = lines[k*(nx+1) +i][11:23]
         U[k][i]     = lines[k*(nx+1) +i][23:35] 
         #U[k][i] = sol_exacte(X[i],T[k])
@@ -41,8 +41,8 @@ for k in range(sm):
                         
         
     err_L2[k] = np.sqrt(sum(err[k][:])) * 1/nx
-    plt.plot(X,err[k],'r')
-    plt.plot(X,U[k],'g')
+   # plt.plot(X,err[k],'r')
+   # plt.plot(X,U[k],'g')
     plt.plot(X,U_t[k],'b')
     plt.show()
 

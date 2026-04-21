@@ -5,6 +5,7 @@ function flux(u_) result(f)
    real              :: f
    ! f = 0.5 * u_**2
    f = 4*u_**2 /(4*u_**2 + (1-u_)**2)
+   ! print *,f,u_, 'f'
    return
 end function flux
 
@@ -14,6 +15,7 @@ function flux_p(u_) result(f)
    real              :: f
    ! f = u_
    f = 8*u_* (4*u_**2 + (1-u_)**2 - u_*(4*u_-(1-u_)))/(4*u_**2 + (1-u_)**2)**2 
+   ! print *,f,u_, 'f_p'
    return
 end function flux_p
 
@@ -26,18 +28,49 @@ function flux_pp(u_) result(f)
    return
 end function flux_pp
 
-function godunov(u_,v_)
+function godunov(u_,v_, not_convex)
    implicit none
    real, intent(in)  :: u_,v_
    real              :: godunov
    real              :: flux
 
-   if(u_<v_) then
-      godunov = min(flux(u_), flux(v_))
-      if(u_*v_<=0) godunov =0
+   
+   logical, intent(in), optional :: not_convex
+   real              :: step
+   integer           :: i 
+   real, dimension(0:100):: X
+
+   if( (.not. present(not_convex)) .or. (.not. not_convex) ) then
+      if(u_<v_) then
+         godunov = min(flux(u_), flux(v_))
+         if(u_*v_<=0) godunov =0
+      else 
+         godunov = max(flux(u_), flux(v_))
+      end if
    else 
-      godunov = max(flux(u_), flux(v_))
+      if(u_<v_) then
+         step = (v_-u_)/100
+         X = (/  (u_+ (i)*step, i = 0,100)  /)
+         godunov = flux(u_)
+
+         do i=0,100
+            ! print *,u_,v_,X(i), flux(X(i)), godunov, 'min'
+            if(flux(X(i))<godunov) godunov = flux(X(i))
+         end do
+
+      else 
+         step = -(v_-u_)/100
+         X = (/  (u_+ (i)*step, i = 0,100)  /)
+         godunov = flux(u_)
+
+         do i=0,100
+            ! if(godunov>0) print *,u_,v_,X(i), flux(X(i)), godunov, 'max'
+            if(flux(X(i))>godunov) godunov = flux(X(i))
+         end do
+
+      end if
    end if
+   
 
    return
 end function godunov

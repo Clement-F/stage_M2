@@ -26,8 +26,9 @@ program FiniteVolume
 
 
    interface
-      function godunov(u_,v_)
+      function godunov(u_,v_, not_convex)
       real, intent (in) :: u_,v_
+      logical, intent(in), optional :: not_convex
       real              :: godunov
       end function godunov
    end interface
@@ -49,27 +50,27 @@ program FiniteVolume
 
 !  domaine spatial
    integer              :: nx
-   real                 :: dx, L
-   real, dimension(:), Pointer   :: X
+   real                 :: dx, xd, xf
+   real, dimension(:),  Pointer :: X
 !  domaine temporelle
    integer, parameter   :: nt=500
    real       :: T
    real                 :: t_=0.0,  dt=0.0
 
 !  Flux Numeriques
-   real, dimension(:),Pointer   :: F
+   real, dimension(:),  Pointer :: F
 
 !  Solution scalaire
-   real, dimension(:),Pointer   :: U, U_ex
+   real, dimension(:),  Pointer :: U, U_ex
+   real,dimension (:,:),Pointer :: sol
 
 !  diverses valeurs numériques nécessaire
-   real     :: vitesse=0., cfl=1.
+   real     :: vitesse=0., cfl
    integer  :: n =0
 
 !  file parameter
    integer, parameter   :: numfile_sol=1, numfile_data=2, numfile_param=3
    integer              :: n_imp=0
-   real,dimension (:,:),Pointer :: sol
    real                 :: t_imp
    character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt', nomfile_param = 'param.txt'
    character(len=32)    :: str,save_format
@@ -84,21 +85,23 @@ program FiniteVolume
    
    open(unit=numfile_param, file=nomfile_param, form ='formatted', status ='old')
 
-   read(numfile_param,  *) nx;   
-   read(numfile_param,  *) L;   
-   read(numfile_param,  *) T;    
+   read(numfile_param,  *) nx;  
+   read(numfile_param,  *) xd;  
+   read(numfile_param,  *) xf;      
+   read(numfile_param,  *) T;     
+   read(numfile_param,  *) cfl;      
 
-   dx = real(L)/nx
+   dx = real((xf-xd))/nx
 
-   allocate(X(nx));   X(0:nx-1) = (/ ((i+0.5)*dx, i = 0,nx-1)  /)
+   allocate(X(nx));   X(0:nx-1) = (/  (xd+ (i+0.5)*dx, i = 0,nx-1)  /)
    allocate(F(0:nx))
    allocate(U(0:nx-1),  U_ex(0:nx-1))
    allocate(sol (3,nx))
 
    t_imp=T/real(10)
 
-
-   U = U_init(X)
+   U =0
+   where (X>-0.5 .and. X<0) U =1
 
    ! print *, "init"
    
@@ -136,18 +139,18 @@ program FiniteVolume
       do i=0,nx
          
         if(i==0) then   
-               F(0)  = godunov(U(0),U(0))
+               F(0)  = godunov(U(0),U(0),       not_convex=.true.)
         else if (i==nx) then   
-               F(nx) = godunov(U(nx-1),U(nx-1))
+               F(nx) = godunov(U(nx-1),U(nx-1), not_convex=.true.)
         else   
-               F(i)  = godunov(U(i-1),U(i))
+               F(i)  = godunov(U(i-1),U(i),     not_convex=.true.)
         end if
         
       end do
 
       U(:) = U(:) - ((dt/dx)* (F(1:nx)-F(0:nx-1)) )
 
-      if(t_>   n_imp*t_imp)  then
+      if(t_ >=  n_imp*t_imp)  then
 
          print *, "exact sol calcul"
          do i=0,nx-1
@@ -159,9 +162,9 @@ program FiniteVolume
 
          print *, "loop : ",n,", n_imp",n_imp,", time :",t_," ; ","dt : ",dt, ";"
          n_imp = n_imp +1
-         sol(1,:)=X
-         sol(2,:)=U
-         sol(3,:)=U_ex
+         sol(1,:)=X(0:nx-1)
+         sol(2,:)=U(0:nx-1)
+         sol(3,:)=U_ex(0:nx-1)
          write(unit=numfile_sol,  fmt=save_format) sol
          write(unit=numfile_data, fmt='("time_save =" f10.6)')  t_
       end if
