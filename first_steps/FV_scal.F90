@@ -68,11 +68,16 @@ program FiniteVolume
    real     :: vitesse=0., cfl
    integer  :: n =0
 
+!  error variables
+   real     :: err_L1=0, err_L2=0, err_Li=0
+
+
 !  file parameter
-   integer, parameter   :: numfile_sol=1, numfile_data=2, numfile_param=3
-   integer              :: n_imp=0
+   integer, parameter   :: numfile_sol=1, numfile_data=2, numfile_param=3, numfile_err =4, numfile_conv =5
+   integer              :: n_imp=0, n_imp_max
    real                 :: t_imp
-   character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt', nomfile_param = 'param.txt'
+   character(len=32)    :: nomfile_sol = 'file_sol.txt',   nomfile_data = 'file_data.txt', nomfile_param = 'param.txt', nomfile_err = 'error_file.txt', &
+                           nomfile_conv = 'convergence_err.txt'
    character(len=32)    :: str,save_format
 ! =======================================================================================
 ! =======================================================================================
@@ -89,7 +94,8 @@ program FiniteVolume
    read(numfile_param,  *) xd;  
    read(numfile_param,  *) xf;      
    read(numfile_param,  *) T;     
-   read(numfile_param,  *) cfl;      
+   read(numfile_param,  *) cfl;   
+   read(numfile_param,  *) n_imp_max;     
 
    dx = real((xf-xd))/nx
 
@@ -98,10 +104,11 @@ program FiniteVolume
    allocate(U(0:nx-1),  U_ex(0:nx-1))
    allocate(sol (3,nx))
 
-   t_imp=T/real(10)
+   t_imp=T/real(n_imp_max)
 
-   U =0
-   where (X>-0.5 .and. X<0) U =1
+   ! U =0
+   ! where (X>-0.5 .and. X<0) U =1
+   U = sin(2*pi*X)
 
    ! print *, "init"
    
@@ -134,16 +141,17 @@ program FiniteVolume
       end if
       
 
-      open(unit=numfile_sol, file=nomfile_sol, form ='formatted', status ='old')
+      open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
+      open(unit=numfile_err,  file=nomfile_err, form ='formatted', status ='old')
 
       do i=0,nx
          
         if(i==0) then   
-               F(0)  = godunov(U(0),U(0),       not_convex=.true.)
+               F(0)  = godunov(U(0),U(0),       not_convex=.false.)
         else if (i==nx) then   
-               F(nx) = godunov(U(nx-1),U(nx-1), not_convex=.true.)
+               F(nx) = godunov(U(nx-1),U(nx-1), not_convex=.false.)
         else   
-               F(i)  = godunov(U(i-1),U(i),     not_convex=.true.)
+               F(i)  = godunov(U(i-1),U(i),     not_convex=.false.)
         end if
         
       end do
@@ -166,6 +174,14 @@ program FiniteVolume
          sol(2,:)=U(0:nx-1)
          sol(3,:)=U_ex(0:nx-1)
          write(unit=numfile_sol,  fmt=save_format) sol
+
+         if(sum( abs(U-U_ex))*dx > err_L1) err_L1 = sum( abs(U-U_ex))*dx 
+         if(sum( (U-U_ex)**2)*dx > err_L2) err_L2 = sum( (U-U_ex)**2)*dx 
+
+
+         write(unit=numfile_err, fmt='(" --------------- at time : "f10.6" ----------------- ")') t_ 
+         write(unit=numfile_err, fmt='("err_L1 :" f16.10 )') sum( abs(U-U_ex))*dx 
+         write(unit=numfile_err, fmt='("err_L2 :" f16.10 )') sum( (U-U_ex)**2)*dx   
          write(unit=numfile_data, fmt='("time_save =" f10.6)')  t_
       end if
       
@@ -173,6 +189,18 @@ program FiniteVolume
 
 
    end do
+   
+   close(unit=numfile_data)
+   close(unit=numfile_err)
+   close(unit=numfile_param)
+   close(unit=numfile_sol)
+
+   open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
+   write(unit=numfile_conv, fmt='("=====================")') 
+   write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nx
+   write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') sum( abs(U-U_ex))*dx 
+   write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') sum( (U-U_ex)**2)*dx  
+   write(unit=numfile_conv, fmt='("=====================")') 
 
    print *, "program complete !"
 

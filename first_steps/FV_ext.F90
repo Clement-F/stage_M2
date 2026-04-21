@@ -3,8 +3,8 @@ function flux(u_) result(f)
    implicit none
    real, intent(in)  :: u_
    real              :: f
-   ! f = 0.5 * u_**2
-   f = 4*u_**2 /(4*u_**2 + (1-u_)**2)
+   f = 0.5 * u_**2
+   ! f = 4*u_**2 /(4*u_**2 + (1-u_)**2)
    ! print *,f,u_, 'f'
    return
 end function flux
@@ -13,9 +13,9 @@ function flux_p(u_) result(f)
    implicit none
    real, intent(in)  :: u_
    real              :: f
-   ! f = u_
-   f = 8*u_* (4*u_**2 + (1-u_)**2 - u_*(4*u_-(1-u_)))/(4*u_**2 + (1-u_)**2)**2 
-   ! print *,f,u_, 'f_p'
+   f = u_
+   ! f = 8*u_* (4*u_**2 + (1-u_)**2 - u_*(4*u_-(1-u_)))/(4*u_**2 + (1-u_)**2)**2 
+
    return
 end function flux_p
 
@@ -106,12 +106,10 @@ function U_init(x) result(U)
     implicit none
     real, intent(in)    :: x
     real                :: U
+    real,parameter      :: pi = acos(-1.)
     
 
-   !  U = sin(2*3.1415* x)
-   U = 0
-   if (X<0.5) U =1
-
+    U = sin(2*pi* x)
    return 
 end function U_init
 
@@ -120,9 +118,10 @@ function U_init_p(x) result(U)
     implicit none
     real, intent(in)    :: x
     real                :: U
+    real,parameter      :: pi = acos(-1.)
 
-   !  U = 2*3.1415* cos(2*3.1415* x)
-   U = 0
+    U = 2*pi* cos(2*pi* x)
+   ! U = 0
     return 
 end function U_init_p
 
@@ -144,16 +143,16 @@ function Newton_search(x,t) result(u)
         ! print *, n, err
         xk = xk -   (flux_p(U_init(xk))*t + xk-x)/(flux_pp(U_init(xk))*U_init_p(xk)*t +1)
         err =    abs(flux_p(U_init(xk))*t + xk-x)
-        if(t>1./(2*pi)) then
-            if(x<0.5 .and. xk>0.5) then 
-                xk =0.5 - 1e-6
-                ! print *, "rectification gauche "
-            end if
-            if(x>0.5 .and. xk<0.5) then
-                xk =0.5 + 1e-6
-                ! print *, "rectification droite "
-            end if
-        end if
+      !   if(t>1./(2*pi)) then
+            ! if(x<0.5 .and. xk>0.5) then 
+            !     xk =0.5 - 1e-6
+            !     ! print *, "rectification gauche "
+            ! end if
+            ! if(x>0.5 .and. xk<0.5) then
+            !     xk =0.5 + 1e-6
+            !     ! print *, "rectification droite "
+            ! end if
+      !   end if
         n = n+1
     end do
     
