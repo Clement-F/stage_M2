@@ -8,38 +8,34 @@ program FiniteVolume
       real, intent (in) :: u_
       real              :: flux
       end function flux
-   end interface
-   
-   interface
+
       function flux_p(u_)
       real, intent (in) :: u_
       real              :: flux_p
-      end function flux_p
-   end interface
+      end function flux_p 
 
-   interface
-      function U_init(x_)
+      function Q_init(x_)
       real,dimension(:), intent (in) :: x_
-      real              :: U_init
-      end function U_init
-   end interface
+      real              :: Q_init
+      end function Q_init
 
+      subroutine Update(Q,X,dt,nx, arg_string)
+         implicit none
+         integer,intent(in)  :: nx
+         real, dimension(0:nx-1), intent(inout)  :: Q
+         real, dimension(0:nx-1), intent(in)  :: X
+         real, intent(in) ::  dt
+         character(len=32), intent(in), optional :: arg_string
+      end subroutine
 
-   interface
-      function godunov(u_,v_, not_convex)
-      real, intent (in) :: u_,v_
-      logical, intent(in), optional :: not_convex
-      real              :: godunov
-      end function godunov
-   end interface
-
-
-   interface
       function Newton_search(x,t)
       real, intent (in) :: x,t
       real              :: Newton_search
       end function Newton_search
    end interface
+
+
+
 
 ! loop int   
    integer:: i,j,k
@@ -61,7 +57,7 @@ program FiniteVolume
    real, dimension(:),  Pointer :: F
 
 !  Solution scalaire
-   real, dimension(:),  Pointer :: U, U_ex
+   real, dimension(:),  Pointer :: Q, Q_ex
    real,dimension (:,:),Pointer :: sol
 
 !  diverses valeurs numériques nécessaire
@@ -70,6 +66,9 @@ program FiniteVolume
 
 !  error variables
    real     :: err_L1=0, err_L2=0, err_Li=0
+
+!  probleme variable
+   character(len=32)    :: methode_update = "godunov" 
 
 
 !  file parameter
@@ -82,11 +81,6 @@ program FiniteVolume
 ! =======================================================================================
 ! =======================================================================================
 ! =======================================================================================
-
-!  INIT
-   ! where(X<0.3) U=0
-   ! where(X>0.7) U=0.5
-   ! where(X>0.3 .and. X<0.7) U=-1
    
    open(unit=numfile_param, file=nomfile_param, form ='formatted', status ='old')
 
@@ -99,22 +93,19 @@ program FiniteVolume
 
    dx = real((xf-xd))/nx
 
-   allocate(X(nx));   X(0:nx-1) = (/  (xd+ (i+0.5)*dx, i = 0,nx-1)  /)
+   allocate(X(0:nx+1));   X(1:nx) = (/  (xd+ i*dx, i = 1,nx)  /); X(0) = xd; X(nx+1) = xf
    allocate(F(0:nx))
-   allocate(U(0:nx-1),  U_ex(0:nx-1))
+   allocate(Q(0:nx-1),  Q_ex(0:nx-1))
    allocate(sol (3,nx))
 
    t_imp=T/real(n_imp_max)
 
-   ! U =0
-   ! where (X>-0.5 .and. X<0) U =1
-   U = sin(2*pi*X)
+   ! Q =0
+   ! where (X>-0.5 .and. X<0) Q =1
+   Q = sin(2*pi*( X(1:nx)+X(0:nx-1) )/2 ); Q_ex = 0
 
    ! print *, "init"
    
-! print *, 'declarer les valeurs gauche et droite du probleme de Riemann'
-! read *, ud,ug 
-
    write(save_format, '("(" i5 "(f10.6, f12.8, f12.8 /))")') nx 
 
    open(unit=numfile_data, file=nomfile_data, form ='formatted', status ='old')
@@ -122,6 +113,9 @@ program FiniteVolume
    write(unit= numfile_data, fmt='("nt = "i5)') nt
    write(unit= numfile_data, fmt='("nx = "i5)') nx
    write(unit= numfile_data, fmt='("save_max =" i5)')  int(T/t_imp)
+   
+   open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
+   open(unit=numfile_err,  file=nomfile_err, form ='formatted', status ='old')
 
 !  boucle while sur le temps 
    do while (t_<real(T))
@@ -129,7 +123,7 @@ program FiniteVolume
 
       vitesse =0
       do i=1,nx
-         if(   abs(flux_p((U(i))))>vitesse )   vitesse = abs(flux_p((U(i))))
+         if(   abs(flux_p((Q(i))))>vitesse )   vitesse = abs(flux_p((Q(i))))
       end do
 
       ! print *, "vitesse max found : ", vitesse, ";"
@@ -140,48 +134,33 @@ program FiniteVolume
          dt = cfl*dx 
       end if
       
-
-      open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
-      open(unit=numfile_err,  file=nomfile_err, form ='formatted', status ='old')
-
-      do i=0,nx
-         
-        if(i==0) then   
-               F(0)  = godunov(U(0),U(0),       not_convex=.false.)
-        else if (i==nx) then   
-               F(nx) = godunov(U(nx-1),U(nx-1), not_convex=.false.)
-        else   
-               F(i)  = godunov(U(i-1),U(i),     not_convex=.false.)
-        end if
-        
-      end do
-
-      U(:) = U(:) - ((dt/dx)* (F(1:nx)-F(0:nx-1)) )
+      call Update(Q=Q, X=X,dt=dt,nx =nx, arg_string = methode_update) 
 
       if(t_ >=  n_imp*t_imp)  then
 
          print *, "exact sol calcul"
-         do i=0,nx-1
-            ! U_ex(i) = Newton_search(X(i),t_)
-            call pied_charact(X(i),t_,U_ex(i))
-         end do
+
+         ! do i=0,nx-1
+         !    ! Q_ex(i) = Newton_search(X(i),t_)
+         !    call pied_charact(X(i),t_,Q_ex(i))
+         ! end do
 
          print *, "exact sol calculated"
 
          print *, "loop : ",n,", n_imp",n_imp,", time :",t_," ; ","dt : ",dt, ";"
          n_imp = n_imp +1
          sol(1,:)=X(0:nx-1)
-         sol(2,:)=U(0:nx-1)
-         sol(3,:)=U_ex(0:nx-1)
+         sol(2,:)=Q(0:nx-1)
+         sol(3,:)=Q_ex(0:nx-1)
          write(unit=numfile_sol,  fmt=save_format) sol
 
-         if(sum( abs(U-U_ex))*dx > err_L1) err_L1 = sum( abs(U-U_ex))*dx 
-         if(sum( (U-U_ex)**2)*dx > err_L2) err_L2 = sum( (U-U_ex)**2)*dx 
+         if(sum( abs(Q-Q_ex))*dx > err_L1) err_L1 = sum( abs(Q-Q_ex))*dx 
+         if(sum( (Q-Q_ex)**2)*dx > err_L2) err_L2 = sum( (Q-Q_ex)**2)*dx 
 
 
          write(unit=numfile_err, fmt='(" --------------- at time : "f10.6" ----------------- ")') t_ 
-         write(unit=numfile_err, fmt='("err_L1 :" f16.10 )') sum( abs(U-U_ex))*dx 
-         write(unit=numfile_err, fmt='("err_L2 :" f16.10 )') sum( (U-U_ex)**2)*dx   
+         write(unit=numfile_err, fmt='("err_L1 :" f16.10 )') sum( abs(Q-Q_ex))*dx 
+         write(unit=numfile_err, fmt='("err_L2 :" f16.10 )') sum( (Q-Q_ex)**2)*dx   
          write(unit=numfile_data, fmt='("time_save =" f10.6)')  t_
       end if
       
@@ -198,8 +177,8 @@ program FiniteVolume
    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
    write(unit=numfile_conv, fmt='("=====================")') 
    write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nx
-   write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') sum( abs(U-U_ex))*dx 
-   write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') sum( (U-U_ex)**2)*dx  
+   write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') sum( abs(Q-Q_ex))*dx 
+   write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') sum( (Q-Q_ex)**2)*dx  
    write(unit=numfile_conv, fmt='("=====================")') 
 
    print *, "program complete !"

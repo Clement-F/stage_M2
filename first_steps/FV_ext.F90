@@ -34,7 +34,6 @@ function godunov(u_,v_, not_convex)
    real              :: godunov
    real              :: flux
 
-   
    logical, intent(in), optional :: not_convex
    real              :: step
    integer           :: i 
@@ -75,7 +74,6 @@ function godunov(u_,v_, not_convex)
    return
 end function godunov
 
-
 function rusanov(u_,v_)
    implicit none
    real, intent(in)  :: u_,v_
@@ -102,47 +100,46 @@ function Roe(u_,v_)
    return
 end function Roe
 
-function U_init(x) result(U)
+function Q_init(x) result(Q)
     implicit none
     real, intent(in)    :: x
-    real                :: U
+    real                :: Q
     real,parameter      :: pi = acos(-1.)
     
 
-    U = sin(2*pi* x)
+    Q = sin(2*pi* x)
    return 
-end function U_init
+end function Q_init
 
-
-function U_init_p(x) result(U)
+function Q_init_p(x) result(Q)
     implicit none
     real, intent(in)    :: x
-    real                :: U
+    real                :: Q
     real,parameter      :: pi = acos(-1.)
 
-    U = 2*pi* cos(2*pi* x)
-   ! U = 0
+    Q = 2*pi* cos(2*pi* x)
+   ! Q = 0
     return 
-end function U_init_p
+end function Q_init_p
 
-function Newton_search(x,t) result(u)
+function Newton_search(x,t) result(q)
     implicit none
     real, intent(in)    :: x,t
-    real                :: U_init, U_init_p
+    real                :: Q_init, Q_init_p
     real                :: flux_p, flux_pp
-    real                :: xk, err, u, epsi = 1e-10
+    real                :: xk, err, q, epsi = 1e-10
     real,parameter      :: pi = acos(-1.)
     integer             :: n=0
 
     n = 0
-    err = abs(flux_p(U_init(xk))*t+ xk-x)
+    err = abs(flux_p(Q_init(xk))*t+ xk-x)
     ! print *, err, epsi
     xk = x
 
     do while(err>epsi .and. n<50)
         ! print *, n, err
-        xk = xk -   (flux_p(U_init(xk))*t + xk-x)/(flux_pp(U_init(xk))*U_init_p(xk)*t +1)
-        err =    abs(flux_p(U_init(xk))*t + xk-x)
+        xk = xk -   (flux_p(Q_init(xk))*t + xk-x)/(flux_pp(Q_init(xk))*Q_init_p(xk)*t +1)
+        err =    abs(flux_p(Q_init(xk))*t + xk-x)
       !   if(t>1./(2*pi)) then
             ! if(x<0.5 .and. xk>0.5) then 
             !     xk =0.5 - 1e-6
@@ -157,7 +154,7 @@ function Newton_search(x,t) result(u)
     end do
     
 
-    u = U_init(xk)
+    q = Q_init(xk)
     return
 
 end function Newton_search
@@ -207,22 +204,109 @@ subroutine pied_charact(x,t,sol)
 
    real, intent(in) :: x,t
    real, intent(out):: sol
-   real  :: U_init
+   real  :: Q_init
    ! print *,'pied caract'
    if(t<1./(2*pi)-1e-2) then
-      if(x<=0.5)  sol = U_init(dicho(g,0.,0.5))
-      if(x>0.5)   sol = U_init(dicho(g,0.5,1.))
+      if(x<=0.5)  sol = Q_init(dicho(g,0.,0.5))
+      if(x>0.5)   sol = Q_init(dicho(g,0.5,1.))
    else       
-      if(x<=0.5)  sol = U_init(dicho(g,0.,0.5-1e-3))
-      if(x>0.5)   sol = U_init(dicho(g,0.5+1e-3,1.))
+      if(x<=0.5)  sol = Q_init(dicho(g,0.,0.5-1e-3))
+      if(x>0.5)   sol = Q_init(dicho(g,0.5+1e-3,1.))
    end if
    contains
    function g(x_)
       real,intent(in) :: x_
-      real  :: flux_p, U_init
+      real  :: flux_p, Q_init
       real  :: g
-      g = flux_p(U_init(x_))*t + x_ -x
+      g = flux_p(Q_init(x_))*t + x_ -x
       return 
    end function g
 
 end subroutine pied_charact
+
+
+subroutine Update(Q,X,dt,nx, arg_string)
+   implicit none
+   integer,                intent(in)  :: nx
+   real, dimension(0:nx-1),intent(inout)  :: Q
+   real, dimension(0:nx+1),intent(in)  :: X
+
+   real,                   intent(in) ::  dt
+   character(len=32),      intent(in),optional :: arg_string
+
+   character(len=32) :: methode_update
+   integer :: i 
+   real, dimension(0:nx) :: F
+   real, dimension(0:nx) :: delta
+
+
+
+
+    interface
+      function godunov(u_,v_, not_convex)
+      real, intent (in) :: u_,v_
+      logical, intent(in), optional :: not_convex
+      real              :: godunov
+      end function godunov
+
+      
+      function Rusanov(u_,v_)
+      real, intent (in) :: u_,v_
+      real              :: Rusanov
+      end function Rusanov
+
+      
+      function Roe(u_,v_)
+      real, intent (in) :: u_,v_
+      real              :: Roe
+      end function Roe
+   end interface
+
+
+   if(present(arg_string)) methode_update = arg_string
+
+   if(methode_update == "godunov") then
+   
+      do i=0,nx
+        if(i==0) then;        F(0)  = godunov(Q(0),Q(0),       not_convex=.false.)
+        else if (i==nx) then; F(nx) = godunov(Q(nx-1),Q(nx-1), not_convex=.false.)
+        else;                 F(i)  = godunov(Q(i-1),Q(i),     not_convex=.false.)
+        end if
+      end do
+
+      do i=0,nx-1
+         Q(i) = Q(i) - ((dt/(X(i+1)-X(i)) )* (F(i+1)-F(i)) )
+      end do
+
+   else if(methode_update == "Rusanov") then
+   
+      do i=0,nx
+        if(i==0) then;        F(0)  = Rusanov(Q(0),Q(0))
+        else if (i==nx) then; F(nx) = Rusanov(Q(nx-1),Q(nx-1))
+        else;                 F(i)  = Rusanov(Q(i-1),Q(i))
+        end if
+      end do
+
+      Q(:) = Q(:) - ((dt/(X(i+1)-X(i)))* (F(1:nx)-F(0:nx-1)) )
+
+   else if(methode_update == "Roe") then 
+   
+      do i=0,nx
+        if(i==0) then;        F(0)  = Rusanov(Q(0),Q(0))
+        else if (i==nx) then; F(nx) = Rusanov(Q(nx-1),Q(nx-1))
+        else;                 F(i)  = Rusanov(Q(i-1),Q(i))
+        end if
+      end do
+      
+      Q(:) = Q(:) - ((dt/(X(i+1)-X(i)))* (F(1:nx)-F(0:nx-1)) )
+
+   else if(methode_update == "reconstruction")
+
+      do i=1,nx-2
+         delta(i) = ( (Q(i)-Q(i-1))*(X(i)-X(i-1)) + (Q(i+1)-Q(i))*(X(i+1)-X(i)) )/( (X(i)-X(i-1))**2 + (X(i+1)-X(i))**2 )
+         
+      end do
+
+   end if
+
+end subroutine
