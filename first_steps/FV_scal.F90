@@ -137,16 +137,13 @@ program FiniteVolume
          dt = cfl*dx 
       end if
       
-      t_ = t_ +dt
-      call Update(Q=Q, X=X,dt=dt,nx =nx, arg_string = methode_update) 
-
       if(t_ >=  n_imp*t_imp)  then
 
          print *, "exact sol calcul"
 
          do i=0,nx-1
             ! Q_ex(i) = Newton_search((X(i)+X(i+1))/2,t_)
-            call pied_charact( X(i) ,t_,Q_ex(i))
+            call pied_charact( (X(i)+X(i+1))/2 ,t_,Q_ex(i))
          end do
 
          print *, "exact sol calculated"
@@ -170,6 +167,9 @@ program FiniteVolume
          write(unit=numfile_data, fmt='("time_save =" f10.6)')  t_
       end if
       
+      
+      t_ = t_ +dt
+      call Update(Q=Q, X=X,dt=dt,nx =nx, arg_string = methode_update) 
 
 
    end do

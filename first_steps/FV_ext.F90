@@ -374,6 +374,7 @@ subroutine Update(Q,X,dt,nx, arg_string)
       ! print *,"methode : reconstruction"
 
       delta(0) = (Q(1)-Q(0))/(2*dx);  delta(nx-1) = (Q(nx-1)-Q(nx-2))/(2*dx); 
+      
       do i=1,nx-2
          delta(i) = (Q(i+1)-Q(i-1))/(2*dx)
       end do
@@ -445,12 +446,12 @@ subroutine Update(Q,X,dt,nx, arg_string)
 
       do i=0,nx
          ! print *,i
-      !   if(i==0) then;        F(0)  = Lax_Friedrichs(Q(i)+0.5*dx*delta(i)        ,Q(i)-0.5*dx*delta(i))
-      !   else if (i==nx) then; F(nx) = Lax_Friedrichs(Q(i-1)+0.5*dx*delta(i-1)    ,Q(i-1)-0.5*dx*delta(i-1))
+        if(i==0) then;        F(0)  = Lax_Friedrichs(Q(i)+0.5*dx*delta(i)        ,Q(i)-0.5*dx*delta(i))
+        else if (i==nx) then; F(nx) = Lax_Friedrichs(Q(i-1)+0.5*dx*delta(i-1)    ,Q(i-1)-0.5*dx*delta(i-1))
 
 
-        if(i==0) then;        F(0)  = Lax_Friedrichs(Q(nx-1)+0.5*dx*delta(nx-1)  ,Q(i)-0.5*dx*delta(i))
-        else if (i==nx) then; F(nx) = Lax_Friedrichs(Q(i-1)+0.5*dx*delta(i-1)    ,Q(0)-0.5*dx*delta(0))
+      !   if(i==0) then;        F(0)  = Lax_Friedrichs(Q(nx-1)+0.5*dx*delta(nx-1)  ,Q(i)-0.5*dx*delta(i))
+      !   else if (i==nx) then; F(nx) = Lax_Friedrichs(Q(i-1)+0.5*dx*delta(i-1)    ,Q(0)-0.5*dx*delta(0))
 
 
 
@@ -475,12 +476,12 @@ subroutine Update(Q,X,dt,nx, arg_string)
       do i=1,nx-2; delta(i) = minmod(delta(i),2*alpha* (Q(i)-Q(i-1))/dx,2*alpha* (Q(i+1)-Q(i))/dx); end do
 
       do i=0,nx
-      !   if(i==0) then;        F(0)  = Lax_Friedrichs(Q_int(i)+0.5*dx*delta(i)        ,Q_int(i)-0.5*dx*delta(i))
-      !   else if (i==nx) then; F(nx) = Lax_Friedrichs(Q_int(i-1)+0.5*dx*delta(i-1)    ,Q_int(i)-0.5*dx*delta(i))
+        if(i==0) then;        F(0)  = Lax_Friedrichs(Q_int(i)+0.5*dx*delta(i)        ,Q_int(i)-0.5*dx*delta(i))
+        else if (i==nx) then; F(nx) = Lax_Friedrichs(Q_int(i-1)+0.5*dx*delta(i-1)    ,Q_int(i)-0.5*dx*delta(i))
 
         
-        if(i==0) then;        F(0)  = Lax_Friedrichs(Q_int(nx-1)+0.5*dx*delta(nx-1)  ,Q_int(i)-0.5*dx*delta(i))
-        else if (i==nx) then; F(nx) = Lax_Friedrichs(Q_int(i-1)+0.5*dx*delta(i-1)    ,Q_int(0)-0.5*dx*delta(0))
+      !   if(i==0) then;        F(0)  = Lax_Friedrichs(Q_int(nx-1)+0.5*dx*delta(nx-1)  ,Q_int(i)-0.5*dx*delta(i))
+      !   else if (i==nx) then; F(nx) = Lax_Friedrichs(Q_int(i-1)+0.5*dx*delta(i-1)    ,Q_int(0)-0.5*dx*delta(0))
 
         else;                 F(i)  = Lax_Friedrichs(Q_int(i-1)+0.5*dx*delta(i-1)    ,Q_int(i)-0.5*dx*delta(i))
         end if
