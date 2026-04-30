@@ -1,6 +1,6 @@
-200            | nx 
-0.0            | xd
+10000           | nx 
+0.0             | xd
 1.0             | xf
-1.0             | T
-0.5            | cfl
-50              | number of screenshots
+0.1             | T
+0.5             | cfl
+10              | number of screenshots

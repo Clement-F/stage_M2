@@ -19,7 +19,7 @@ U_t = np.zeros((sm,nx))
 X   = np.zeros(nx)
 dec = 0
 
-U = np.zeros((sm,nx))
+U_ex = np.zeros((sm,nx))
 err = np.zeros((sm,nx))
 err_L2 = np.zeros(sm)
 
@@ -27,15 +27,16 @@ for k in range(0,sm):
     for i in range(0,(nx)):
         X[i] = lines[k*(nx+1) + i][1:11]
         U_t[k][i]   = lines[k*(nx+1) +i][11:23]
-        U[k][i]     = lines[k*(nx+1) +i][23:35] 
+        U_ex[k][i]     = lines[k*(nx+1) +i][23:35] 
         
-        err[k][i] = abs(U_t[k][i] - U[k][i])**2
+        err[k][i] = abs(U_t[k][i] - U_ex[k][i])
                         
         
-    err_L2[k] = np.sqrt(sum(err[k][:])) * 1/nx
+    err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
     plt.plot(X,err[k],'r')
-    plt.plot(X,U[k],'g')
-    plt.plot(X,U_t[k],'b')
+    #plt.plot(X,U_ex[k],'g')
+    #plt.plot(X,U_t[k],'b')
+    #plt.xlim(0.0,0.1)
     plt.show()
 
 print(max(err_L2))

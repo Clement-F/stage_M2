@@ -14,8 +14,8 @@ program FiniteVolume
       real              :: flux_p
       end function flux_p 
 
-      function Q_init(x_)
-      real,dimension(:), intent (in) :: x_
+      function Q_init(x)
+      real, intent(in)    :: x
       real              :: Q_init
       end function Q_init
 
@@ -68,7 +68,7 @@ program FiniteVolume
    real     :: err_L1=0, err_L2=0, err_Li=0
 
 !  probleme variable
-   character(len=32)    :: methode_update = "godunov" 
+   character(len=32)    :: methode_update = "limitation" 
 
 
 !  file parameter
@@ -93,16 +93,18 @@ program FiniteVolume
 
    dx = real((xf-xd))/nx
 
-   allocate(X(0:nx+1));   X(1:nx) = (/  (xd+ i*dx, i = 1,nx)  /); X(0) = xd; X(nx+1) = xf
+   allocate(X(0:nx+1));   X(1:nx) = (/  (xd+ i*dx, i = 1,nx-1)  /); X(0) = xd; X(nx) = xf
    allocate(F(0:nx))
    allocate(Q(0:nx-1),  Q_ex(0:nx-1))
-   allocate(sol (3,nx))
+   allocate(sol(3,nx))
 
    t_imp=T/real(n_imp_max)
-
+! 
    ! Q =0
    ! where (X>-0.5 .and. X<0) Q =1
-   Q = sin(2*pi*( X(1:nx)+X(0:nx-1) )/2 ); Q_ex = 0
+   do i=0,nx-1;  Q(i)= Q_init((X(i)+X(i+1))/2 ); end do
+   Q_ex  = 0
+
 
    ! print *, "init"
    
@@ -119,6 +121,7 @@ program FiniteVolume
 
 !  boucle while sur le temps 
    do while (t_<real(T))
+   
       n = n +1
 
       vitesse =0
@@ -134,37 +137,39 @@ program FiniteVolume
          dt = cfl*dx 
       end if
       
+      t_ = t_ +dt
       call Update(Q=Q, X=X,dt=dt,nx =nx, arg_string = methode_update) 
 
       if(t_ >=  n_imp*t_imp)  then
 
          print *, "exact sol calcul"
 
-         ! do i=0,nx-1
-         !    ! Q_ex(i) = Newton_search(X(i),t_)
-         !    call pied_charact(X(i),t_,Q_ex(i))
-         ! end do
+         do i=0,nx-1
+            ! Q_ex(i) = Newton_search((X(i)+X(i+1))/2,t_)
+            call pied_charact( X(i) ,t_,Q_ex(i))
+         end do
 
          print *, "exact sol calculated"
 
          print *, "loop : ",n,", n_imp",n_imp,", time :",t_," ; ","dt : ",dt, ";"
          n_imp = n_imp +1
-         sol(1,:)=X(0:nx-1)
+         sol(1,:)=X(1:nx)
          sol(2,:)=Q(0:nx-1)
          sol(3,:)=Q_ex(0:nx-1)
          write(unit=numfile_sol,  fmt=save_format) sol
 
-         if(sum( abs(Q-Q_ex))*dx > err_L1) err_L1 = sum( abs(Q-Q_ex))*dx 
-         if(sum( (Q-Q_ex)**2)*dx > err_L2) err_L2 = sum( (Q-Q_ex)**2)*dx 
+         if((sum( abs(Q-Q_ex))*dx) > err_L1)       err_L1 = (sum( abs(Q-Q_ex))*dx) 
+         if(sqrt(sum( (Q-Q_ex)**2)*dx) > err_L2)   err_L2 = sqrt(sum( (Q-Q_ex)**2)*dx)
+         if(maxval(abs(Q-Q_ex))>err_Li)            err_Li = maxval(abs(Q-Q_ex)) 
 
 
          write(unit=numfile_err, fmt='(" --------------- at time : "f10.6" ----------------- ")') t_ 
-         write(unit=numfile_err, fmt='("err_L1 :" f16.10 )') sum( abs(Q-Q_ex))*dx 
-         write(unit=numfile_err, fmt='("err_L2 :" f16.10 )') sum( (Q-Q_ex)**2)*dx   
+         write(unit=numfile_err, fmt='("err_L1 :" f16.10 )') err_L1
+         write(unit=numfile_err, fmt='("err_L2 :" f16.10 )') err_L2
+         write(unit=numfile_err, fmt='("err_Li :" f16.10 )') err_Li
          write(unit=numfile_data, fmt='("time_save =" f10.6)')  t_
       end if
       
-      t_ = t_ +dt
 
 
    end do
@@ -177,8 +182,9 @@ program FiniteVolume
    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
    write(unit=numfile_conv, fmt='("=====================")') 
    write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nx
-   write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') sum( abs(Q-Q_ex))*dx 
-   write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') sum( (Q-Q_ex)**2)*dx  
+   write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') err_L1
+   write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') err_L2
+   write(unit=numfile_conv, fmt='("err_Li :" f16.10 )') err_Li
    write(unit=numfile_conv, fmt='("=====================")') 
 
    print *, "program complete !"
