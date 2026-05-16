@@ -1,0 +1,14 @@
+#####################################################
+# Definition of the comilation commands (FC and LD) #
+#  and the compilation options (FFLAGS et LDFLAGS)  #
+#####################################################
+FC	= gfortran
+LD	= gfortran
+
+FFLAGS  = -g -C -O3 -march=native -ftree-vectorize -fopenmp
+LDFLAGS = -g -C -O3 -march=native -ftree-vectorize -fopenmp
+#####################################################
+#                  Librairies                       #
+#####################################################
+LIBPATH = 
+MODPATH =
