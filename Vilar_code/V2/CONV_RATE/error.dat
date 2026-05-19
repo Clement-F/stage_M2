@@ -1,0 +1,1774 @@
+  		#################################
+		##  L1 AND L2 NUMERICAL ERROR  ##
+		##     FOR RK DGPk SCHEMES     ##
+		## ON SCALAR CONSERVATION LAWS ##
+		#################################
+
+ -----------------------------------------------------------------------------  
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          10 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19042543E-03  0.30628414E-03
+  
+ -----------------------------------------------------------------------------
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.17797294E-04  0.40091563E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.52877628E-06  0.16093942E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.25566477E-08  0.10753509E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH         160 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.12288420E-10  0.13753073E-10
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          10 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.78496705E-06  0.10166259E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.25145058E-07  0.31980422E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.80892020E-09  0.10232248E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.24708122E-10  0.31633261E-10
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.85839472E-05  0.21590859E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14836414E-06  0.49813613E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.33830857E-09  0.14619507E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.12870289E-04  0.15988472E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.13169225E-05  0.17085876E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH         160 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15560391E-06  0.20906011E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH         320 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19339243E-07  0.26118650E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.99278673E-05  0.13372327E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.12384027E-05  0.16715770E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH         160 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15472427E-06  0.20894851E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH         320 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19338261E-07  0.26118610E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.21774669E-04  0.58079398E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH         160 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.24463252E-05  0.84183888E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 3rd ORDER DG METHOD
+  WITH         320 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.17735746E-06  0.78274379E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.39784329E-09  0.53205679E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.75953016E-11  0.10078127E-10
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.69419057E-11  0.77744507E-11
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.85839472E-05  0.21590859E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14836414E-06  0.49813613E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.33830857E-09  0.14619507E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15118751E-05  0.41972181E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.22856906E-07  0.68179112E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.99999999999965683     
+  WITH A 4th ORDER DG METHOD
+  WITH         160 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.42972028E-09  0.62957375E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.77971793E-13  0.10565613E-12
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.10370318E-05  0.29188823E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.43521140E-07  0.15127558E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46571459E-09  0.16846639E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.10370318E-05  0.29188823E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.43521140E-07  0.15127558E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46571456E-09  0.16846639E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.20055306E-05  0.39112213E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.58980306E-07  0.16124090E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50122680E-09  0.16930682E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46571467E-09  0.16846639E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46571460E-09  0.16846639E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.38845483E-03  0.64069476E-03
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.18633768E-03  0.30444596E-03
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.77857256E-09  0.10006420E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.77857256E-09  0.10006420E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.21772500E-06  0.62277595E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.21772500E-06  0.62277595E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.21772500E-06  0.62277595E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.21772500E-06  0.62277595E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          25 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.36649936E-05  0.12300226E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          50 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.96614963E-07  0.29052012E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         100 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.38317946E-08  0.12981156E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         200 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14435985E-09  0.52591177E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          25 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.36649936E-05  0.12300226E-04
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          50 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.96614963E-07  0.29052012E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         100 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.38317941E-08  0.12981156E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         200 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14435936E-09  0.52591180E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          50 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.10861551E-06  0.35217247E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         100 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46969072E-08  0.16948628E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         200 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19201601E-09  0.72405951E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          50 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.96614963E-07  0.29052012E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         100 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.38317946E-08  0.12981156E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         200 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14435991E-09  0.52591174E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH          50 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.10861521E-06  0.35217168E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         100 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46969071E-08  0.16948628E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         200 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19201616E-09  0.72405953E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         100 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.46969072E-08  0.16948628E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.10000000000000001     
+  WITH A 5th ORDER DG METHOD
+  WITH         200 CELLS
+  FOR A BURGERS PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19201598E-09  0.72405952E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 9th ORDER DG METHOD
+  WITH           1 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.19639409E-03  0.22434630E-03
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 9th ORDER DG METHOD
+  WITH           2 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.59944971E-07  0.72555753E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 9th ORDER DG METHOD
+  WITH           1 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.19639409E-03  0.22434630E-03
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 9th ORDER DG METHOD
+  WITH           2 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.59944947E-07  0.72555746E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 9th ORDER DG METHOD
+  WITH           4 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.11978704E-08  0.14122673E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 9th ORDER DG METHOD
+  WITH           8 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.13373793E-09  0.14855411E-09
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 9th ORDER DG METHOD
+  WITH          16 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.23499983E-11  0.26101934E-11
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 9th ORDER DG METHOD
+  WITH          32 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.11474805E-14  0.12745221E-14
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           5 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.12749529E-05  0.16913092E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          10 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.20342977E-07  0.26799937E-07
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          20 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.39778541E-09  0.53196575E-09
+  
+ -----------------------------------------------------------------------------
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          40 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.70395184E-11  0.95778260E-11
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.77971793E-13  0.10565613E-12
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           1 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.11317303E-01  0.13182934E-01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           2 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.46438258E-03  0.52702976E-03
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           4 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.54160314E-05  0.64117081E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           8 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.78718996E-07  0.10168820E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          16 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.12565724E-08  0.17176179E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          32 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.37695456E-10  0.48626147E-10
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          64 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.30840577E-12  0.42207144E-12
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           1 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.11317303E-01  0.13182934E-01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           2 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.46438258E-03  0.52702976E-03
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           4 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.54160314E-05  0.64117081E-05
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           8 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.78718996E-07  0.10168820E-06
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          16 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.12565724E-08  0.17176179E-08
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          32 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.37695456E-10  0.48626147E-10
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          64 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.30840577E-12  0.42207144E-12
+  
+ -----------------------------------------------------------------------------  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           1 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.52554799E+00  0.57632367E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           2 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.20073127E+00  0.22558982E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           4 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.73341273E-01  0.83980084E-01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH           8 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.26587236E-01  0.31608670E-01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 6th ORDER DG METHOD
+  WITH          16 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.11556780E-01  0.13612020E-01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          32 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.57091635E-02  0.64636990E-02
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          64 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.28511993E-02  0.31858064E-02
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH         128 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.14255022E-02  0.15875284E-02
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH           1 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.58625845E+00  0.69735987E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH           2 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.53891267E+00  0.60078229E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH           4 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.38597047E+00  0.42937365E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH           8 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.23787581E+00  0.26416072E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          16 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.13291130E+00  0.14755088E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          32 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.70325148E-01  0.78113115E-01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 6th ORDER DG METHOD
+  WITH          64 CELLS
+  FOR A ADVECT PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           2
+  
+  L1 AND L2 ERRORS
+  0.36186395E-01  0.40205690E-01
+  
+ -----------------------------------------------------------------------------  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.95952076E+00  0.38637364E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.27923077E+01  0.28782209E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.00000000000000000000000000000000000      
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.24164754E+01  0.26122198E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.24164797E+01  0.26122208E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15430082E+01  0.21122778E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14350433E+01  0.20636528E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15189002E+01  0.20958171E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14425779E+01  0.20763901E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14006290E+01  0.20323685E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14984964E+01  0.20837134E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14129359E+01  0.20454070E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19985821E+01  0.23722158E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14984964E+01  0.20837134E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14984964E+01  0.20837134E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15033661E+01  0.20866698E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.13926077E+01  0.20286941E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14006290E+01  0.20323685E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14006290E+01  0.20323685E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14984964E+01  0.20837134E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.15084157E+01  0.20837655E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14327592E+01  0.20538502E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14984964E+01  0.20837134E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14335643E+01  0.20541713E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14316470E+01  0.20607797E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14335643E+01  0.20541713E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14335643E+01  0.20541713E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14330766E+01  0.20542124E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14327592E+01  0.20538502E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.13857030E+01  0.20221515E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14128817E+01  0.20453104E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.19973183E+01  0.23716337E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.14128817E+01  0.20453104E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.13097050E+01  0.17694915E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.47949686E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.50000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.54599132E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57921852E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57933533E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.56526447E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.58073305E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57867739E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.58073305E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME    1.0000000000000000     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.21500598E+01  0.24595216E+01
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57933533E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.58073305E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57867739E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57845247E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57836194E+00
+  
+ -----------------------------------------------------------------------------
+  
+  NUMERICAL ERRORS AT TIME   0.40000000000000002     
+  WITH A 4th ORDER DG METHOD
+  WITH          80 CELLS
+  FOR A BUCKLEY PROBLEM
+  WITH THE NUMERICAL FLUX TYPE           1
+  
+  L1 AND L2 ERRORS
+  0.50000000E+00  0.57867739E+00
+  
+ -----------------------------------------------------------------------------
