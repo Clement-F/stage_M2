@@ -58,7 +58,7 @@ program FiniteVolume
 
 !  Solution scalaire
    real, dimension(:),  Pointer :: Q, Q_ex
-   real,dimension (:,:),Pointer :: sol
+   real, dimension(:,:),Pointer :: sol
 
 !  diverses valeurs numériques nécessaire
    real     :: vitesse=0., cfl

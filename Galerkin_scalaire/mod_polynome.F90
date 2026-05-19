@@ -1,0 +1,755 @@
+
+MODULE mod_polynome
+    USE mod_declaration
+    IMPLICIT NONE
+    
+CONTAINS
+
+
+    FUNCTION test(x)
+        IMPLICIT NONE
+        REAL(prec), INTENT(in) :: x
+        REAL(prec) :: test 
+        test = sin(x)
+    END FUNCTION test
+
+    FUNCTION eval_sol(ni,YY)
+        IMPLICIT NONE
+        INTEGER, INTENT(in) :: ni
+        REAL(prec)   , INTENT(in) :: YY
+        REAL(prec) :: eval_sol 
+        INTEGER :: ii,jj
+        eval_sol= 0._prec
+
+        DO ii = 1,order_x
+            eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+        END DO
+
+    END FUNCTION eval_sol
+
+    FUNCTION quadrature(ni,fct1,opt1,fct2,opt2) 
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni
+        INTERFACE
+            FUNCTION fct1(YY,opt)
+                USE precis
+                REAL(prec),INTENT(IN) :: YY
+                INTEGER,   INTENT(IN) :: opt
+                REAL(prec) :: fct1
+            END FUNCTION fct1
+            
+            FUNCTION fct2(YY,opt)
+                USE precis
+                REAL(prec),INTENT(IN) :: YY
+                INTEGER,   INTENT(IN) :: opt
+                REAL(prec) :: fct2
+            END FUNCTION fct2
+        END INTERFACE
+
+        INTEGER,   INTENT(IN) :: opt1,opt2
+
+        REAL(prec) :: quadrature
+        REAL(prec) :: YY
+        INTEGER :: kk
+        
+        quadrature = 0._prec
+
+
+        DO kk =1,order_x
+            YY = Ref_to_loc(ni,x_quad(kk))
+            quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(ni)
+        END DO
+
+        quadrature = quadrature* (x_cell(ni+1)-x_cell(ni))*0.5_prec
+
+    END FUNCTION quadrature
+
+    FUNCTION integration(fct1,opt1,fct2,opt2)
+        IMPLICIT NONE
+
+        INTERFACE
+        FUNCTION fct1(YY,opt)
+            USE precis
+            REAL(prec),INTENT(IN) :: YY
+            INTEGER,   INTENT(IN) :: opt
+            REAL(prec) :: fct1
+        END FUNCTION fct1
+        
+        FUNCTION fct2(YY,opt)
+            USE precis
+            REAL(prec),INTENT(IN) :: YY
+            INTEGER,   INTENT(IN) :: opt
+            REAL(prec) :: fct2
+        END FUNCTION fct2
+        END INTERFACE
+
+        INTEGER,   INTENT(IN) :: opt1,opt2
+
+        INTEGER :: ni
+        REAL(prec) :: integration
+
+        integration = 0._prec
+
+        DO ni = 1,nb_cell
+            integration = integration + quadrature(ni, fct1,opt1, fct2,opt2)
+        END DO
+
+
+    END FUNCTION integration
+
+    FUNCTION unit(x)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: x
+        REAL(prec) :: unit 
+        unit =1._prec
+    END FUNCTION unit
+
+    SUBROUTINE Coeff_DG_init
+        IMPLICIT NONE
+
+    
+        IF(TRIM(DG_meth) == "Taylor") THEN
+            call base_Taylor_init
+            coeff_DG(:,:) = coeff_Taylor(:,:)
+        ELSE IF (TRIM(DG_meth) == "Legendre") THEN
+            call base_Legendre_init
+            coeff_DG(:,:) = coeff_legendre(:,:)
+        END IF
+
+    END SUBROUTINE Coeff_DG_init
+
+    SUBROUTINE Coeff_quad_init
+        IMPLICIT NONE
+
+        IF(TRIM(quad_meth) == "Lobatto") THEN
+            CALL quad_1D_lobatto(order_x,x_quad,w_quad)
+        ELSE IF(TRIM(quad_meth) == "Legendre") THEN
+            CALL quad_1D_legendre(order_x,x_quad,w_quad)
+        END IF
+
+    END SUBROUTINE Coeff_quad_init
+    
+    SUBROUTINE base_Legendre_init
+        IMPLICIT NONE
+
+        IF (order_x.GT.9) THEN
+        WRITE(*,*) "PROBLEM IN init_coef_legendre"
+        WRITE(*,*) "THE order_x IS TOO HIGH"
+        STOP
+        END IF
+        
+        coeff_legendre=0._prec
+        coeff_legendre(1,1)=1._prec
+        coeff_legendre(2,2)=1._prec
+        coeff_legendre(3,3)=3._prec/2._prec
+        coeff_legendre(3,1)=-1._prec/2._prec
+        coeff_legendre(4,4)=5._prec/2._prec
+        coeff_legendre(4,2)=-3._prec/2._prec
+        coeff_legendre(5,5)=35._prec/8._prec
+        coeff_legendre(5,3)=-15._prec/4._prec
+        coeff_legendre(5,1)=3._prec/8._prec
+        coeff_legendre(6,6)=63._prec/8._prec
+        coeff_legendre(6,4)=-35._prec/4._prec
+        coeff_legendre(6,2)=15._prec/8._prec
+        coeff_legendre(7,7)=231._prec/16._prec
+        coeff_legendre(7,5)=-315._prec/16._prec
+        coeff_legendre(7,3)=105._prec/16._prec
+        coeff_legendre(7,1)=-5._prec/16._prec
+        coeff_legendre(8,8)=429._prec/16._prec
+        coeff_legendre(8,6)=-693._prec/16._prec
+        coeff_legendre(8,4)=315._prec/16._prec
+        coeff_legendre(8,2)=-35._prec/16._prec
+        coeff_legendre(9,9)=6435._prec/128._prec
+        coeff_legendre(9,7)=-3003._prec/32._prec
+        coeff_legendre(9,5)=3465._prec/64._prec
+        coeff_legendre(9,3)=-315._prec/32._prec
+        coeff_legendre(9,1)=35._prec/128._prec
+            
+    END SUBROUTINE base_Legendre_init
+
+    SUBROUTINE base_Taylor_init
+        IMPLICIT NONE
+
+        IF (order_x.GT.9) THEN
+        WRITE(*,*) "PROBLEM IN init_coef_moment"
+        WRITE(*,*) "THE order_x IS TOO HIGH"
+        STOP
+        END IF
+        
+        coeff_Taylor=0._prec
+        coeff_Taylor(1,2)=1._prec
+        coeff_Taylor(2,3)=1._prec
+        coeff_Taylor(2,1)=-1._prec/12._prec
+        coeff_Taylor(3,4)=1._prec
+        coeff_Taylor(3,2)=-1._prec/4._prec
+        coeff_Taylor(4,5)=1._prec
+        coeff_Taylor(4,3)=-1._prec/2._prec
+        coeff_Taylor(4,1)=7._prec/240._prec
+        coeff_Taylor(5,6)=1._prec
+        coeff_Taylor(5,4)=-5._prec/6._prec
+        coeff_Taylor(5,2)=7._prec/48._prec
+        coeff_Taylor(6,7)=1._prec
+        coeff_Taylor(6,5)=-5._prec/4._prec
+        coeff_Taylor(6,3)=7._prec/16._prec
+        coeff_Taylor(6,1)=-31._prec/1344._prec
+        coeff_Taylor(7,8)=1._prec
+        coeff_Taylor(7,6)=-7._prec/4._prec
+        coeff_Taylor(7,4)=49._prec/48._prec
+        coeff_Taylor(7,2)=-31._prec/192._prec
+        coeff_Taylor(8,9)=1._prec
+        coeff_Taylor(8,7)=-7._prec/3._prec
+        coeff_Taylor(8,5)=49._prec/24._prec
+        coeff_Taylor(8,3)=-31._prec/48._prec
+        coeff_Taylor(8,1)=127._prec/3840._prec
+
+    END SUBROUTINE base_Taylor_init
+
+    SUBROUTINE base_Lagrange_init ! TODO
+    END SUBROUTINE base_Lagrange_init
+
+    SUBROUTINE quad_1D_lobatto(n_quad_1D,x_quad,w_quad)
+        IMPLICIT NONE
+
+        INTEGER,INTENT(IN) :: n_quad_1D 
+        REAL(prec),DIMENSION(:),INTENT(OUT) :: x_quad,w_quad
+        REAL(prec) :: aa,bb
+
+        x_quad(1)=-1._prec
+        x_quad(n_quad_1D)=1._prec
+        SELECT CASE (n_quad_1D)
+        CASE (2)
+        w_quad=1._prec
+        CASE (3)
+        x_quad(2)=0._prec
+        w_quad(1)=1._prec/3._prec
+        w_quad(2)=4._prec/3._prec
+        w_quad(3)=1._prec/3._prec
+        CASE (4)
+        aa=SQRT(1._prec/5._prec)
+        x_quad(2)=-aa
+        x_quad(3)=aa
+        bb=1._prec/9._prec
+        w_quad(1)=1._prec/6._prec
+        w_quad(2)=5._prec/6._prec
+        w_quad(3)=5._prec/6._prec
+        w_quad(4)=1._prec/6._prec
+        CASE (5)
+        aa=SQRT(3._prec/7._prec)
+        x_quad(2)=-aa
+        x_quad(3)=0._prec
+        x_quad(4)=aa
+        w_quad(1)=1._prec/10._prec
+        w_quad(2)=49._prec/90._prec
+        w_quad(3)=32._prec/45._prec
+        w_quad(4)=49._prec/90._prec
+        w_quad(5)=1._prec/10._prec
+        CASE (6)
+        aa=SQRT(1._prec/3._prec-2._prec*SQRT(7._prec)/21._prec)
+        bb=SQRT(1._prec/3._prec+2._prec*SQRT(7._prec)/21._prec)
+        x_quad(2)=-bb
+        x_quad(3)=-aa
+        x_quad(4)=aa
+        x_quad(5)=bb
+        aa=(14._prec+SQRT(7._prec))/30._prec
+        bb=(14._prec-SQRT(7._prec))/30._prec
+        w_quad(1)=1._prec/15._prec
+        w_quad(2)=bb
+        w_quad(3)=aa
+        w_quad(4)=aa
+        w_quad(5)=bb
+        w_quad(6)=1._prec/15._prec
+        CASE (7)
+        aa=SQRT(5._prec/11._prec-2._prec*SQRT(5._prec/3._prec)/11._prec)
+        bb=SQRT(5._prec/11._prec+2._prec*SQRT(5._prec/3._prec)/11._prec)
+        x_quad(2)=-bb
+        x_quad(3)=-aa
+        x_quad(4)=0._prec
+        x_quad(5)=aa
+        x_quad(6)=bb
+        aa=(124._prec+7._prec*SQRT(15._prec))/350._prec
+        bb=(124._prec-7._prec*SQRT(15._prec))/350._prec
+        w_quad(1)=1._prec/21._prec
+        w_quad(2)=bb
+        w_quad(3)=aa
+        w_quad(4)=256._prec/525._prec
+        w_quad(5)=aa
+        w_quad(6)=bb
+        w_quad(7)=1._prec/21._prec
+        CASE (8)
+        x_quad(5)=0.2092992179024788687686572603453513_prec
+        x_quad(6)=0.5917001814331423021445107313979532_prec
+        x_quad(7)=0.8717401485096066153374457612206634_prec
+        x_quad(4)=-x_quad(5)
+        x_quad(3)=-x_quad(6)
+        x_quad(2)=-x_quad(7)
+        
+        w_quad(5)=0.41245879465870388156705297140221_prec
+        w_quad(6)=0.341122692483504364764240677107748_prec
+        w_quad(7)=0.2107042271435060393829920657757563_prec
+        w_quad(8)=0.03571428571428571428571428571428571_prec
+        w_quad(4)=w_quad(5)
+        w_quad(3)=w_quad(6)
+        w_quad(2)=w_quad(7)
+        w_quad(1)=w_quad(8)
+        CASE (9)
+        x_quad(5)=0._prec
+        x_quad(6)=0.3631174638261781587107520687086592_prec
+        x_quad(7)=0.6771862795107377534458854270913425_prec
+        x_quad(8)=0.899757995411460157312345244418338_prec
+        x_quad(4)=-x_quad(6)
+        x_quad(3)=-x_quad(7)
+        x_quad(2)=-x_quad(8)
+        
+        w_quad(5)=0.3715192743764172335600907029478458_prec
+        w_quad(6)=0.346428510973046345115131532139718_prec
+        w_quad(7)=0.2745387125001617352807056185793727_prec
+        w_quad(8)=0.1654953615608055250463397200292083_prec
+        w_quad(9)=0.02777777777777777777777777777777778_prec
+        w_quad(4)=w_quad(6)
+        w_quad(3)=w_quad(7)
+        w_quad(2)=w_quad(8)
+        w_quad(1)=w_quad(9)
+        CASE (10)
+        x_quad(6)=0.1652789576663870246262197659581735_prec
+        x_quad(7)=0.477924949810444495661175092731258_prec
+        x_quad(8)=0.7387738651055050750031061748598307_prec
+        x_quad(9)=0.9195339081664588138289326608223381_prec
+        x_quad(5)=-x_quad(6)
+        x_quad(4)=-x_quad(7)
+        x_quad(3)=-x_quad(8)
+        x_quad(2)=-x_quad(9)
+        
+        w_quad(6)=0.327539761183897456656510527916893_prec
+        w_quad(7)=0.292042683679683757875582257374444_prec
+        w_quad(8)=0.2248893420631264521194578217310478_prec
+        w_quad(9)=0.1333059908510701111262271707553929_prec
+        w_quad(10)=0.02222222222222222222222222222222222_prec
+        w_quad(5)=w_quad(6)
+        w_quad(4)=w_quad(7)
+        w_quad(3)=w_quad(8)
+        w_quad(2)=w_quad(9)
+        w_quad(1)=w_quad(10)
+        CASE DEFAULT
+        WRITE(*,*) "PROBLEM IN quad_1D_lobatto",n_quad_1D
+        STOP
+        END SELECT
+
+    END SUBROUTINE quad_1D_lobatto
+    
+    SUBROUTINE quad_1D_legendre(n_quad_1D,x_quad,w_quad)
+        IMPLICIT NONE
+
+        INTEGER,INTENT(IN) :: n_quad_1D 
+        REAL(prec),DIMENSION(:),INTENT(OUT) :: x_quad,w_quad
+        REAL(prec) :: aa,bb
+
+        SELECT CASE (n_quad_1D)
+        CASE (1)
+        x_quad=0._prec
+        w_quad=2._prec
+        CASE (2)
+        aa=1._prec/SQRT(3._prec)
+        x_quad(1)=-aa
+        x_quad(2)=aa
+        w_quad=1._prec
+        CASE (3)
+        aa=SQRT(3._prec/5._prec)
+        x_quad(1)=-aa
+        x_quad(2)=0._prec
+        x_quad(3)=aa
+        bb=1._prec/9._prec
+        w_quad(1)=5._prec*bb
+        w_quad(2)=8._prec*bb
+        w_quad(3)=5._prec*bb
+        CASE (4)
+        aa=SQRT(3._prec/7._prec-2._prec/7._prec*SQRT(6._prec/5._prec))
+        bb=SQRT(3._prec/7._prec+2._prec/7._prec*SQRT(6._prec/5._prec))
+        x_quad(1)=-bb
+        x_quad(2)=-aa
+        x_quad(3)=aa
+        x_quad(4)=bb
+        aa=SQRT(30._prec)
+        bb=1._prec/36._prec
+        w_quad(1)=(18._prec-aa)*bb
+        w_quad(2)=(18._prec+aa)*bb
+        w_quad(3)=(18._prec+aa)*bb
+        w_quad(4)=(18._prec-aa)*bb
+        CASE (5)
+        aa=SQRT(5._prec-2._prec*SQRT(10._prec/7._prec))/3._prec
+        bb=SQRT(5._prec+2._prec*SQRT(10._prec/7._prec))/3._prec
+        x_quad(1)=-bb
+        x_quad(2)=-aa
+        x_quad(3)=0._prec
+        x_quad(4)=aa
+        x_quad(5)=bb
+        aa=SQRT(70._prec)
+        bb=1._prec/900._prec
+        w_quad(1)=(322._prec-13._prec*aa)*bb
+        w_quad(2)=(322._prec+13._prec*aa)*bb
+        w_quad(3)=128._prec/225._prec
+        w_quad(4)=(322._prec+13._prec*aa)*bb
+        w_quad(5)=(322._prec-13._prec*aa)*bb
+        CASE DEFAULT
+        
+        END SELECT
+
+    END SUBROUTINE quad_1D_legendre
+
+! ---------------------------------------------------------------
+! ---------------------------------------------------------------
+
+    FUNCTION DG_base(XX,ordre_poly)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ordre_poly
+        REAL(prec), INTENT(IN) :: XX
+        REAL(prec) :: DG_base
+        INTEGER :: ii
+
+        DG_base = 0._prec
+
+        DO ii =1,ordre_poly
+            DG_base = DG_base + coeff_DG(ordre_poly,ii) * XX**ii
+        END DO
+        
+
+    END FUNCTION DG_base
+
+    FUNCTION Ref_to_loc(ni,XX) result(YY)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni
+        REAL(prec), INTENT(IN) :: XX
+        REAL(prec) :: xL,xR
+        REAL(prec) :: YY
+
+        xL = x_cell(ni); xR= x_cell(ni+1)
+
+        YY = XX*(xR-xL)/2._prec + (xR+xL)/2._prec 
+
+    END FUNCTION Ref_to_loc
+
+    FUNCTION Loc_to_Ref(ni,YY) result(XX)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni
+        REAL(prec), INTENT(IN) :: YY
+        REAL(prec) :: XX
+
+        XX = 2._prec * (YY-x_middle(ni))/(x_cell(ni+1)-x_cell(ni))
+
+    END FUNCTION Loc_to_Ref
+
+    SUBROUTINE Projection_Pk(fct, fct_h, ni)
+        IMPLICIT NONE
+        
+        INTERFACE
+        FUNCTION fct(YY)
+            USE precis
+            REAL(prec),INTENT(IN) :: YY
+            REAL(prec) :: fct
+        END FUNCTION fct
+        END INTERFACE
+
+        INTEGER, INTENT(IN) :: ni
+        REAL(prec), DIMENSION(order_x), INTENT(OUT) :: fct_h
+
+        REAL(prec), DIMENSION(order_x) :: f_prod
+        REAL(prec) :: YY
+        REAL(prec) :: xR, xL
+        INTEGER :: jj, kk
+
+        xL = x_cell(ni); xR= x_cell(ni+1)
+
+        f_prod = 0._prec
+
+        DO jj =1,order_x
+            DO kk =1,order_x
+                YY = Ref_to_loc(ni,x_quad(kk))
+                f_prod(jj) = f_prod(jj) + fct(YY)*DG_base(x_quad(kk),kk)*w_quad(kk)
+            END DO
+        END DO
+
+        fct_h = MATMUL(Masse_inv,f_prod)
+
+    END SUBROUTINE Projection_Pk
+
+    SUBROUTINE Matrice_Masse_init
+        IMPLICIT NONE
+
+        INTEGER :: ii,jj
+
+        DO ii = 1,order_x
+            DO jj = ii,order_x
+                Masse(ii,jj) = quadrature(1,DG_base,ii,DG_base,jj)
+                Masse(jj,ii) = Masse(ii,jj)
+            END DO
+        END DO
+        
+        CALL inv_mat(Masse,Masse_inv,1)
+
+
+    END SUBROUTINE Matrice_Masse_init
+
+
+! ---------------------------------------------------------------
+! ---------------------------------------------------------------
+
+
+  !----------------------------------------!
+  ! INVERSION PROCEDURE OF A SQUARE MATRIX !
+  !----------------------------------------!
+  SUBROUTINE inv_mat(M,M1,symm)
+    IMPLICIT NONE
+    
+    INTEGER,INTENT(IN) :: symm
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: M1
+    INTEGER :: ndim
+
+    !! Check if the matrix is square !!
+    ndim=SIZE(M(1,:))
+    IF (SIZE(M(:,1))/=ndim) THEN
+       WRITE(*,*) "NON SQUARE MATRIX ",ndim,SIZE(M(:,1))
+       STOP
+    END IF
+    
+    IF (ndim==1) THEN
+       M1(1,1)=1._prec/M(1,1)
+    ELSE IF (ndim==2) THEN
+       CALL invers_M22(M,M1)
+    ELSE IF (ndim==3) THEN
+       CALL invers_M33(M,M1)
+    ELSE
+       IF (symm==1) THEN
+          CALL invers_matrix_sym(M,M1)
+       ELSE
+          CALL invers_matrix(M,M1)
+       END IF
+    END IF
+
+  END SUBROUTINE inv_mat
+
+
+  !-------------------------------------!
+  ! INVERSION PROCEDURE OF A 2x2 MATRIX !
+  !-------------------------------------!
+  SUBROUTINE invers_M22(M,M1)
+    IMPLICIT NONE
+    
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: M1
+    REAL(prec) :: det
+
+    det=M(1,1)*M(2,2)-M(1,2)*M(2,1)
+    M1(1,1)=M(2,2);M1(1,2)=-M(1,2)
+    M1(2,1)=-M(2,1);M1(2,2)=M(1,1)
+
+    IF (ABS(det).LE.0.1_prec**prec) THEN
+       WRITE(*,*) "PROBLEM IN THE 2x2 MATRIX INVERSION",ABS(det)
+       WRITE(*,*) "|",M(1,1),",",M(1,2),"|"
+       WRITE(*,*) "|",M(2,1),",",M(2,2),"|"
+    END IF
+
+    M1=M1/det
+
+  END SUBROUTINE invers_M22
+
+
+  !-------------------------------------!
+  ! INVERSION PROCEDURE OF A 3x3 MATRIX !
+  !-------------------------------------!
+  SUBROUTINE invers_M33(M,M1)
+    IMPLICIT NONE
+    
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: M1
+    REAL(prec) :: det,aa,bb,cc,dd,ee,ff,gg,hh,ii
+
+    aa=M(1,1);bb=M(1,2);cc=M(1,3)
+    dd=M(2,1);ee=M(2,2);ff=M(2,3)
+    gg=M(3,1);hh=M(3,2);ii=M(3,3)
+
+    det=aa*ee*ii+dd*hh*cc+gg*bb*ff&
+     & -gg*ee*cc-aa*hh*ff-ii*bb*dd
+
+    M1(1,1)=ee*ii-hh*ff;M1(1,2)=cc*hh-bb*ii;M1(1,3)=bb*ff-ee*cc
+    M1(2,1)=ff*gg-dd*ii;M1(2,2)=aa*ii-cc*gg;M1(2,3)=dd*cc-aa*ff
+    M1(3,1)=dd*hh-ee*gg;M1(3,2)=gg*bb-hh*aa;M1(3,3)=aa*ee-bb*dd
+
+    IF (ABS(det).LE.0.1_prec**prec) THEN
+       WRITE(*,*) "PROBLEM IN THE 3x3 MATRIX INVERSION",ABS(det)
+       WRITE(*,*) "|",M(1,1),",",M(1,2),",",M(1,3),"|"
+       WRITE(*,*) "|",M(2,1),",",M(2,2),",",M(2,3),"|"
+       WRITE(*,*) "|",M(3,1),",",M(3,2),",",M(3,3),"|"
+    END IF
+
+    M1=M1/det
+
+  END SUBROUTINE invers_M33
+
+
+  !-------------------------------------------!
+  ! INVERSION PROCEDURE OF A SYMMETRIC MATRIX !
+  !-------------------------------------------!
+  SUBROUTINE invers_matrix_sym(M,M1)
+    IMPLICIT NONE
+    
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: M1
+    REAL(prec),DIMENSION(size(M(1,:)),size(M(1,:))) :: L,L1
+    INTEGER :: n,i,j,k
+    
+    
+    n=SIZE(M(1,:))
+    M1=0._prec;L1=0._prec
+    
+    CALL cholesky(M,L)
+    
+    !$OMP PARALLEL NUM_THREADS(num_thrd)
+    !$OMP DO PRIVATE(i,k) 
+    DO j=1,n
+       L1(j,j)=1._prec/L(j,j)
+       DO i=j+1,n
+          DO k=j,i-1
+             L1(i,j)=L1(i,j)-L(i,k)*L1(k,j)
+          END DO
+          L1(i,j)=L1(i,j)/L(i,i)
+       END DO
+    END DO
+    !$OMP END DO
+
+    !$OMP DO PRIVATE(k) COLLAPSE(2)
+    DO i=1,n
+       DO j=1,n
+          DO k=MAX(i,j),n
+             M1(i,j)=M1(i,j)+L1(k,i)*L1(k,j)
+          END DO
+       END DO
+    END DO
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+  END SUBROUTINE invers_matrix_sym
+  
+
+  !-------------------------------------------------------------------!
+  ! L.L^t DECOMPOSITION FOR a POSITIVE SEMI-DEFINITE SYMMETRIC MATRIX !
+  !-------------------------------------------------------------------!
+  SUBROUTINE cholesky(M,L)
+    IMPLICIT NONE
+    
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: L
+    INTEGER :: n,i,j,k
+    
+    
+    L=0._prec
+    n=SIZE(M(1,:))
+    DO i=1,n
+
+       L(i,i)=M(i,i)
+       DO k=1,i-1
+          L(i,i)=L(i,i)-L(i,k)**2
+       END DO
+       L(i,i)=SQRT(L(i,i))
+
+       DO j=i+1,n
+          L(j,i)=M(j,i)
+          DO k=1,i-1
+             L(j,i)=L(j,i)-L(i,k)*L(j,k)
+          END DO
+          L(j,i)=L(j,i)/L(i,i)
+       END DO
+
+    END DO
+
+  END SUBROUTINE cholesky
+
+
+  !---------------------------------!
+  ! INVERSION PROCEDURE OF A MATRIX !
+  !---------------------------------!
+  SUBROUTINE invers_matrix(M,M1)
+    IMPLICIT NONE
+    
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: M1
+    REAL(prec),DIMENSION(size(M(1,:)),size(M(1,:))) :: L,L1,U,U1
+    INTEGER :: nn,i,j,k    
+    
+    nn=SIZE(M(1,:))
+    M1=0._prec
+    L1=0._prec
+    U1=0._prec
+    
+    CALL decomp_LU(M,L,U)
+    
+    !$OMP PARALLEL NUM_THREADS(num_thrd)
+    !$OMP DO PRIVATE(i,k)
+    DO j=1,nn
+       L1(j,j)=1._prec!/L(j,j)
+       U1(j,j)=1._prec/U(j,j)
+       DO i=j+1,nn
+          DO k=j,i-1
+             L1(i,j)=L1(i,j)-L(i,k)*L1(k,j)
+             U1(j,i)=U1(j,i)-U1(j,k)*U(k,i)
+          END DO
+          !L1(i,j)=L1(i,j)/L(i,i)
+          U1(j,i)=U1(j,i)/U(i,i)
+       END DO
+    END DO
+    !$OMP END DO
+
+    !$OMP DO PRIVATE(k) COLLAPSE(2)
+    DO i=1,nn
+       DO j=1,nn
+          DO k=MAX(i,j),nn
+             M1(i,j)=M1(i,j)+U1(i,k)*L1(k,j)
+          END DO
+       END DO
+    END DO
+    !$OMP END DO
+    !$OMP END PARALLEL
+    
+  END SUBROUTINE invers_matrix
+
+
+  !-------------------------------!
+  ! L.U DECOMPOSITION (DoolittLE) !
+  !-------------------------------!
+  SUBROUTINE decomp_LU(M,L,U)
+    IMPLICIT NONE
+    
+    REAL(prec),DIMENSION(:,:),INTENT(IN) :: M
+    REAL(prec),DIMENSION(:,:),INTENT(OUT) :: L,U
+    INTEGER :: nn,i,j,k
+    
+    
+    L=0._prec;U=0._prec
+    nn=size(M(1,:))
+    DO i=1,nn
+
+       L(i,i)=1._prec
+       U(i,i)=M(i,i)
+       DO k=1,i-1
+          U(i,i)=U(i,i)-L(i,k)*U(k,i)
+       END DO
+
+       DO j=i+1,nn
+          U(i,j)=M(i,j)
+          L(j,i)=M(j,i)
+          DO k=1,i-1
+             U(i,j)=U(i,j)-L(i,k)*U(k,j)
+             L(j,i)=L(j,i)-L(j,k)*U(k,i)
+          END DO
+          IF (ABS(U(i,i)).LT.eps0) THEN
+             WRITE(*,*) "ERROR DECOMPOSITION LU"
+          ELSE
+             L(j,i)=L(j,i)/U(i,i)
+          END IF
+       END DO
+
+    END DO
+
+  END SUBROUTINE decomp_LU
+
+
+END MODULE mod_polynome
