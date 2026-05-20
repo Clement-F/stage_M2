@@ -10,7 +10,7 @@ CONTAINS
         IMPLICIT NONE
         REAL(prec), INTENT(in) :: x
         REAL(prec) :: test 
-        test = sin(x)
+        test = cos(x)
     END FUNCTION test
 
     FUNCTION eval_sol(ni,YY)
@@ -54,13 +54,18 @@ CONTAINS
         
         quadrature = 0._prec
 
-
-        DO kk =1,order_x
-            YY = Ref_to_loc(ni,x_quad(kk))
-            quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(ni)
-        END DO
-
-        quadrature = quadrature* (x_cell(ni+1)-x_cell(ni))*0.5_prec
+        IF(ni .GT. 0) THEN 
+            DO kk =1,order_x
+                YY = Ref_to_loc(ni,x_quad(kk))
+                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)
+            END DO
+            
+            quadrature = quadrature* (x_cell(ni+1)-x_cell(ni))*0.5_prec
+        ELSE 
+            DO kk =1,order_x
+                quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
+            END DO
+        END IF
 
     END FUNCTION quadrature
 
@@ -408,7 +413,7 @@ CONTAINS
         DG_base = 0._prec
 
         DO ii =1,ordre_poly
-            DG_base = DG_base + coeff_DG(ordre_poly,ii) * XX**ii
+            DG_base = DG_base + coeff_DG(ordre_poly,ii) * XX**(ii-1)
         END DO
         
 
@@ -463,11 +468,14 @@ CONTAINS
         DO jj =1,order_x
             DO kk =1,order_x
                 YY = Ref_to_loc(ni,x_quad(kk))
-                f_prod(jj) = f_prod(jj) + fct(YY)*DG_base(x_quad(kk),kk)*w_quad(kk)
+                f_prod(jj) = f_prod(jj) + fct(YY)*DG_base(x_quad(kk),jj)*w_quad(kk)
             END DO
         END DO
 
         fct_h = MATMUL(Masse_inv,f_prod)
+
+        ! print *, fct_h
+
 
     END SUBROUTINE Projection_Pk
 
@@ -478,7 +486,7 @@ CONTAINS
 
         DO ii = 1,order_x
             DO jj = ii,order_x
-                Masse(ii,jj) = quadrature(1,DG_base,ii,DG_base,jj)
+                Masse(ii,jj) = quadrature(0,DG_base,ii,DG_base,jj)
                 Masse(jj,ii) = Masse(ii,jj)
             END DO
         END DO
