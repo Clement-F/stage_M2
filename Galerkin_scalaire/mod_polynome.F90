@@ -6,9 +6,10 @@ MODULE mod_polynome
 CONTAINS
 
 
-    FUNCTION test(x)
+    FUNCTION test(x,ni)
         IMPLICIT NONE
         REAL(prec), INTENT(in) :: x
+        INTEGER,    INTENT(in) :: ni
         REAL(prec) :: test 
         test = cos(x)
     END FUNCTION test
@@ -102,9 +103,10 @@ CONTAINS
 
     END FUNCTION integration
 
-    FUNCTION unit(x)
+    FUNCTION unit(x, ni)
         IMPLICIT NONE
         REAL(prec), INTENT(IN) :: x
+        INTEGER,    INTENT(IN) :: ni
         REAL(prec) :: unit 
         unit =1._prec
     END FUNCTION unit
@@ -118,7 +120,7 @@ CONTAINS
             coeff_DG(:,:) = coeff_Taylor(:,:)
         ELSE IF (TRIM(DG_meth) == "Legendre") THEN
             call base_Legendre_init
-            coeff_DG(:,:) = coeff_legendre(:,:)
+            coeff_DG(:,:) = coeff_legendre(:order_x,:order_x)
         END IF
 
     END SUBROUTINE Coeff_DG_init
@@ -419,6 +421,23 @@ CONTAINS
 
     END FUNCTION DG_base
 
+    
+    FUNCTION dDG_base(XX,ordre_poly)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ordre_poly
+        REAL(prec), INTENT(IN) :: XX
+        REAL(prec) :: dDG_base
+        INTEGER :: ii
+
+        dDG_base = 0._prec
+
+        DO ii =2,ordre_poly
+            dDG_base = dDG_base + (ii-1)*coeff_DG(ordre_poly,ii) * XX**(ii-2)
+        END DO
+        
+
+    END FUNCTION dDG_base
+
     FUNCTION Ref_to_loc(ni,XX) result(YY)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni
@@ -446,9 +465,10 @@ CONTAINS
         IMPLICIT NONE
         
         INTERFACE
-        FUNCTION fct(YY)
+        FUNCTION fct(YY,ni)
             USE precis
             REAL(prec),INTENT(IN) :: YY
+            INTEGER,   INTENT(IN) :: ni
             REAL(prec) :: fct
         END FUNCTION fct
         END INTERFACE
@@ -468,7 +488,7 @@ CONTAINS
         DO jj =1,order_x
             DO kk =1,order_x
                 YY = Ref_to_loc(ni,x_quad(kk))
-                f_prod(jj) = f_prod(jj) + fct(YY)*DG_base(x_quad(kk),jj)*w_quad(kk)
+                f_prod(jj) = f_prod(jj) + fct(YY,ni)*DG_base(x_quad(kk),jj)*w_quad(kk)
             END DO
         END DO
 
@@ -495,6 +515,23 @@ CONTAINS
 
 
     END SUBROUTINE Matrice_Masse_init
+
+    SUBROUTINE Matrice_Rigid_init
+        IMPLICIT NONE
+
+        INTEGER :: ii,jj
+
+        DO ii = 1,order_x
+            DO jj = ii,order_x
+                Rigid(ii,jj) = quadrature(0,DG_base,ii,dDG_base,jj)
+                Rigid(jj,ii) = Rigid(ii,jj)
+            END DO
+        END DO
+        
+        CALL inv_mat(Rigid,Rigid_inv,1)
+
+
+    END SUBROUTINE Matrice_Rigid_init
 
 
 ! ---------------------------------------------------------------
