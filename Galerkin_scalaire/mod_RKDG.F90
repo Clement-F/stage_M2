@@ -9,7 +9,7 @@ CONTAINS
     REAL(prec), INTENT(in) :: u
     REAL(prec) :: flux
 
-    flux = 2._prec*u
+    flux = max_dflux*u
 
   END FUNCTION flux
 
@@ -123,7 +123,7 @@ CONTAINS
     INTEGER :: ii,jj
     REAL(prec) :: ti
     REAL(prec), DIMENSION(order_x) :: sig_1, sig_2
-    REAL(prec), DIMENSION(order_x) :: BB
+    REAL(prec), DIMENSION(order_x) :: V_B, S_B, BB
     
     CALL flux_numerique
 
@@ -135,18 +135,21 @@ CONTAINS
       print *,"-----------"
 
       DO ii=1,order_x
-        sig_1(ii) = DG_base(x_cell(ni),ii); 
-        sig_2(ii) = DG_base(x_cell(ni+1),ii); 
+        sig_1(ii) = DG_base(Loc_to_Ref(ni,x_cell(ni)),ii); 
+        sig_2(ii) = DG_base(Loc_to_Ref(ni,x_cell(ni+1)),ii); 
       END DO
 
       print *,sig_1,sig_2
       print *, "base poly bord"
+      print *,flux_h(ni)%base_poly
 
       sol_step(1)%base_poly = sol(ni)%base_poly
-      BB =MATMUL(Rigid,flux_h(ni)%base_poly)-(flux_h(ni)%inter(2)*sig_2 - flux_h(ni)%inter(1)*sig_1)
-      ! print *,"BB", BB
+      V_B = MATMUL(Rigid,flux_h(ni)%base_poly)/(cell_size(ni))
+      S_B = -(flux_h(ni)%inter(2)*sig_2 - flux_h(ni)%inter(1)*sig_1)/(cell_size(ni))
+      BB  = V_B + S_B 
+      print *,"B", V_B, S_B, BB
 
-      L_step(1,:) = MATMUL(Masse_inv, BB  ) /cell_size(ni)
+      L_step(1,:) = MATMUL(Masse_inv, BB  ) 
       
       ! print *,"init du step fini"
 
@@ -162,8 +165,11 @@ CONTAINS
           sol_step(ii+1)%base_poly = sol_step(ii+1)%base_poly + RK_alpha(ii,jj)*sol_step(jj)%base_poly &
           & + RK_beta(ii,jj)*dt*L_step(jj,:)  
         END DO
-        BB =MATMUL(Rigid,flux_h(ni)%base_poly)-(flux_h(ni)%inter(2)*sig_2 - flux_h(ni)%inter(1)*sig_1)
-        L_step(ii+1,:) = MATMUL(Masse_inv, BB )/cell_size(ni)
+
+        V_B = MATMUL(Rigid,flux_h(ni)%base_poly)/(cell_size(ni))
+        S_B = -(flux_h(ni)%inter(2)*sig_2 - flux_h(ni)%inter(1)*sig_1)/(cell_size(ni))
+        BB  = V_B + S_B         
+        L_step(ii+1,:) = MATMUL(Masse_inv, BB )
         ! print *,"a"
         ! print *,sol_step(ii+1)%base_poly
       END DO

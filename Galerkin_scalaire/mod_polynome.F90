@@ -14,6 +14,16 @@ CONTAINS
         test = cos(x)
     END FUNCTION test
 
+    
+    FUNCTION test1(x,ni)
+        IMPLICIT NONE
+        REAL(prec), INTENT(in) :: x
+        INTEGER,    INTENT(in) :: ni
+        REAL(prec) :: test1 
+        test1 = 0._prec
+        if(1.<x .and. x<2.) test1 = 1._prec
+    END FUNCTION test1
+
     FUNCTION eval_sol(ni,YY)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
@@ -522,13 +532,12 @@ CONTAINS
         INTEGER :: ii,jj
 
         DO ii = 1,order_x
-            DO jj = ii,order_x
-                Rigid(ii,jj) = quadrature(0,DG_base,ii,dDG_base,jj)
-                Rigid(jj,ii) = Rigid(ii,jj)
+            DO jj = 1,order_x
+                Rigid(jj,ii) = quadrature(0,DG_base,ii,dDG_base,jj)
             END DO
         END DO
         
-        CALL inv_mat(Rigid,Rigid_inv,1)
+        ! CALL inv_mat(Rigid,Rigid_inv,1)
 
 
     END SUBROUTINE Matrice_Rigid_init

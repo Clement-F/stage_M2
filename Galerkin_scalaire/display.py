@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 with open('file_data.txt') as f:
     lines = f.readlines()
 
-nx = int(lines[0][5:11])*2
+nx = int(lines[0][5:11])*5
 sm = int(lines[1][5:11])
 
 with open('file_sol.txt') as f:
@@ -33,7 +33,7 @@ for k in range(0,sm):
 plt.plot(X,U_ex[0],'g')
 plt.plot(X,U_t[0],'k')
 plt.plot(X,U_t[-1],'b')
-#plt.plot(X,U_t[2],'r')
+plt.plot(X,U_t[2],'r')
 #plt.xlim(0.0,0.1)
 plt.show()
 

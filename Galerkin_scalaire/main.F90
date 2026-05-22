@@ -6,8 +6,8 @@ PROGRAM MAIN
     REAL(prec) :: t,xi
 
     xL = 0._prec ; xR = 2* 3.1415_prec
-    order_x =2; order_t = 1
-    nb_cell =10
+    order_x =3; order_t = 1
+    nb_cell =51
 
     print *, "init"
 
@@ -24,7 +24,7 @@ PROGRAM MAIN
         x_middle(i)= x_cell(i) + cell_size(i)/2._prec
     END DO
 
-    time = 0._prec; tmax= 0.5_prec; CFL=1._prec
+    time = 0._prec; tmax= 3._prec; CFL=1._prec
     n_time =1
     print *,"init polynome and quadrature"
 
@@ -60,8 +60,8 @@ PROGRAM MAIN
 
 
     DO i=1,nb_cell
-        DO j=1,2
-            xi = x_cell(i) + REAL(j, prec)/2._prec*cell_size(i)
+        DO j=1,5
+            xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
             ! write (*,"(i3,i3)",advance ='no') i,j
             t = eval_sol(i,xi)
             write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
@@ -76,8 +76,8 @@ PROGRAM MAIN
     CALL Time_step
 
     DO i=1,nb_cell
-        DO j=1,2
-            xi = x_cell(i) + REAL(j, prec)/2._prec*cell_size(i)
+        DO j=1,5
+            xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
             ! write (*,"(i3,i3)",advance ='no') i,j
             t = eval_sol(i,xi)
             write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
@@ -87,19 +87,19 @@ PROGRAM MAIN
     write(unit=numfile_sol, fmt='("------------------------")' ) 
 
 
-    ! DO WHILE (time .LT. tmax)
-    !     CALL Time_step
+    DO WHILE (time .LT. tmax)
+        CALL Time_step
         
-    !     DO i=1,nb_cell
-    !         DO j=1,2
-    !             xi = x_cell(i) + REAL(j, prec)/2._prec*cell_size(i)
-    !             ! write (*,"(i3,i3)",advance ='no') i,j
-    !             t = eval_sol(i,xi)
-    !             write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
-    !         END DO
-    !     END DO
-    !     write(unit=numfile_sol, fmt='("------------------------")' ) 
-    ! END DO
+        DO i=1,nb_cell
+            DO j=1,5
+                xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
+                ! write (*,"(i3,i3)",advance ='no') i,j
+                t = eval_sol(i,xi)
+                write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
+            END DO
+        END DO
+        write(unit=numfile_sol, fmt='("------------------------")' ) 
+    END DO
 
    write(unit= numfile_data, fmt='("nt = "i5)') n_time
 
