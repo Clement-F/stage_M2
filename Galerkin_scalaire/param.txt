@@ -1,6 +1,24 @@
-10001           | nx 
-0.0             | xd
-1.0             | xf
-0.1             | T
+---------------------------------------------------
+    Paramètres du domaine (temps x espace)
+---------------------------------------------------
+100             | nx 
+-3.14159        | xd
+3.14159         | xf
+2.             | T
+---------------------------------------------------
 0.9             | cfl
-10              | number of screenshots
+10              | frame rule
+20              | print rule
+---------------------------------------------------
+    Paramètres de quadrature / polynomes
+---------------------------------------------------
+3               | ordre espace
+2               | ordre temps
+Legendre        | polynomes
+Legendre        | quadrature
+---------------------------------------------------
+    Paramètres du problème
+---------------------------------------------------
+sinus            | solution initiale (sinus,unit,creneau)
+advection         | problème (advection, burgers)
+1.0             | vitesse advection (si pb = advection)

@@ -6,23 +6,22 @@ MODULE mod_polynome
 CONTAINS
 
 
-    FUNCTION test(x,ni)
+    FUNCTION sinus(x,ni)
         IMPLICIT NONE
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
-        REAL(prec) :: test 
-        test = cos(x)
-    END FUNCTION test
-
+        REAL(prec) :: sinus 
+        sinus = sin(x)
+    END FUNCTION sinus
     
-    FUNCTION test1(x,ni)
+    FUNCTION creneau(x,ni)
         IMPLICIT NONE
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
-        REAL(prec) :: test1 
-        test1 = 0._prec
-        if(1.<x .and. x<2.) test1 = 1._prec
-    END FUNCTION test1
+        REAL(prec) :: creneau 
+        creneau = 0._prec
+        if(0.4_prec<x .and. x<0.6_prec) creneau = 1._prec
+    END FUNCTION creneau
 
     FUNCTION eval_sol(ni,YY)
         IMPLICIT NONE
@@ -37,6 +36,20 @@ CONTAINS
         END DO
 
     END FUNCTION eval_sol
+    
+    FUNCTION eval_step(ni,YY)
+        IMPLICIT NONE
+        INTEGER, INTENT(in) :: ni
+        REAL(prec)   , INTENT(in) :: YY
+        REAL(prec) :: eval_step 
+        INTEGER :: ii,jj
+        eval_step= 0._prec
+
+        DO ii = 1,order_x
+            eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+        END DO
+
+    END FUNCTION eval_step
 
     FUNCTION quadrature(ni,fct1,opt1,fct2,opt2) 
         IMPLICIT NONE
@@ -502,7 +515,7 @@ CONTAINS
             END DO
         END DO
 
-        fct_h = MATMUL(Masse_inv,f_prod)
+        fct_h = MATMUL(Masse_inv,f_prod) !*(cell_size(ni)/2._prec)
 
         ! print *, fct_h
 

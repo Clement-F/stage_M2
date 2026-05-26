@@ -1,107 +1,63 @@
 PROGRAM MAIN
 
    use mod_RKDG
+   use mod_init
    implicit none
 
     REAL(prec) :: t,xi
 
-    xL = 0._prec ; xR = 2* 3.1415_prec
-    order_x =3; order_t = 1
-    nb_cell =51
-
-    print *, "init"
-
-    CALL ALLOCATE_all
-
-    dx = REAL((xR-xL)/nb_cell, prec)
-
-    DO i =1,nb_cell+1 
-        x_cell(i) = xL + (i-1)*dx
-    END DO
-    
-    DO i=1,nb_cell
-        cell_size(i)= x_cell(i+1)-x_cell(i)  
-        x_middle(i)= x_cell(i) + cell_size(i)/2._prec
-    END DO
-
-    time = 0._prec; tmax= 3._prec; CFL=1._prec
-    n_time =1
-    print *,"init polynome and quadrature"
-
-    DG_meth = "Legendre"
-    quad_meth = "Legendre"
-
-    print *,"quad"
-    CALL Coeff_quad_init
-    print *,"poly"
-    CALL Coeff_DG_init
-    print *,"RK"
-    CALL Coeff_RK_init(order_t)
-
-    print *,"init mass"
-
-    CALL Matrice_Masse_init
-    CALL Matrice_Rigid_init
-
-    print *,"projection"
-
-    DO i=1,nb_cell
-        CALL Projection_Pk(test,sol(i)%base_poly,i)
-        ! print *, sol(i)%base_poly
-    END DO
-
-    print *,"evaluation"
-
-
-   open(unit=numfile_data, file=nomfile_data, form ='formatted', status ='old')
-   open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
+    CALL INIT_ALL
+    open(unit=numfile_data, file=nomfile_data, form ='formatted', status ='old')
+    open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
    
-   write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
-
-
-    DO i=1,nb_cell
-        DO j=1,5
-            xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
-            ! write (*,"(i3,i3)",advance ='no') i,j
-            t = eval_sol(i,xi)
-            write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
-        END DO
-    END DO
-
-    max_dflux = 2._prec
-
-    print *,"time_step"
-    write(unit=numfile_sol, fmt='("------------------------")' ) 
-
-    CALL Time_step
-
-    DO i=1,nb_cell
-        DO j=1,5
-            xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
-            ! write (*,"(i3,i3)",advance ='no') i,j
-            t = eval_sol(i,xi)
-            write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
-        END DO
-    END DO
-    print *,"time_step"
-    write(unit=numfile_sol, fmt='("------------------------")' ) 
-
-
-    DO WHILE (time .LT. tmax)
-        CALL Time_step
+    write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
         
-        DO i=1,nb_cell
-            DO j=1,5
-                xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
-                ! write (*,"(i3,i3)",advance ='no') i,j
-                t = eval_sol(i,xi)
-                write(unit=numfile_sol,  fmt='(f10.6, f12.6)') xi,t
+    
+            print *,n_time, time, dt
+            DO i=1,nb_cell
+                DO j=1,5
+                    xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
+                    t = eval_sol(i,xi)
+                    write(unit=numfile_sol,  fmt='(f10.6, f16.6)') xi,t
+                END DO
             END DO
-        END DO
-        write(unit=numfile_sol, fmt='("------------------------")' ) 
+            n_imp = n_imp +1
+            Time_stemp(n_imp) = time
+            ! print *, sol(1)%base_poly
+            ! print *, sol(nb_cell)%base_poly
+            
+            write(unit=numfile_sol, fmt='("------------------------")' ) 
+            
+    DO WHILE (time .LT. tmax)     
+        ! print *,time   
+        CALL dt_calc
+        CALL Time_step
+        IF(time >=  n_imp*t_imp)  THEN
+        
+            print *,"--------------",n_time, time, dt,"--------------"
+            DO i=1,nb_cell
+                DO j=1,5
+                    xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
+                    t = eval_sol(i,xi)
+                    write(unit=numfile_sol,  fmt='(f10.6, f16.6)') xi,t
+                END DO
+            END DO
+            ! print *, sol(1)%base_poly
+            ! print *, sol(nb_cell)%base_poly
+            n_imp = n_imp +1
+            Time_stemp(n_imp) = time
+            
+            write(unit=numfile_sol, fmt='("------------------------")' ) 
+        END IF
+        
+
     END DO
 
-   write(unit= numfile_data, fmt='("nt = "i5)') n_time
+    write(unit= numfile_data, fmt='("nt = "i5)') n_imp
+    DO i=1,n_imp
+        write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
+    END DO
+
 
 
 
