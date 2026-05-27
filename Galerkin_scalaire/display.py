@@ -3,12 +3,12 @@ import matplotlib.pyplot as plt
 
 with open('file_data.txt') as f:
     lines = f.readlines()
-
-nx = int(lines[0][5:11])*5
-sm = int(lines[1][5:11])
+order = int(lines[0][10:16])
+nx = int(lines[1][5:11])*order
+sm = int(lines[2][5:11])
 
 T=[]
-for k in range(2,2+sm):
+for k in range(3,3+sm):
     T.append(float(lines[k][14:30]))
 
 
@@ -27,13 +27,13 @@ for k in range(0,sm):
     for i in range(0,(nx)):
         X[i] = lines[k*(nx+1) + i][0:10]
         U_t[k][i]   = lines[k*(nx+1) +i][11:23]
-        U_ex[k][i]  = np.sin(X[i] - T[k])
+        U_ex[k][i]  = lines[k*(nx+1) +i][27:43]
         
-        #err[k][i] = abs(U_t[k][i] - U_ex[k][i]) 
+        err[k][i] = abs(U_t[k][i] - U_ex[k][i]) 
                    
         
     err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
-    #plt.plot(X,err[k],'ro')
+    #plt.plot(X,err[k],'r')
     plt.plot(X,U_ex[k],'g')
     plt.plot(X,U_t[k],'b')
     #plt.xlim(0.0,0.1)
@@ -48,6 +48,6 @@ for k in range(0,sm):
 #plt.plot(X,U_t[2],'r')
 #plt.xlim(0.0,0.1)
 plt.show()
-
+print(sum(U_t[0]), sum(U_t[-1]))
 print(max(err_L2))
     

@@ -10,47 +10,15 @@ PROGRAM MAIN
     open(unit=numfile_data, file=nomfile_data, form ='formatted', status ='old')
     open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
    
+    write(unit= numfile_data, fmt='("ordre x = "i5)') order_x
     write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
         
-    
-            print *,n_time, time, dt
-            DO i=1,nb_cell
-                DO j=1,5
-                    xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
-                    t = eval_sol(i,xi)
-                    write(unit=numfile_sol,  fmt='(f10.6, f16.6)') xi,t
-                END DO
-            END DO
-            n_imp = n_imp +1
-            Time_stemp(n_imp) = time
-            ! print *, sol(1)%base_poly
-            ! print *, sol(nb_cell)%base_poly
-            
-            write(unit=numfile_sol, fmt='("------------------------")' ) 
-            
+    CALL writout
+
     DO WHILE (time .LT. tmax)     
-        ! print *,time   
         CALL dt_calc
         CALL Time_step
-        IF(time >=  n_imp*t_imp)  THEN
-        
-            print *,"--------------",n_time, time, dt,"--------------"
-            DO i=1,nb_cell
-                DO j=1,5
-                    xi = x_cell(i) + REAL(j, prec)/5._prec*cell_size(i)
-                    t = eval_sol(i,xi)
-                    write(unit=numfile_sol,  fmt='(f10.6, f16.6)') xi,t
-                END DO
-            END DO
-            ! print *, sol(1)%base_poly
-            ! print *, sol(nb_cell)%base_poly
-            n_imp = n_imp +1
-            Time_stemp(n_imp) = time
-            
-            write(unit=numfile_sol, fmt='("------------------------")' ) 
-        END IF
-        
-
+        CALL writout 
     END DO
 
     write(unit= numfile_data, fmt='("nt = "i5)') n_imp
@@ -66,7 +34,19 @@ PROGRAM MAIN
     ! print *,"_"
    close(unit=numfile_sol)
    close(unit=numfile_data)
+
+    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
+    write(unit=numfile_conv, fmt='("=====================")') 
+    write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) order_x-1, order_t
+    write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nb_cell
+    write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') err_L1
+    write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') err_L2
+    write(unit=numfile_conv, fmt='("err_Li :" f16.10 )') err_Li
+    write(unit=numfile_conv, fmt='("=====================")') 
+    close(unit=numfile_conv)
+
     print *,"closed"
+    
 
     CALL DEALLOCATE_all
 

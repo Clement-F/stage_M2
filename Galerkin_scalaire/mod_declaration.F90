@@ -4,11 +4,12 @@ MODULE mod_declaration
   IMPLICIT NONE
 
   TYPE var_type
-     REAL(prec),DIMENSION(:),POINTER :: base_poly
+     REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG
+     REAL(prec),DIMENSION(:),POINTER :: val_nodes   ! valeurs aux points de quadratures
      REAL(prec),DIMENSION(2) :: inter
   END TYPE var_type
 
-  TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h
+  TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa
 
   REAL(prec), DIMENSION(:),   POINTER :: x_cell, x_middle, cell_size
   REAL(prec), DIMENSION(:),   POINTER :: x_quad, w_quad
@@ -27,13 +28,16 @@ MODULE mod_declaration
   INTEGER :: n_imp, n_time, frame_rule, print_rule
   REAL(prec) :: time, tmax,t_ini,dt, t_imp
   REAL(prec) :: xL,xR,CFL,max_dflux,dx
-  REAL(prec) :: eps0 =0._prec
+  REAL(prec), parameter :: pi = acos(-1._prec)
+  REAL(prec), parameter :: eps0=0.1_prec**(2*prec-3)
   REAL(prec) :: vit_adv 
+  REAL(prec) :: err_L1, err_L2, err_Li
 
   CHARACTER(LEN=32) :: DG_meth, quad_meth, sol_ini_name, flux_name
 
-  INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3
-  CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt'
+  INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4
+  CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt', & 
+                        & nomfile_conv= 'convergence_err.txt' 
 
   INTEGER :: i,j
 
@@ -43,7 +47,7 @@ MODULE mod_declaration
   SUBROUTINE ALLOCATE_all
     IMPLICIT NONE
 
-    ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell))
+    ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
     ALLOCATE( x_cell(nb_cell+1), x_middle(nb_cell), cell_size(nb_cell)) 
     ALLOCATE( x_quad(order_x), w_quad(order_x) ) 
     ALLOCATE( coeff_DG(order_x, order_x) ) 
@@ -57,9 +61,10 @@ MODULE mod_declaration
     ALLOCATE( Rigid(order_x,order_x), Rigid_inv(order_x,order_x) ) 
     
     DO i =1,nb_cell
-      ALLOCATE(sol(i)%base_poly(order_x))
-      ALLOCATE(sol_step(i)%base_poly(order_x))
-      ALLOCATE(flux_h(i)%base_poly(order_x))
+      ALLOCATE(sol(i)%base_poly(order_x));      ALLOCATE(sol(i)%val_nodes(order_x))
+      ALLOCATE(sol_exa(i)%base_poly(order_x));  ALLOCATE(sol_exa(i)%val_nodes(order_x)) 
+      ALLOCATE(sol_step(i)%base_poly(order_x)); ALLOCATE(sol_step(i)%val_nodes(order_x))
+      ALLOCATE(flux_h(i)%base_poly(order_x));   ALLOCATE(flux_h(i)%val_nodes(order_x))
     END DO
     
 
@@ -109,7 +114,7 @@ MODULE mod_declaration
        RK_beta(2)=0.5_prec
     CASE (3)
        RK_time(1)=0._prec
-       RK_alpha(1,1)=1._prec
+       RK_alpha(1,2)=1._prec
        RK_beta(1)=1._prec
 
        RK_time(2)=0.5_prec

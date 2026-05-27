@@ -29,7 +29,7 @@ CONTAINS
     REAL(prec), INTENT(IN) :: x
     REAL(prec) :: flux_uh
 
-    flux_uh = flux(eval_step(ni,x))
+    flux_uh = flux(eval_step(x,ni))
 
   END FUNCTION flux_uh
 
@@ -40,8 +40,8 @@ CONTAINS
 
     ! print *, "flux"
     DO ni = 1,nb_cell
-      sol_step(ni)%inter(1) = eval_step(ni, x_cell(ni))
-      sol_step(ni)%inter(2) = eval_step(ni, x_cell(ni+1))
+      sol_step(ni)%inter(1) = eval_step(x_cell(ni),ni)
+      sol_step(ni)%inter(2) = eval_step(x_cell(ni+1),ni)
     END DO
 
     DO ni = 1,nb_cell
@@ -53,7 +53,7 @@ CONTAINS
         ud = sol_step(ni)  %inter(1)
       END IF
 
-      flux_h(ni)  %inter(1) = 0.5_prec * (flux(ug) + flux(ud) - max_dflux*(ud-ug))  
+      flux_h(ni)  %inter(1) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
 
       IF (ni ==1) THEN ;  flux_h(nb_cell)%inter(2) = flux_h(1) %inter(1)    
       ELSE ;              flux_h(ni-1)   %inter(2) = flux_h(ni)%inter(1)    
@@ -76,15 +76,15 @@ CONTAINS
 
     ! print *,"calc time"
 
+    DO ni=1,nb_cell
+      sol_step(ni)%base_poly = sol(ni)%base_poly
+    END DO 
+      
 
     DO tni =1,order_t
       
         ! print *,RK_alpha(tni,1),RK_alpha(tni,2), RK_beta(tni)
 
-      DO ni=1,nb_cell
-        sol_step(ni)%base_poly = sol(ni)%base_poly
-      END DO 
-      
       CALL flux_numerique
 
       DO ni =1,nb_cell
@@ -126,8 +126,8 @@ CONTAINS
     ELSE IF(TRIM(flux_name) == "burgers") THEN
       !boucle pour max de u ? 
       DO i=1,nb_cell
-        IF(max_dflux .LT. sol(i)%base_poly(1)) THEN
-          max_dflux = sol(i)%base_poly(1)
+        IF(max_dflux .LT. sol_step(i)%base_poly(1)) THEN
+          max_dflux = sol_step(i)%base_poly(1)
         END IF
       END DO
     ELSE 
@@ -138,5 +138,42 @@ CONTAINS
     dt = min(CFL*dx/((2*(order_x-1)+1)*max_dflux),tmax-time)
 
   END SUBROUTINE dt_calc
+
+  SUBROUTINE writout
+    IMPLICIT NONE
+
+    REAL(prec) :: out1, out2,xi
+    REAL(prec) :: err1 , err2, errLi
+
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec
+
+    IF(time >=  n_imp*t_imp)  THEN
+      write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
+      DO i=1,nb_cell
+          DO j=order_x,1,-1
+              xi = Ref_to_loc(i,x_quad(j))
+              out1 = eval_sol(xi,i)
+              out2 = sinus(xi - time*vit_adv,0)
+              write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+              errLi = max(errLi , abs(out1-out2))
+              err1 = err1 + abs(out1-out2)*w_quad(j)
+              err2 = err2 + ((out1-out2)*w_quad(j))**2
+          END DO
+      END DO
+      
+      write(*, fmt ='("err L1 = ", e20.12)')  err1
+      write(*, fmt ='("err L2 = ", e20.12)')  err2
+      write(*, fmt ='("err Li = ", e20.12)')  errLi
+
+      err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
+
+      ! print *, sol(1)%base_poly
+      ! print *, sol(nb_cell)%base_poly
+      n_imp = n_imp +1
+      Time_stemp(n_imp) = time
+      
+      write(unit=numfile_sol, fmt='("------------------------")' ) 
+    END IF
+  END SUBROUTINE writout
 
 END MODULE

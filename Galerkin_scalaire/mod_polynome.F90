@@ -11,7 +11,7 @@ CONTAINS
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: sinus 
-        sinus = sin(x)
+        sinus = sin(2._prec*pi*x)
     END FUNCTION sinus
     
     FUNCTION creneau(x,ni)
@@ -23,12 +23,12 @@ CONTAINS
         if(0.4_prec<x .and. x<0.6_prec) creneau = 1._prec
     END FUNCTION creneau
 
-    FUNCTION eval_sol(ni,YY)
+    FUNCTION eval_sol(YY,ni)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_sol 
-        INTEGER :: ii,jj
+        INTEGER :: ii
         eval_sol= 0._prec
 
         DO ii = 1,order_x
@@ -37,14 +37,14 @@ CONTAINS
 
     END FUNCTION eval_sol
     
-    FUNCTION eval_step(ni,YY)
+    FUNCTION eval_step(YY,ni)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_step 
-        INTEGER :: ii,jj
+        INTEGER :: ii
         eval_step= 0._prec
-
+        
         DO ii = 1,order_x
             eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
         END DO
@@ -79,16 +79,16 @@ CONTAINS
         quadrature = 0._prec
 
         IF(ni .GT. 0) THEN 
-            DO kk =1,order_x
+            DO kk =order_x,1,-1
                 YY = Ref_to_loc(ni,x_quad(kk))
-                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)
+                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
             END DO
             
-            quadrature = quadrature* (x_cell(ni+1)-x_cell(ni))*0.5_prec
         ELSE 
-            DO kk =1,order_x
+            DO kk =order_x,1,-1
                 quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
             END DO
+            
         END IF
 
     END FUNCTION quadrature
@@ -437,8 +437,8 @@ CONTAINS
 
         DG_base = 0._prec
 
-        DO ii =1,ordre_poly
-            DG_base = DG_base + coeff_DG(ordre_poly,ii) * XX**(ii-1)
+        DO ii =ordre_poly,1,-1
+            DG_base = DG_base + coeff_DG(ordre_poly,ii) * (XX**(ii-1))
         END DO
         
 
@@ -454,7 +454,7 @@ CONTAINS
 
         dDG_base = 0._prec
 
-        DO ii =2,ordre_poly
+        DO ii =ordre_poly,2,-1
             dDG_base = dDG_base + (ii-1)*coeff_DG(ordre_poly,ii) * XX**(ii-2)
         END DO
         
@@ -484,7 +484,7 @@ CONTAINS
 
     END FUNCTION Loc_to_Ref
 
-    SUBROUTINE Projection_Pk(fct, fct_h, ni)
+    SUBROUTINE Projection_Pk(fct, fct_h, ni,fct_val)
         IMPLICIT NONE
         
         INTERFACE
@@ -498,6 +498,7 @@ CONTAINS
 
         INTEGER, INTENT(IN) :: ni
         REAL(prec), DIMENSION(order_x), INTENT(OUT) :: fct_h
+        REAL(prec), DIMENSION(order_x), INTENT(IN), optional :: fct_val
 
         REAL(prec), DIMENSION(order_x) :: f_prod
         REAL(prec) :: YY
@@ -507,18 +508,25 @@ CONTAINS
         xL = x_cell(ni); xR= x_cell(ni+1)
 
         f_prod = 0._prec
-
-        DO jj =1,order_x
-            DO kk =1,order_x
-                YY = Ref_to_loc(ni,x_quad(kk))
-                f_prod(jj) = f_prod(jj) + fct(YY,ni)*DG_base(x_quad(kk),jj)*w_quad(kk)
+        
+        IF(.not. present(fct_val)) THEN
+            DO jj =order_x,1,-1
+                DO kk =order_x,1,-1
+                    YY = Ref_to_loc(ni,x_quad(kk))
+                    f_prod(jj) = f_prod(jj) + fct(YY,ni)*DG_base(x_quad(kk),jj)*w_quad(kk)
+                END DO
             END DO
-        END DO
 
-        fct_h = MATMUL(Masse_inv,f_prod) !*(cell_size(ni)/2._prec)
+        ELSE 
+            DO jj =order_x,1,-1
+                DO kk =order_x,1,-1
+                    f_prod(jj) = f_prod(jj) + fct_val(kk)*DG_base(x_quad(kk),jj)*w_quad(kk)
+                END DO
+            END DO
 
-        ! print *, fct_h
+        END IF
 
+        fct_h = MATMUL(Masse_inv,f_prod)
 
     END SUBROUTINE Projection_Pk
 

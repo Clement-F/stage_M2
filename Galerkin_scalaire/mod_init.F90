@@ -51,6 +51,8 @@ CONTAINS
             max_dflux = vit_adv
         END IF
 
+        err_L1 = 0._prec; err_L2 =0._prec;  err_Li=0._prec
+
     END SUBROUTINE INIT_ALL
 
     SUBROUTINE Skip_lines(unit,nlines)
