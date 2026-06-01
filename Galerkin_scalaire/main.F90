@@ -25,6 +25,7 @@ PROGRAM MAIN
         
         CALL writout 
     END DO
+    CALL writout 
 
     write(unit= numfile_data, fmt='("nt = "i5)') n_imp
     DO i=1,n_imp

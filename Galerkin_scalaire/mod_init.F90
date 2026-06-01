@@ -14,8 +14,8 @@ CONTAINS
         IF(TRIM(DG_meth)=="Lobatto") size_base = order_x 
         IF(TRIM(DG_meth)=="Legendre") size_base = order_x 
 
-        if(TRIM(quad_meth)=="Lobatto") size_quad_nodes = CEILING((size_base+2 )/2.)
-        if(TRIM(quad_meth)=="Legendre") size_quad_nodes = size_base
+        if(TRIM(quad_meth)=="Lobatto") size_quad_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
+        if(TRIM(quad_meth)=="Legendre")size_quad_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
 
         CALL ALLOCATE_all
         dx = REAL((xR-xL)/nb_cell, prec)
@@ -24,6 +24,7 @@ CONTAINS
             x_cell(i) = xL + (i-1)*dx
         END DO
         
+
         DO i=1,nb_cell
             cell_size(i)= x_cell(i+1)-x_cell(i)  
             x_middle(i)= x_cell(i) + cell_size(i)/2._prec
@@ -34,12 +35,13 @@ CONTAINS
         n_imp = 0
         t_imp = tmax/Real(print_rule,prec)
 
+
         CALL Coeff_quad_init
         CALL Coeff_DG_init
         CALL Coeff_RK_init(order_t)
         CALL Matrice_Masse_init
         CALL Matrice_Rigid_init
-        
+
         DO i=1,nb_cell
             CALL Projection_Pk(Q_init,sol(i)%base_poly,i)
         END DO
@@ -49,6 +51,7 @@ CONTAINS
         END IF
 
         err_L1 = 0._prec; err_L2 =0._prec;  err_Li=0._prec
+        print *,"end init"
 
     END SUBROUTINE INIT_ALL
 

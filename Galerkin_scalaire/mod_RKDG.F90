@@ -15,6 +15,8 @@ CONTAINS
       flux = vit_adv*u
     CASE("burgers")
       flux = 0.5_prec * u**2  
+    CASE("Buckley")
+      flux = 4._prec*u**2/((4._prec*u**2)+ (1._prec-u)**2 )
     CASE DEFAULT
        WRITE(*,*) "flux non reconnu ",flux_name
        flux = 0._prec
@@ -23,8 +25,6 @@ CONTAINS
 
 
   END FUNCTION flux
-
-
 
   FUNCTION flux_d(u)
     IMPLICIT NONE
@@ -36,8 +36,10 @@ CONTAINS
       flux_d = vit_adv
     CASE("burgers")
       flux_d = u  
+    CASE("Buckley")
+      flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u)))/(4._prec*u**2 + (1._prec-u)**2)**2
     CASE DEFAULT
-       WRITE(*,*) "flux non reconnu ",flux_name
+       WRITE(*,*) "flux_d non reconnu ",flux_name
        flux_d = 0._prec
        STOP
     END SELECT
@@ -140,22 +142,38 @@ CONTAINS
 
   SUBROUTINE dt_calc
     IMPLICIT NONE
+    REAL(prec) :: max_u,min_u,u_step
 
     IF(TRIM(flux_name) == "advection") THEN
       max_dflux = abs(vit_adv)
-    ELSE IF(TRIM(flux_name) == "burgers") THEN
+    ELSE !IF(TRIM(flux_name) == "burgers") THEN
       !boucle pour max de u ? 
       max_dflux = 0._prec
       DO i=1,nb_cell
-        IF(max_dflux .LT. sol(i)%base_poly(1)) THEN
-          max_dflux = abs(sol(i)%base_poly(1))
+        DO j=1,size_quad_nodes
+        IF(max_u .LT. eval_sol( Ref_to_loc(i,x_quad(j)),i) ) THEN
+          max_u = eval_sol( Ref_to_loc(i,x_quad(j)),i)
+        END IF
+        IF(min_u .GT. eval_sol( Ref_to_loc(i,x_quad(j)),i) ) THEN
+          min_u = eval_sol( Ref_to_loc(i,x_quad(j)),i)
+        END IF
+        END DO
+      END DO
+
+      u_step = (max_u-min_u)/10._prec
+
+      DO i=1,10
+        IF(max_dflux .LT. flux_d(min_u+REAL(i,prec)*u_step) ) THEN
+          max_dflux = flux_d(min_u+REAL(i,prec)*u_step)
         END IF
       END DO
-    ELSE 
-      print *,"flux non reconnue"
-      max_dflux = 1._prec
+
+    ! ELSE 
+    !   print *,"flux non reconnue"
+    !   max_dflux = 1._prec
     END IF
-    dt = min(CFL*dx/((2*(order_x-1)+1)*max_dflux),tmax-time)
+    ! print *,max_dflux
+    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
   END SUBROUTINE dt_calc
 
@@ -167,7 +185,7 @@ CONTAINS
 
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec
 
-    IF(time >=  n_imp*t_imp)  THEN
+    IF(time .GE.  REAL(n_imp,prec)*t_imp-eps0)  THEN
       write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
           DO j=1,size_base
@@ -232,43 +250,28 @@ CONTAINS
 
   END subroutine pied_charact
 
-    ! FUNCTION Newton_search(x,t, Q_init) result(q)
-    !     implicit none
-    !     REAL(prec), INTENT(IN)    :: x,t
-    !     REAL(prec)                :: xk, err, q, epsi = 1e-20
-    !     integer             :: n=0
+    FUNCTION Newton_search(x,t) result(q)
+        implicit none
+        REAL(prec), INTENT(IN)    :: x,t
+        REAL(prec)                :: xk, err, q, epsi = 1e-20
+        integer             :: n=0
         
-    !     interface
-    !         FUNCTION Q_init(x)
-    !             USE precis   
-    !             REAL(prec),INTENT(IN) :: x 
-    !             REAL(prec) Q_init 
-    !         END FUNCTION Q_init
+      !     n = 0
+      !     err = abs(flux(Q_init(xk))*t+ xk-x)
+      !     ! print *, err, epsi
+      !     xk = x
 
-            
-    !         FUNCTION Q_init_d(x)
-    !             USE precis   
-    !             REAL(prec),INTENT(IN) :: x 
-    !             REAL(prec) Q_init_d 
-    !         END FUNCTION Q_init_d
-    !     END interface
+      !     do while(err>epsi .and. n<50)
+      !         xk = xk -   (flux(Q_init(xk))*t + xk-x)/(flux_d(Q_init(xk))*Q_init_d(xk)*t +1)
+      !         err =    abs(flux(Q_init(xk))*t + xk-x)
 
-    !     n = 0
-    !     err = abs(flux(Q_init(xk))*t+ xk-x)
-    !     ! print *, err, epsi
-    !     xk = x
+      !         n = n+1
+      !     END do
+          
 
-    !     do while(err>epsi .and. n<50)
-    !         xk = xk -   (flux(Q_init(xk))*t + xk-x)/(flux_d(Q_init(xk))*Q_init_d(xk)*t +1)
-    !         err =    abs(flux(Q_init(xk))*t + xk-x)
+      !     q = Q_init(xk)
+      !     return
 
-    !         n = n+1
-    !     END do
-        
-
-    !     q = Q_init(xk)
-    !     return
-
-    ! END FUNCTION Newton_search
+    END FUNCTION Newton_search
 
 END MODULE

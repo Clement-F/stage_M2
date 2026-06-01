@@ -20,7 +20,7 @@ CONTAINS
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: creneau 
         creneau = 0._prec
-        if(0.4_prec<x .and. x<0.6_prec) creneau = 1._prec
+        if(-0.5_prec<x .and. x<0._prec) creneau = 1._prec
     END FUNCTION creneau
 
     FUNCTION Q_init(x,ni)
@@ -28,12 +28,20 @@ CONTAINS
         REAL(prec), INTENT(IN) :: x
         INTEGER,    INTENT(IN) :: ni
         REAL(prec) :: Q_init
-        IF (TRIM(sol_ini_name) =="sinus") THEN
+
+        IF     (TRIM(sol_ini_name)=="sinus") THEN
             Q_init = sinus(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="unit") THEN
             Q_init = unit(x,ni)
+        ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
+            Q_init = 0._prec
+            if(x>0._prec) Q_init =-1._prec
         ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
             Q_init = creneau(x,ni)
+        ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
+            Q_init = 0._prec
+            if(0.3_prec<x .and. x<0.7_prec) Q_init = -1._prec
+            if(x>0.7_prec) Q_init = 0.5_prec
         END IF
     END FUNCTION Q_init
 

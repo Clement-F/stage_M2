@@ -76,17 +76,27 @@ MODULE mod_declaration
     IMPLICIT NONE
 
     DO i =1,nb_cell
-        DEALLOCATE(sol(i)%base_poly)
-    END DO
-    DEALLOCATE( sol)
+      DEALLOCATE(sol(i)%base_poly);      DEALLOCATE(sol(i)%val_nodes)
+      DEALLOCATE(sol_exa(i)%base_poly);  DEALLOCATE(sol_exa(i)%val_nodes) 
+      DEALLOCATE(sol_step(i)%base_poly); DEALLOCATE(sol_step(i)%val_nodes)
+      DEALLOCATE(flux_h(i)%base_poly);   DEALLOCATE(flux_h(i)%val_nodes)
+    END DO 
+
+    DEALLOCATE( sol, sol_step, flux_h, sol_exa)
     DEALLOCATE( x_cell, x_middle, cell_size) 
-    DEALLOCATE( x_quad, w_quad) 
-    DEALLOCATE( coeff_DG) 
+    DEALLOCATE( x_quad, w_quad ) 
+    ! DEALLOCATE( coeff_DG ) 
 
     DEALLOCATE( coeff_Taylor, coeff_legendre )
-    ! ALLOCATE( RK_alpha, RK_beta )
-
+    DEALLOCATE( RK_alpha, RK_beta, RK_time )
+    DEALLOCATE( L_step)
+    DEALLOCATE( Time_stemp)
+    
+    DEALLOCATE( pts_DG ) 
+    DEALLOCATE( coeff_DG ) 
     DEALLOCATE( Masse, Masse_inv ) 
+    DEALLOCATE( Rigid, Rigid_inv ) 
+
     
   END SUBROUTINE DEALLOCATE_all
   

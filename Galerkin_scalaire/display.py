@@ -32,10 +32,10 @@ for k in range(0,sm):
                    
         
     err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
-    plt.plot(X,err[k],'r')
-    plt.plot(X,U_ex[k],'g')
+    #plt.plot(X,err[k],'r')
+    #plt.plot(X,U_ex[k],'g')
     plt.plot(X,U_t[k],'b')
-    #plt.xlim(0.0,0.1)
+    plt.ylim(-.2,1.2)
     plt.show()         
         
 #for k in range(1,sm):
