@@ -1,24 +1,24 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-200            | nx 
-0.        | xd
-1.        | xf
-1.             | T
+10000            | nx 
+0.              | xd
+1.              | xf
+0.1              | T
 ---------------------------------------------------
 0.9             | cfl
 10              | frame rule
-2              | print rule
+11              | print rule
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 ---------------------------------------------------
-2               | ordre espace
-2               | ordre temps
-Legendre        | polynomes
-Legendre        | quadrature
+3              | ordre espace
+3              | ordre temps
+Lobatto        | polynomes  (Legendre,Lobatto)
+Lobatto        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-sinus            | solution initiale (sinus,unit,creneau)
-advection         | problème (advection, burgers)
-1.0             | vitesse advection (si pb = advection)
+sinus           | solution initiale (sinus,unit,creneau)
+burgers         | problème (advection, burgers)
+-1.              | vitesse advection (si pb = advection)

@@ -10,6 +10,13 @@ CONTAINS
         CALL READ_DATA
         
         print *, "init"
+
+        IF(TRIM(DG_meth)=="Lobatto") size_base = order_x 
+        IF(TRIM(DG_meth)=="Legendre") size_base = order_x 
+
+        if(TRIM(quad_meth)=="Lobatto") size_quad_nodes = CEILING((size_base+2 )/2.)
+        if(TRIM(quad_meth)=="Legendre") size_quad_nodes = size_base
+
         CALL ALLOCATE_all
         dx = REAL((xR-xL)/nb_cell, prec)
 
@@ -33,22 +40,12 @@ CONTAINS
         CALL Matrice_Masse_init
         CALL Matrice_Rigid_init
         
-        IF (TRIM(sol_ini_name) =="sinus") THEN
-            DO i=1,nb_cell
-                CALL Projection_Pk(sinus,sol(i)%base_poly,i)
-            END DO
-        ELSE IF(TRIM(sol_ini_name)=="unit") THEN
-            DO i=1,nb_cell
-                CALL Projection_Pk(unit,sol(i)%base_poly,i)
-            END DO
-        ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
-            DO i=1,nb_cell
-                CALL Projection_Pk(creneau,sol(i)%base_poly,i)
-            END DO
-        END IF
+        DO i=1,nb_cell
+            CALL Projection_Pk(Q_init,sol(i)%base_poly,i)
+        END DO
 
         IF(TRIM(flux_name) == "advection") THEN 
-            max_dflux = vit_adv
+            max_dflux = abs(vit_adv)
         END IF
 
         err_L1 = 0._prec; err_L2 =0._prec;  err_Li=0._prec

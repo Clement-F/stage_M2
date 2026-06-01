@@ -1,6 +1,3 @@
-ordre x =     2
-nx =   200
-nt =     3
-time     1 =         0.000000
-time     2 =         0.501000
-time     3 =         1.000000
+ordre x =     3
+ordre t =     3
+nx = 10000

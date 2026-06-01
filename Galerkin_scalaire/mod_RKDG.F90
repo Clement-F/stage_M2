@@ -1,5 +1,6 @@
 MODULE mod_RKDG 
    use mod_polynome
+   use mod_Divers
   IMPLICIT NONE
 
 CONTAINS
@@ -22,6 +23,27 @@ CONTAINS
 
 
   END FUNCTION flux
+
+
+
+  FUNCTION flux_d(u)
+    IMPLICIT NONE
+    REAL(prec), INTENT(in) :: u
+    REAL(prec) :: flux_d
+
+    SELECT CASE (TRIM(flux_name))
+    CASE("advection")
+      flux_d = vit_adv
+    CASE("burgers")
+      flux_d = u  
+    CASE DEFAULT
+       WRITE(*,*) "flux non reconnu ",flux_name
+       flux_d = 0._prec
+       STOP
+    END SELECT
+
+
+  END FUNCTION flux_d
 
   FUNCTION flux_uh(x,ni)
     IMPLICIT NONE
@@ -71,8 +93,8 @@ CONTAINS
 
     INTEGER :: ii,jj
     REAL(prec) :: ti
-    REAL(prec), DIMENSION(order_x) :: sig_1, sig_2
-    REAL(prec), DIMENSION(order_x) :: V_B, S_B, BB
+    REAL(prec), DIMENSION(size_base) :: sig_1, sig_2
+    REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB
 
     ! print *,"calc time"
 
@@ -89,7 +111,7 @@ CONTAINS
 
       DO ni =1,nb_cell
 
-        DO ii=1,order_x
+        DO ii=1,size_base
           sig_1(ii) = DG_base(Loc_to_Ref(ni,x_cell(ni)),ii); 
           sig_2(ii) = DG_base(Loc_to_Ref(ni,x_cell(ni+1)),ii); 
         END DO
@@ -113,8 +135,6 @@ CONTAINS
         sol(ni)%base_poly  = sol_step(ni)%base_poly
     END DO
 
-    time = time +dt
-    n_time = n_time +1
 
   END SUBROUTINE Time_step
 
@@ -122,19 +142,19 @@ CONTAINS
     IMPLICIT NONE
 
     IF(TRIM(flux_name) == "advection") THEN
-      max_dflux = vit_adv
+      max_dflux = abs(vit_adv)
     ELSE IF(TRIM(flux_name) == "burgers") THEN
       !boucle pour max de u ? 
+      max_dflux = 0._prec
       DO i=1,nb_cell
-        IF(max_dflux .LT. sol_step(i)%base_poly(1)) THEN
-          max_dflux = sol_step(i)%base_poly(1)
+        IF(max_dflux .LT. sol(i)%base_poly(1)) THEN
+          max_dflux = abs(sol(i)%base_poly(1))
         END IF
       END DO
     ELSE 
       print *,"flux non reconnue"
       max_dflux = 1._prec
     END IF
-    
     dt = min(CFL*dx/((2*(order_x-1)+1)*max_dflux),tmax-time)
 
   END SUBROUTINE dt_calc
@@ -150,16 +170,26 @@ CONTAINS
     IF(time >=  n_imp*t_imp)  THEN
       write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
-          DO j=order_x,1,-1
+          DO j=1,size_base
               xi = Ref_to_loc(i,x_quad(j))
               out1 = eval_sol(xi,i)
-              out2 = sinus(xi - time*vit_adv,0)
+
+              IF(TRIM(flux_name) == "advection") THEN 
+                out2 =Q_init(xi - time*vit_adv,0)
+              ELSE 
+                call pied_charact(xi,time,out2)
+              END IF
+
               write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+
               errLi = max(errLi , abs(out1-out2))
-              err1 = err1 + abs(out1-out2)*w_quad(j)
-              err2 = err2 + ((out1-out2)*w_quad(j))**2
+              err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+              err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
           END DO
+
       END DO
+
+      err2 = sqrt(err2)
       
       write(*, fmt ='("err L1 = ", e20.12)')  err1
       write(*, fmt ='("err L2 = ", e20.12)')  err2
@@ -175,5 +205,70 @@ CONTAINS
       write(unit=numfile_sol, fmt='("------------------------")' ) 
     END IF
   END SUBROUTINE writout
+
+
+  
+  subroutine pied_charact(x,t,sol)
+
+    REAL(prec), INTENT(IN) :: x,t
+    REAL(prec), intent(out):: sol
+    REAL(prec) :: xd,xf
+
+    IF(TRIM(flux_name)=="advection") THEN
+      xd = xL-abs(vit_adv)*t; xf = xR + abs(vit_adv)*t
+    ELSE
+      xd = xL-t; xf = xR + t
+    END IF
+    sol = Q_init(dicho(g,xd,xf),0)
+
+    contains
+    FUNCTION g(x_)
+        use precis
+        REAL(prec),INTENT(IN) :: x_
+        REAL(prec)  :: g
+        g = flux_d(Q_init(x_,0))*t + x_ -x
+        return 
+    END FUNCTION g
+
+  END subroutine pied_charact
+
+    ! FUNCTION Newton_search(x,t, Q_init) result(q)
+    !     implicit none
+    !     REAL(prec), INTENT(IN)    :: x,t
+    !     REAL(prec)                :: xk, err, q, epsi = 1e-20
+    !     integer             :: n=0
+        
+    !     interface
+    !         FUNCTION Q_init(x)
+    !             USE precis   
+    !             REAL(prec),INTENT(IN) :: x 
+    !             REAL(prec) Q_init 
+    !         END FUNCTION Q_init
+
+            
+    !         FUNCTION Q_init_d(x)
+    !             USE precis   
+    !             REAL(prec),INTENT(IN) :: x 
+    !             REAL(prec) Q_init_d 
+    !         END FUNCTION Q_init_d
+    !     END interface
+
+    !     n = 0
+    !     err = abs(flux(Q_init(xk))*t+ xk-x)
+    !     ! print *, err, epsi
+    !     xk = x
+
+    !     do while(err>epsi .and. n<50)
+    !         xk = xk -   (flux(Q_init(xk))*t + xk-x)/(flux_d(Q_init(xk))*Q_init_d(xk)*t +1)
+    !         err =    abs(flux(Q_init(xk))*t + xk-x)
+
+    !         n = n+1
+    !     END do
+        
+
+    !     q = Q_init(xk)
+    !     return
+
+    ! END FUNCTION Newton_search
 
 END MODULE

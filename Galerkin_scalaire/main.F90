@@ -11,6 +11,7 @@ PROGRAM MAIN
     open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
    
     write(unit= numfile_data, fmt='("ordre x = "i5)') order_x
+    write(unit= numfile_data, fmt='("ordre t = "i5)') order_t
     write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
         
     CALL writout
@@ -18,6 +19,10 @@ PROGRAM MAIN
     DO WHILE (time .LT. tmax)     
         CALL dt_calc
         CALL Time_step
+
+        time = time +dt
+        n_time = n_time +1
+        
         CALL writout 
     END DO
 
@@ -26,22 +31,17 @@ PROGRAM MAIN
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 
-
-
-
-
-
     ! print *,"_"
-   close(unit=numfile_sol)
-   close(unit=numfile_data)
+    close(unit=numfile_sol)
+    close(unit=numfile_data)
 
     open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
     write(unit=numfile_conv, fmt='("=====================")') 
-    write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) order_x-1, order_t
+    write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) size_base-1, order_t
     write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nb_cell
-    write(unit=numfile_conv, fmt='("err_L1 :" f16.10 )') err_L1
-    write(unit=numfile_conv, fmt='("err_L2 :" f16.10 )') err_L2
-    write(unit=numfile_conv, fmt='("err_Li :" f16.10 )') err_Li
+    write(unit=numfile_conv, fmt='("err_L1 :" e20.12 )') err_L1
+    write(unit=numfile_conv, fmt='("err_L2 :" e20.12 )') err_L2
+    write(unit=numfile_conv, fmt='("err_Li :" e20.12 )') err_Li
     write(unit=numfile_conv, fmt='("=====================")') 
     close(unit=numfile_conv)
 

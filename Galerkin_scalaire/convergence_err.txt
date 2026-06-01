@@ -1,0 +1,56 @@
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    10 we have error :
+err_L1 :  0.127521677097E-01
+err_L2 :  0.191022544353E-01
+err_Li :  0.639893450285E-01
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    20 we have error :
+err_L1 :  0.239019165550E-02
+err_L2 :  0.407575529908E-02
+err_Li :  0.252383313191E-01
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    50 we have error :
+err_L1 :  0.212667597641E-03
+err_L2 :  0.392845691441E-03
+err_Li :  0.306889659008E-02
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =   100 we have error :
+err_L1 :  0.345573464983E-04
+err_L2 :  0.711905327201E-04
+err_Li :  0.623147726994E-03
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =   200 we have error :
+err_L1 :  0.567992106453E-05
+err_L2 :  0.130548461469E-04
+err_Li :  0.121999793173E-03
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =   500 we have error :
+err_L1 :  0.494218600266E-06
+err_L2 :  0.126907746472E-05
+err_Li :  0.129020588480E-04
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =  1000 we have error :
+err_L1 :  0.768063105487E-07
+err_L2 :  0.213445222383E-06
+err_Li :  0.230521489534E-05
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =  2000 we have error :
+err_L1 :  0.116304890278E-07
+err_L2 :  0.347679703694E-07
+err_Li :  0.402872556220E-06
+=====================

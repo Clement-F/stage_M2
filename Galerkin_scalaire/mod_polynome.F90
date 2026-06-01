@@ -23,6 +23,23 @@ CONTAINS
         if(0.4_prec<x .and. x<0.6_prec) creneau = 1._prec
     END FUNCTION creneau
 
+    FUNCTION Q_init(x,ni)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: x
+        INTEGER,    INTENT(IN) :: ni
+        REAL(prec) :: Q_init
+        IF (TRIM(sol_ini_name) =="sinus") THEN
+            Q_init = sinus(x,ni)
+        ELSE IF(TRIM(sol_ini_name)=="unit") THEN
+            Q_init = unit(x,ni)
+        ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
+            Q_init = creneau(x,ni)
+        END IF
+    END FUNCTION Q_init
+
+! ---------------------------------------------------------------
+
+
     FUNCTION eval_sol(YY,ni)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
@@ -31,7 +48,7 @@ CONTAINS
         INTEGER :: ii
         eval_sol= 0._prec
 
-        DO ii = 1,order_x
+        DO ii = 1,size_base
             eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
         END DO
 
@@ -45,7 +62,7 @@ CONTAINS
         INTEGER :: ii
         eval_step= 0._prec
         
-        DO ii = 1,order_x
+        DO ii = 1,size_base
             eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
         END DO
 
@@ -79,13 +96,13 @@ CONTAINS
         quadrature = 0._prec
 
         IF(ni .GT. 0) THEN 
-            DO kk =order_x,1,-1
+            DO kk =size_quad_nodes,1,-1
                 YY = Ref_to_loc(ni,x_quad(kk))
                 quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
             END DO
             
         ELSE 
-            DO kk =order_x,1,-1
+            DO kk =size_quad_nodes,1,-1
                 quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
             END DO
             
@@ -134,16 +151,41 @@ CONTAINS
         unit =1._prec
     END FUNCTION unit
 
+    FUNCTION Lagrange_basis(XX,ii)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: XX 
+        INTEGER,    INTENT(IN) :: ii
+        INTEGER :: jj 
+        REAL(prec) :: Lagrange_basis
+        Lagrange_basis = 1._prec
+
+        DO jj =1,size_base
+
+            IF(jj .NE. ii) THEN 
+                Lagrange_basis = Lagrange_basis * (XX-pts_DG(jj))/(pts_DG(ii)-pts_DG(jj))
+            END IF
+
+        END DO
+
+    END FUNCTION Lagrange_basis
+
+
     SUBROUTINE Coeff_DG_init
         IMPLICIT NONE
 
+        REAL(prec), DIMENSION(size_base ) :: temp
     
         IF(TRIM(DG_meth) == "Taylor") THEN
             call base_Taylor_init
             coeff_DG(:,:) = coeff_Taylor(:,:)
+
         ELSE IF (TRIM(DG_meth) == "Legendre") THEN
             call base_Legendre_init
-            coeff_DG(:,:) = coeff_legendre(:order_x,:order_x)
+            coeff_DG(:,:) = coeff_legendre(:size_base,:size_base)
+
+        ELSE IF (TRIM(DG_meth) == "Lobatto") THEN
+            CALL quad_1D_lobatto(size_base,pts_DG,temp)
+
         END IF
 
     END SUBROUTINE Coeff_DG_init
@@ -152,9 +194,9 @@ CONTAINS
         IMPLICIT NONE
 
         IF(TRIM(quad_meth) == "Lobatto") THEN
-            CALL quad_1D_lobatto(order_x,x_quad,w_quad)
+            CALL quad_1D_lobatto(size_quad_nodes,x_quad,w_quad)
         ELSE IF(TRIM(quad_meth) == "Legendre") THEN
-            CALL quad_1D_legendre(order_x,x_quad,w_quad)
+            CALL quad_1D_legendre(size_quad_nodes,x_quad,w_quad)
         END IF
 
     END SUBROUTINE Coeff_quad_init
@@ -437,26 +479,46 @@ CONTAINS
 
         DG_base = 0._prec
 
-        DO ii =ordre_poly,1,-1
-            DG_base = DG_base + coeff_DG(ordre_poly,ii) * (XX**(ii-1))
-        END DO
-        
+        IF(DG_meth == "Legendre") THEN
+            DO ii =ordre_poly,1,-1
+                DG_base = DG_base + coeff_DG(ordre_poly,ii) * (XX**(ii-1))
+            END DO
+
+        ELSE IF(DG_meth == "Lobatto") THEN
+            DG_base = Lagrange_basis(XX,ordre_poly)
+
+        END IF
+            
 
     END FUNCTION DG_base
-
     
     FUNCTION dDG_base(XX,ordre_poly)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ordre_poly
         REAL(prec), INTENT(IN) :: XX
         REAL(prec) :: dDG_base
-        INTEGER :: ii
+        REAL(prec) :: temp
+        INTEGER :: ii,jj
 
         dDG_base = 0._prec
 
+        IF(DG_meth == "Legendre") THEN
         DO ii =ordre_poly,2,-1
             dDG_base = dDG_base + (ii-1)*coeff_DG(ordre_poly,ii) * XX**(ii-2)
         END DO
+        ELSE IF(DG_meth == "Lobatto") THEN
+        DO ii =1,size_base
+            temp =1._prec
+
+            DO jj =1,size_base
+                IF((jj .NE. ii) .and. (jj .ne.ordre_poly)) THEN 
+                temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))
+                END IF
+            END DO
+
+            IF(ii .NE. ordre_poly)  dDG_base = dDG_base + temp/(pts_DG(ordre_poly)-pts_DG(ii))
+        END DO
+        END IF
         
 
     END FUNCTION dDG_base
@@ -497,10 +559,10 @@ CONTAINS
         END INTERFACE
 
         INTEGER, INTENT(IN) :: ni
-        REAL(prec), DIMENSION(order_x), INTENT(OUT) :: fct_h
-        REAL(prec), DIMENSION(order_x), INTENT(IN), optional :: fct_val
+        REAL(prec), DIMENSION(size_base), INTENT(OUT) :: fct_h
+        REAL(prec), DIMENSION(size_base), INTENT(IN), optional :: fct_val
 
-        REAL(prec), DIMENSION(order_x) :: f_prod
+        REAL(prec), DIMENSION(size_base) :: f_prod
         REAL(prec) :: YY
         REAL(prec) :: xR, xL
         INTEGER :: jj, kk
@@ -510,16 +572,16 @@ CONTAINS
         f_prod = 0._prec
         
         IF(.not. present(fct_val)) THEN
-            DO jj =order_x,1,-1
-                DO kk =order_x,1,-1
+            DO jj =size_base,1,-1
+                DO kk =size_quad_nodes,1,-1
                     YY = Ref_to_loc(ni,x_quad(kk))
                     f_prod(jj) = f_prod(jj) + fct(YY,ni)*DG_base(x_quad(kk),jj)*w_quad(kk)
                 END DO
             END DO
 
         ELSE 
-            DO jj =order_x,1,-1
-                DO kk =order_x,1,-1
+            DO jj =size_base,1,-1
+                DO kk =size_quad_nodes,1,-1
                     f_prod(jj) = f_prod(jj) + fct_val(kk)*DG_base(x_quad(kk),jj)*w_quad(kk)
                 END DO
             END DO
@@ -535,8 +597,8 @@ CONTAINS
 
         INTEGER :: ii,jj
 
-        DO ii = 1,order_x
-            DO jj = ii,order_x
+        DO ii = 1,size_base
+            DO jj = ii,size_base
                 Masse(ii,jj) = quadrature(0,DG_base,ii,DG_base,jj)
                 Masse(jj,ii) = Masse(ii,jj)
             END DO
@@ -552,8 +614,8 @@ CONTAINS
 
         INTEGER :: ii,jj
 
-        DO ii = 1,order_x
-            DO jj = 1,order_x
+        DO ii = 1,size_base
+            DO jj = 1,size_base
                 Rigid(jj,ii) = quadrature(0,DG_base,ii,dDG_base,jj)
             END DO
         END DO
@@ -563,10 +625,8 @@ CONTAINS
 
     END SUBROUTINE Matrice_Rigid_init
 
-
 ! ---------------------------------------------------------------
 ! ---------------------------------------------------------------
-
 
   !----------------------------------------!
   ! INVERSION PROCEDURE OF A SQUARE MATRIX !
@@ -602,7 +662,6 @@ CONTAINS
 
   END SUBROUTINE inv_mat
 
-
   !-------------------------------------!
   ! INVERSION PROCEDURE OF A 2x2 MATRIX !
   !-------------------------------------!
@@ -626,7 +685,6 @@ CONTAINS
     M1=M1/det
 
   END SUBROUTINE invers_M22
-
 
   !-------------------------------------!
   ! INVERSION PROCEDURE OF A 3x3 MATRIX !
@@ -659,7 +717,6 @@ CONTAINS
     M1=M1/det
 
   END SUBROUTINE invers_M33
-
 
   !-------------------------------------------!
   ! INVERSION PROCEDURE OF A SYMMETRIC MATRIX !
@@ -704,7 +761,6 @@ CONTAINS
     
   END SUBROUTINE invers_matrix_sym
   
-
   !-------------------------------------------------------------------!
   ! L.L^t DECOMPOSITION FOR a POSITIVE SEMI-DEFINITE SYMMETRIC MATRIX !
   !-------------------------------------------------------------------!
@@ -737,7 +793,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE cholesky
-
 
   !---------------------------------!
   ! INVERSION PROCEDURE OF A MATRIX !
@@ -786,7 +841,6 @@ CONTAINS
     
   END SUBROUTINE invers_matrix
 
-
   !-------------------------------!
   ! L.U DECOMPOSITION (DoolittLE) !
   !-------------------------------!
@@ -825,6 +879,5 @@ CONTAINS
     END DO
 
   END SUBROUTINE decomp_LU
-
 
 END MODULE mod_polynome

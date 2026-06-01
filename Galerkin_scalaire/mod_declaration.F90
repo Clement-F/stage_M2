@@ -13,6 +13,7 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:),   POINTER :: x_cell, x_middle, cell_size
   REAL(prec), DIMENSION(:),   POINTER :: x_quad, w_quad
+  REAL(prec), DIMENSION(:),   POINTER :: pts_DG
   REAL(prec), DIMENSION(:,:), POINTER :: coeff_DG
 
   REAL(prec), DIMENSION(:,:), POINTER :: coeff_Taylor, coeff_legendre
@@ -24,7 +25,7 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
-  INTEGER :: nb_cell, order_x, order_t
+  INTEGER :: nb_cell, order_x, order_t, size_base, size_quad_nodes
   INTEGER :: n_imp, n_time, frame_rule, print_rule
   REAL(prec) :: time, tmax,t_ini,dt, t_imp
   REAL(prec) :: xL,xR,CFL,max_dflux,dx
@@ -49,25 +50,26 @@ MODULE mod_declaration
 
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
     ALLOCATE( x_cell(nb_cell+1), x_middle(nb_cell), cell_size(nb_cell)) 
-    ALLOCATE( x_quad(order_x), w_quad(order_x) ) 
-    ALLOCATE( coeff_DG(order_x, order_x) ) 
+    ALLOCATE( x_quad(size_quad_nodes), w_quad(size_quad_nodes) ) 
+    ALLOCATE( coeff_DG(size_base, size_base) ) 
 
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,order_t), RK_beta(order_t), RK_time(order_t) )
-    ALLOCATE( L_step(order_x))
+    ALLOCATE( L_step(size_base))
     ALLOCATE( Time_stemp(print_rule+1))
-
-    ALLOCATE( Masse(order_x,order_x), Masse_inv(order_x,order_x) ) 
-    ALLOCATE( Rigid(order_x,order_x), Rigid_inv(order_x,order_x) ) 
     
+    ALLOCATE( pts_DG(size_base) ) 
+    ALLOCATE( coeff_DG(size_base, size_base) ) 
+    ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
+    ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
+
     DO i =1,nb_cell
-      ALLOCATE(sol(i)%base_poly(order_x));      ALLOCATE(sol(i)%val_nodes(order_x))
-      ALLOCATE(sol_exa(i)%base_poly(order_x));  ALLOCATE(sol_exa(i)%val_nodes(order_x)) 
-      ALLOCATE(sol_step(i)%base_poly(order_x)); ALLOCATE(sol_step(i)%val_nodes(order_x))
-      ALLOCATE(flux_h(i)%base_poly(order_x));   ALLOCATE(flux_h(i)%val_nodes(order_x))
+      ALLOCATE(sol(i)%base_poly(size_base));      ALLOCATE(sol(i)%val_nodes(size_quad_nodes))
+      ALLOCATE(sol_exa(i)%base_poly(size_base));  ALLOCATE(sol_exa(i)%val_nodes(size_quad_nodes)) 
+      ALLOCATE(sol_step(i)%base_poly(size_base)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes))
+      ALLOCATE(flux_h(i)%base_poly(size_base));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes))
     END DO
     
-
   END SUBROUTINE ALLOCATE_all
 
   SUBROUTINE DEALLOCATE_all
