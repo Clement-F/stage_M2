@@ -7,6 +7,8 @@ CONTAINS
     SUBROUTINE INIT_ALL
         IMPLICIT NONE
 
+        INTEGER :: ni,ii
+
         CALL READ_DATA
         
         print *, "init"
@@ -42,10 +44,30 @@ CONTAINS
         CALL Matrice_Masse_init
         CALL Matrice_Rigid_init
 
-        DO i=1,nb_cell
-            CALL Projection_Pk(Q_init,sol(i)%base_poly,i)
+        print *,"matrices"
+
+        DO ii=1,size_base
+          sig_1(ii) = DG_base(-1._prec,ii); 
+          sig_2(ii) = DG_base( 1._prec,ii); 
         END DO
 
+        DO ni=1,nb_cell
+            CALL Projection_Pk(Q_init,sol(ni)%base_poly,ni)
+
+            DO ii=1,size_quad_nodes
+                sol(ni)%val_nodes(ii)  = eval_sol(Ref_to_loc(ni,x_quad(ii)),ni)
+            END DO
+
+
+            ! IF(TRIM(quad_meth)=="Lobatto") THEN
+            ! sol(ni)%inter(1)      = sol(ni)%val_nodes(1)
+            ! sol(ni)%inter(2)      = sol(ni)%val_nodes(size_quad_nodes)
+            ! ELSE 
+            sol(ni)%inter(1)      = eval_sol(x_cell(ni),ni)
+            sol(ni)%inter(2)      = eval_sol(x_cell(ni+1),ni)
+            ! END IF
+        END DO
+        
         IF(TRIM(flux_name) == "advection") THEN 
             max_dflux = abs(vit_adv)
         END IF

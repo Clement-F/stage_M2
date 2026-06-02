@@ -13,14 +13,14 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:),   POINTER :: x_cell, x_middle, cell_size
   REAL(prec), DIMENSION(:),   POINTER :: x_quad, w_quad
-  REAL(prec), DIMENSION(:),   POINTER :: pts_DG
-  REAL(prec), DIMENSION(:,:), POINTER :: coeff_DG
+  REAL(prec), DIMENSION(:),   POINTER :: pts_DG, sig_1, sig_2
+  REAL(prec), DIMENSION(:,:), POINTER :: coeff_DG, sig_quad
 
   REAL(prec), DIMENSION(:,:), POINTER :: coeff_Taylor, coeff_legendre
 
   REAL(prec), DIMENSION(:,:), POINTER :: RK_alpha
   REAL(prec), DIMENSION(:),   POINTER :: RK_time,RK_beta
-  REAL(prec), DIMENSION(:), POINTER :: L_step
+  REAL(prec), DIMENSION(:),   POINTER :: L_step
   REAL(prec), DIMENSION(:),   POINTER :: Time_stemp
 
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
@@ -51,6 +51,7 @@ MODULE mod_declaration
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
     ALLOCATE( x_cell(nb_cell+1), x_middle(nb_cell), cell_size(nb_cell)) 
     ALLOCATE( x_quad(size_quad_nodes), w_quad(size_quad_nodes) ) 
+    ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,size_quad_nodes))
     ALLOCATE( coeff_DG(size_base, size_base) ) 
 
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )

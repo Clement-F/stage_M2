@@ -568,7 +568,7 @@ CONTAINS
 
         INTEGER, INTENT(IN) :: ni
         REAL(prec), DIMENSION(size_base), INTENT(OUT) :: fct_h
-        REAL(prec), DIMENSION(size_base), INTENT(IN), optional :: fct_val
+        REAL(prec), DIMENSION(size_quad_nodes), INTENT(IN), optional :: fct_val
 
         REAL(prec), DIMENSION(size_base) :: f_prod
         REAL(prec) :: YY
@@ -581,7 +581,7 @@ CONTAINS
         
         IF(.not. present(fct_val)) THEN
             DO jj =size_base,1,-1
-                DO kk =size_quad_nodes,1,-1
+                DO kk =1,size_quad_nodes
                     YY = Ref_to_loc(ni,x_quad(kk))
                     f_prod(jj) = f_prod(jj) + fct(YY,ni)*DG_base(x_quad(kk),jj)*w_quad(kk)
                 END DO
@@ -589,7 +589,7 @@ CONTAINS
 
         ELSE 
             DO jj =size_base,1,-1
-                DO kk =size_quad_nodes,1,-1
+                DO kk =1,size_quad_nodes
                     f_prod(jj) = f_prod(jj) + fct_val(kk)*DG_base(x_quad(kk),jj)*w_quad(kk)
                 END DO
             END DO

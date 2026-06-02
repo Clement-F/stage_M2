@@ -35,7 +35,7 @@ for k in range(0,sm):
     #plt.plot(X,err[k],'r')
     #plt.plot(X,U_ex[k],'g')
     plt.plot(X,U_t[k],'b')
-    plt.ylim(-.2,1.2)
+    #plt.ylim(-.2,1.2)
     plt.show()         
         
 #for k in range(1,sm):

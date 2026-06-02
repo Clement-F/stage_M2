@@ -59,14 +59,9 @@ CONTAINS
 
   SUBROUTINE flux_numerique
     IMPLICIT NONE
-    INTEGER :: ni
+    INTEGER :: ni,ii
     REAL(prec) :: ug,ud
-
-    ! print *, "flux"
-    DO ni = 1,nb_cell
-      sol_step(ni)%inter(1) = eval_step(x_cell(ni),ni)
-      sol_step(ni)%inter(2) = eval_step(x_cell(ni+1),ni)
-    END DO
+    REAL(prec), DIMENSION(size_quad_nodes) :: flux_uh_val
 
     DO ni = 1,nb_cell
       IF (ni ==1) THEN 
@@ -83,7 +78,11 @@ CONTAINS
       ELSE ;              flux_h(ni-1)   %inter(2) = flux_h(ni)%inter(1)    
       END IF
 
-      CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,ni)
+      DO ii=1,size_quad_nodes
+        flux_uh_val(ii) = flux(sol_step(ni)%val_nodes(ii))
+      END DO
+
+      CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,ni,flux_uh_val)
     END DO
 
   END SUBROUTINE flux_numerique
@@ -95,39 +94,45 @@ CONTAINS
 
     INTEGER :: ii,jj
     REAL(prec) :: ti
-    REAL(prec), DIMENSION(size_base) :: sig_1, sig_2
+    ! REAL(prec), DIMENSION(size_base) :: sig_1, sig_2
     REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB
 
     ! print *,"calc time"
 
     DO ni=1,nb_cell
-      sol_step(ni)%base_poly = sol(ni)%base_poly
-    END DO 
+      sol_step(ni)%base_poly  = sol(ni)%base_poly
+      sol_step(ni)%val_nodes  = sol(ni)%val_nodes
+      sol_step(ni)%inter      = sol(ni)%inter
+    END DO
       
 
     DO tni =1,order_t
       
-        ! print *,RK_alpha(tni,1),RK_alpha(tni,2), RK_beta(tni)
-
       CALL flux_numerique
 
       DO ni =1,nb_cell
-
-        DO ii=1,size_base
-          sig_1(ii) = DG_base(Loc_to_Ref(ni,x_cell(ni)),ii); 
-          sig_2(ii) = DG_base(Loc_to_Ref(ni,x_cell(ni+1)),ii); 
-        END DO
 
         V_B = MATMUL(Rigid,flux_h(ni)%base_poly)
         S_B = -(flux_h(ni)%inter(2)*sig_2 - flux_h(ni)%inter(1)*sig_1)
         BB  = (V_B + S_B)
         L_step = MATMUL(Masse_inv, BB  )*(2._prec/(cell_size(ni))) 
-        ! print *, V_B,S_b,BB
-        ! print *,RK_alpha(tni,1),RK_alpha(tni,2), RK_beta(tni)
 
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
                              &+  RK_beta(tni) *dt * L_step
         
+                             
+        DO ii=1,size_quad_nodes
+          sol_step(ni)%val_nodes(ii)  = eval_step(Ref_to_loc(ni,x_quad(ii)),ni)
+        END DO
+
+        IF(TRIM(quad_meth)=="Lobatto") THEN
+          sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
+          sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
+        ELSE 
+          sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni)
+          sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni)
+        END IF
+
       END DO
     END DO
 
@@ -135,6 +140,18 @@ CONTAINS
 
     DO ni=1,nb_cell
         sol(ni)%base_poly  = sol_step(ni)%base_poly
+
+        DO ii=1,size_quad_nodes
+          sol(ni)%val_nodes(ii)  = eval_sol(Ref_to_loc(ni,x_quad(ii)),ni)
+        END DO
+
+        IF(TRIM(quad_meth)=="Lobatto") THEN
+          sol(ni)%inter(1)      = sol(ni)%val_nodes(1)
+          sol(ni)%inter(2)      = sol(ni)%val_nodes(size_quad_nodes)
+        ELSE 
+          sol(ni)%inter(1)      = eval_sol(x_cell(ni),ni)
+          sol(ni)%inter(2)      = eval_sol(x_cell(ni+1),ni)
+        END IF
     END DO
 
 
@@ -151,12 +168,15 @@ CONTAINS
       max_dflux = 0._prec
       DO i=1,nb_cell
         DO j=1,size_quad_nodes
-        IF(max_u .LT. eval_sol( Ref_to_loc(i,x_quad(j)),i) ) THEN
-          max_u = eval_sol( Ref_to_loc(i,x_quad(j)),i)
-        END IF
-        IF(min_u .GT. eval_sol( Ref_to_loc(i,x_quad(j)),i) ) THEN
-          min_u = eval_sol( Ref_to_loc(i,x_quad(j)),i)
-        END IF
+
+          IF(max_u .LT. sol(i)%val_nodes(j) ) THEN
+            max_u = sol(i)%val_nodes(j)
+          END IF
+
+          IF(min_u .GT. sol(i)%val_nodes(j) ) THEN
+            min_u = sol(i)%val_nodes(j)
+          END IF
+
         END DO
       END DO
 
@@ -190,7 +210,7 @@ CONTAINS
       DO i=1,nb_cell
           DO j=1,size_base
               xi = Ref_to_loc(i,x_quad(j))
-              out1 = eval_sol(xi,i)
+              out1 = sol(i)%val_nodes(j)
 
               IF(TRIM(flux_name) == "advection") THEN 
                 out2 =Q_init(xi - time*vit_adv,0)
@@ -250,28 +270,28 @@ CONTAINS
 
   END subroutine pied_charact
 
-    FUNCTION Newton_search(x,t) result(q)
-        implicit none
-        REAL(prec), INTENT(IN)    :: x,t
-        REAL(prec)                :: xk, err, q, epsi = 1e-20
-        integer             :: n=0
+  FUNCTION Newton_search(x,t) result(q)
+      implicit none
+      REAL(prec), INTENT(IN)    :: x,t
+      REAL(prec)                :: xk, err, q, epsi = 1e-20
+      integer             :: n=0
+      
+    !     n = 0
+    !     err = abs(flux(Q_init(xk))*t+ xk-x)
+    !     ! print *, err, epsi
+    !     xk = x
+
+    !     do while(err>epsi .and. n<50)
+    !         xk = xk -   (flux(Q_init(xk))*t + xk-x)/(flux_d(Q_init(xk))*Q_init_d(xk)*t +1)
+    !         err =    abs(flux(Q_init(xk))*t + xk-x)
+
+    !         n = n+1
+    !     END do
         
-      !     n = 0
-      !     err = abs(flux(Q_init(xk))*t+ xk-x)
-      !     ! print *, err, epsi
-      !     xk = x
 
-      !     do while(err>epsi .and. n<50)
-      !         xk = xk -   (flux(Q_init(xk))*t + xk-x)/(flux_d(Q_init(xk))*Q_init_d(xk)*t +1)
-      !         err =    abs(flux(Q_init(xk))*t + xk-x)
+    !     q = Q_init(xk)
+    !     return
 
-      !         n = n+1
-      !     END do
-          
-
-      !     q = Q_init(xk)
-      !     return
-
-    END FUNCTION Newton_search
+  END FUNCTION Newton_search
 
 END MODULE
