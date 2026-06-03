@@ -1,7 +1,7 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-521           | nx 
+1000           | nx 
 -1.5              | xd
 2.5              | xf
 2.0               | T
@@ -14,7 +14,7 @@
 ---------------------------------------------------
 3               | ordre espace
 3               | ordre temps
-Legendre         | polynomes  (Legendre,Lobatto)
+Legendre        | polynomes  (Legendre,Lobatto)
 Legendre        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème

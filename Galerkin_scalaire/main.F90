@@ -47,6 +47,7 @@ PROGRAM MAIN
     close(unit=numfile_conv)
 
     print *,"closed"
+    print *, counter1, counter2
     
 
     CALL DEALLOCATE_all

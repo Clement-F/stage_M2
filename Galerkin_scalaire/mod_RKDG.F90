@@ -120,9 +120,9 @@ CONTAINS
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
                              &+  RK_beta(tni) *dt * L_step
         
-                             
-        DO ii=1,size_quad_nodes
-          sol_step(ni)%val_nodes(ii)  = eval_step(Ref_to_loc(ni,x_quad(ii)),ni)
+        sol_step(ni)%val_nodes = 0._prec           
+        DO ii=1,size_quad_nodes          
+          sol_step(ni)%val_nodes(ii)  = eval_step(Ref_to_loc(ni,x_quad(ii)),ni, ii)
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN
@@ -142,7 +142,7 @@ CONTAINS
         sol(ni)%base_poly  = sol_step(ni)%base_poly
 
         DO ii=1,size_quad_nodes
-          sol(ni)%val_nodes(ii)  = eval_sol(Ref_to_loc(ni,x_quad(ii)),ni)
+          sol(ni)%val_nodes(ii)  = eval_sol(Ref_to_loc(ni,x_quad(ii)),ni, ii)
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN

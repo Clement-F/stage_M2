@@ -48,31 +48,47 @@ CONTAINS
 ! ---------------------------------------------------------------
 
 
-    FUNCTION eval_sol(YY,ni)
+    FUNCTION eval_sol(YY,ni, kk)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
+        INTEGER, INTENT(in), optional :: kk
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_sol 
         INTEGER :: ii
         eval_sol= 0._prec
 
-        DO ii = 1,size_base
-            eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
-        END DO
+        IF(.not. present(kk)) THEN
+            counter1 = counter1 +1
+            DO ii = 1,size_base
+                eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+            END DO
+        ELSE 
+            counter2 = counter2 +1
+            DO ii = 1,size_base
+                eval_sol = eval_sol + sol(ni)%base_poly(ii) * sig_quad(ii,kk)
+            END DO
+        END IF
 
     END FUNCTION eval_sol
     
-    FUNCTION eval_step(YY,ni)
+    FUNCTION eval_step(YY,ni, kk)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
+        INTEGER, INTENT(in), optional :: kk
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_step 
         INTEGER :: ii
         eval_step= 0._prec
         
-        DO ii = 1,size_base
-            eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
-        END DO
+        IF(.not. present(kk)) THEN
+            DO ii = 1,size_base
+                eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+            END DO
+        ELSE 
+            DO ii = 1,size_base
+                eval_step  = eval_step + sol_step(ni)%base_poly(ii) * sig_quad(ii,kk)
+            END DO
+        END IF
 
     END FUNCTION eval_step
 
@@ -583,14 +599,14 @@ CONTAINS
             DO jj =size_base,1,-1
                 DO kk =1,size_quad_nodes
                     YY = Ref_to_loc(ni,x_quad(kk))
-                    f_prod(jj) = f_prod(jj) + fct(YY,ni)*DG_base(x_quad(kk),jj)*w_quad(kk)
+                    f_prod(jj) = f_prod(jj) + fct(YY,ni)*sig_quad(jj,kk)*w_quad(kk)
                 END DO
             END DO
 
         ELSE 
             DO jj =size_base,1,-1
                 DO kk =1,size_quad_nodes
-                    f_prod(jj) = f_prod(jj) + fct_val(kk)*DG_base(x_quad(kk),jj)*w_quad(kk)
+                    f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
                 END DO
             END DO
 
@@ -603,11 +619,16 @@ CONTAINS
     SUBROUTINE Matrice_Masse_init
         IMPLICIT NONE
 
-        INTEGER :: ii,jj
+        INTEGER :: ii,jj,kk
+        Masse =0._prec
 
         DO ii = 1,size_base
             DO jj = ii,size_base
-                Masse(ii,jj) = quadrature(0,DG_base,ii,DG_base,jj)
+                
+                DO kk =size_quad_nodes,1,-1
+                    Masse(ii,jj) = Masse(ii,jj) + sig_quad(ii,kk)*sig_quad(jj,kk)*w_quad(kk)
+                END DO
+
                 Masse(jj,ii) = Masse(ii,jj)
             END DO
         END DO

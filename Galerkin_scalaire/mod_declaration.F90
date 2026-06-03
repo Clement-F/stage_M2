@@ -27,6 +27,7 @@ MODULE mod_declaration
 
   INTEGER :: nb_cell, order_x, order_t, size_base, size_quad_nodes
   INTEGER :: n_imp, n_time, frame_rule, print_rule
+  INTEGER :: counter1, counter2
   REAL(prec) :: time, tmax,t_ini,dt, t_imp
   REAL(prec) :: xL,xR,CFL,max_dflux,dx
   REAL(prec), parameter :: pi = acos(-1._prec)
