@@ -64,18 +64,33 @@ CONTAINS
     REAL(prec), DIMENSION(size_quad_nodes) :: flux_uh_val
 
     DO ni = 1,nb_cell
-      IF (ni ==1) THEN 
-        ug = sol_step(nb_cell)  %inter(2)
-        ud = sol_step(1)        %inter(1)
-      ELSE 
-        ug = sol_step(ni-1)%inter(2)
-        ud = sol_step(ni)  %inter(1)
-      END IF
+        IF (ni ==1) THEN 
+
+          IF (TRIM(bdry_cond) == "period") THEN 
+            ug = sol_step(nb_cell)  %inter(2)
+            ud = sol_step(1)        %inter(1)
+          ELSE IF(TRIM(bdry_cond) == "Neumann") THEN
+            ug = sol_step(1)        %inter(1)
+            ud = sol_step(1)        %inter(1)
+          ELSE 
+            print *, "boundary condition non reconnue"
+          END IF
+
+        ELSE 
+          ug = sol_step(ni-1)%inter(2)
+          ud = sol_step(ni)  %inter(1)
+        END IF
 
       flux_h(ni)  %inter(1) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
 
-      IF (ni ==1) THEN ;  flux_h(nb_cell)%inter(2) = flux_h(1) %inter(1)    
-      ELSE ;              flux_h(ni-1)   %inter(2) = flux_h(ni)%inter(1)    
+
+      IF (ni ==1) THEN
+        IF (TRIM(bdry_cond) == "period")  flux_h(nb_cell)%inter(2) = flux_h(1) %inter(1)  
+        IF (TRIM(bdry_cond) == "Neumann") THEN
+          flux_h(nb_cell)  %inter(2)  = flux(sol_step(nb_cell)%inter(2))
+        END IF
+          
+      ELSE ; flux_h(ni-1)   %inter(2) = flux_h(ni)%inter(1)    
       END IF
 
       DO ii=1,size_quad_nodes
@@ -84,6 +99,8 @@ CONTAINS
 
       CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,ni,flux_uh_val)
     END DO
+    ! print *, flux_h(1)      %inter(1),flux(sol_step(1)%inter(1))
+    ! print *, flux_h(nb_cell)%inter(2),flux(sol_step(nb_cell)%inter(2))
 
   END SUBROUTINE flux_numerique
 
@@ -97,7 +114,6 @@ CONTAINS
     ! REAL(prec), DIMENSION(size_base) :: sig_1, sig_2
     REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB
 
-    ! print *,"calc time"
 
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
@@ -115,23 +131,31 @@ CONTAINS
         V_B = MATMUL(Rigid,flux_h(ni)%base_poly)
         S_B = -(flux_h(ni)%inter(2)*sig_2 - flux_h(ni)%inter(1)*sig_1)
         BB  = (V_B + S_B)
+        
+        ! IF(ni == nb_cell) THEN 
+        !   print *, S_b
+        !   print *, sig_1, sig_2
+        !   print *, flux_h(ni)%inter
+        ! END IF
+
         L_step = MATMUL(Masse_inv, BB  )*(2._prec/(cell_size(ni))) 
 
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
                              &+  RK_beta(tni) *dt * L_step
         
-        sol_step(ni)%val_nodes = 0._prec           
+        sol_step(ni)%val_nodes = 0._prec 
+                  
         DO ii=1,size_quad_nodes          
           sol_step(ni)%val_nodes(ii)  = eval_step(Ref_to_loc(ni,x_quad(ii)),ni, ii)
         END DO
 
-        IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
-          sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
-        ELSE 
+        ! IF(TRIM(quad_meth)=="Lobatto") THEN
+        !   sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
+        !   sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
+        ! ELSE 
           sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni)
           sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni)
-        END IF
+        ! END IF
 
       END DO
     END DO
@@ -157,6 +181,77 @@ CONTAINS
 
   END SUBROUTINE Time_step
 
+  SUBROUTINE Time_step_subcell
+    IMPLICIT NONE
+    INTEGER :: ni, tni
+
+    INTEGER :: ii,jj,kk
+    REAL(prec) :: ti
+    REAL(prec) :: x_s_loc, x_s
+    REAL(prec), DIMENSION(size_base) ::  BB
+
+    ! print *, "subcells"
+
+    DO ni=1,nb_cell
+      sol_step(ni)%base_poly  = sol(ni)%base_poly
+      sol_step(ni)%val_nodes  = sol(ni)%val_nodes
+      sol_step(ni)%val_subcells=sol(ni)%val_subcells
+      sol_step(ni)%inter      = sol(ni)%inter
+    END DO
+
+    DO ii=1,order_t
+      CALL flux_numerique
+
+      DO ni = 1,nb_cell
+        DO jj =1,nb_subcell
+
+          x_s = x_subcell(jj);  x_s_loc = Ref_to_loc(ni,x_s)
+
+          flux_h(ni)%val_subcells(jj) = eval_poly(x_s_loc,ni, flux_h(ni)%base_poly) &
+                                    & - C_m(jj)*(eval_poly(x_cell(ni),ni,  flux_h(ni)%base_poly)-flux_h(ni)%inter(1)) &
+                                    & - C_p(jj)*(eval_poly(x_cell(ni+1),ni,flux_h(ni)%base_poly)-flux_h(ni)%inter(2))
+        END DO
+      END DO
+
+      DO ni = 1,nb_cell
+        DO jj =1,nb_subcell
+          sol_step(ni)%val_subcells(jj)= RK_alpha(tni,1) * sol(ni)%val_subcells(jj) &
+                                    & + RK_alpha(tni,2) * sol_step(ni)%val_subcells(jj) &
+                                    & - RK_beta(tni) *(dt/subcell_size(jj)) * (flux_h(ni)%val_subcells(jj)- flux_h(ni)%val_subcells(jj-1))
+        END DO
+      END DO
+
+      DO ni = 1,nb_cell
+        sol_step(ni)%base_poly = MATMUL(Projection_VF_inv, sol_step(ni)%val_subcells)
+
+        DO jj=1,size_quad_nodes
+          sol_step(ni)%val_nodes(jj)  = eval_step(Ref_to_loc(ni,x_quad(jj)),ni, jj)
+        END DO
+        IF(TRIM(quad_meth)=="Lobatto") THEN
+          sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
+          sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
+        ELSE 
+          sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni)
+          sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni)
+        END IF
+      END DO
+
+    END DO
+
+    
+    DO ni=1,nb_cell
+      sol(ni)%base_poly  = sol_step(ni)%base_poly
+      sol(ni)%val_nodes  = sol_step(ni)%val_nodes
+      sol(ni)%val_subcells=sol_step(ni)%val_subcells
+      sol(ni)%inter      = sol_step(ni)%inter
+    END DO
+
+
+
+
+  END SUBROUTINE Time_step_subcell
+
+
   SUBROUTINE dt_calc
     IMPLICIT NONE
     REAL(prec) :: max_u,min_u,u_step
@@ -180,20 +275,23 @@ CONTAINS
         END DO
       END DO
 
-      u_step = (max_u-min_u)/10._prec
+      max_dflux = max( abs(flux_d(min_u)), abs(flux_d(max_u)))
 
-      DO i=1,10
-        IF(max_dflux .LT. flux_d(min_u+REAL(i,prec)*u_step) ) THEN
-          max_dflux = flux_d(min_u+REAL(i,prec)*u_step)
-        END IF
-      END DO
+      ! u_step = (max_u-min_u)/10._prec
+
+      ! DO i=1,10
+      !   IF(max_dflux .LT. abs(flux_d(min_u+REAL(i,prec)*u_step)) ) THEN
+      !     max_dflux = abs(flux_d(min_u+REAL(i,prec)*u_step))
+      !     ! print *,1, max_dflux, min_u,max_u
+      !   END IF
+      ! END DO
 
     ! ELSE 
     !   print *,"flux non reconnue"
     !   max_dflux = 1._prec
     END IF
-    ! print *,max_dflux
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
+    ! print *,dt, max_dflux
 
   END SUBROUTINE dt_calc
 

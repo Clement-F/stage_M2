@@ -13,7 +13,7 @@ CONTAINS
         
         print *, "init"
 
-        IF(TRIM(DG_meth)=="Lobatto") size_base = order_x 
+        IF(TRIM(DG_meth)=="Lobatto")  size_base = order_x 
         IF(TRIM(DG_meth)=="Legendre") size_base = order_x 
 
         if(TRIM(quad_meth)=="Lobatto") size_quad_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
@@ -21,16 +21,17 @@ CONTAINS
 
         CALL ALLOCATE_all
         dx = REAL((xR-xL)/nb_cell, prec)
+        sub_dx = 2._prec/nb_subcell
 
         DO i =1,nb_cell+1 
             x_cell(i) = xL + (i-1)*dx
-        END DO
-        
+        END DO       
 
         DO i=1,nb_cell
             cell_size(i)= x_cell(i+1)-x_cell(i)  
-            x_middle(i)= x_cell(i) + cell_size(i)/2._prec
+            x_middle(i) = x_cell(i) + cell_size(i)/2._prec
         END DO
+        
         
         time = 0._prec
         n_time =1; 
@@ -48,10 +49,14 @@ CONTAINS
             sig_quad(ii,jj) = DG_base(x_quad(jj),ii)
           END DO
         END DO
+        
+
 
         CALL Coeff_RK_init(order_t)
         CALL Matrice_Masse_init
         CALL Matrice_Rigid_init
+        
+        cALL sub_cells_init
 
         print *,"matrices"
 
@@ -62,8 +67,7 @@ CONTAINS
             DO ii=1,size_quad_nodes
                 sol(ni)%val_nodes(ii)  = eval_sol(Ref_to_loc(ni,x_quad(ii)),ni, ii)
             END DO
-
-
+                        
             IF(TRIM(quad_meth)=="Lobatto") THEN
             sol(ni)%inter(1)      = sol(ni)%val_nodes(1)
             sol(ni)%inter(2)      = sol(ni)%val_nodes(size_quad_nodes)
@@ -71,6 +75,7 @@ CONTAINS
             sol(ni)%inter(1)      = eval_sol(x_cell(ni),ni)
             sol(ni)%inter(2)      = eval_sol(x_cell(ni+1),ni)
             END IF
+
         END DO
         
         IF(TRIM(flux_name) == "advection") THEN 
@@ -105,6 +110,13 @@ CONTAINS
         read(numfile_param,  *) xR;      
         read(numfile_param,  *) tmax;    
         CALL Skip_lines(numfile_param,1) 
+
+        read(numfile_param,  *) subcell_use
+        read(numfile_param,  *) nb_subcell
+        ! read(numfile_param,  *) subcell_repartition
+        CALL Skip_lines(numfile_param,1) 
+
+        CALL Skip_lines(numfile_param,1) 
         read(numfile_param,  *) cfl;   
         read(numfile_param,  *) frame_rule; 
         read(numfile_param,  *) print_rule;     
@@ -121,6 +133,7 @@ CONTAINS
         read(numfile_param,  *) sol_ini_name; 
         read(numfile_param,  *) flux_name;
         read(numfile_param,  *) vit_adv;
+        read(numfile_param,  *) bdry_cond;
 
         
         close(unit=numfile_data)

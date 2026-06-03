@@ -35,7 +35,7 @@ CONTAINS
             Q_init = unit(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
             Q_init = 0._prec
-            if(x>0._prec) Q_init =-1._prec
+            if(x<0._prec) Q_init =1._prec
         ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
             Q_init = creneau(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
@@ -47,6 +47,31 @@ CONTAINS
 
 ! ---------------------------------------------------------------
 
+    FUNCTION eval_poly(YY,ni, base_poly, kk)
+        IMPLICIT NONE
+        INTEGER, INTENT(in) :: ni
+        INTEGER, INTENT(in), optional :: kk
+        REAL(prec), INTENT(in) :: YY
+        REAL(prec), DIMENSION(size_base), INTENT(IN) :: base_poly
+        REAL(prec)  :: eval_poly
+        INTEGER :: ii
+        eval_poly= 0._prec
+
+        IF(.not. present(kk)) THEN
+            counter1 = counter1 +1
+            DO ii = 1,size_base
+                eval_poly = eval_poly + base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+            END DO
+        ELSE 
+            counter2 = counter2 +1
+            DO ii = 1,size_base
+                eval_poly = eval_poly + base_poly(ii) * sig_quad(ii,kk)
+            END DO
+        END IF
+
+
+
+    END FUNCTION eval_poly
 
     FUNCTION eval_sol(YY,ni, kk)
         IMPLICIT NONE
@@ -92,9 +117,10 @@ CONTAINS
 
     END FUNCTION eval_step
 
-    FUNCTION quadrature(ni,fct1,opt1,fct2,opt2) 
+    FUNCTION quadrature(ni,fct1,opt1,fct2,opt2,n_sub) 
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni
+        INTEGER, INTENT(IN), optional :: n_sub 
         INTERFACE
             FUNCTION fct1(YY,opt)
                 USE precis
@@ -119,15 +145,23 @@ CONTAINS
         
         quadrature = 0._prec
 
-        IF(ni .GT. 0) THEN 
+        IF(.not.present(n_sub)) THEN
+
+            IF(ni .GT. 0) THEN 
+                DO kk =size_quad_nodes,1,-1
+                    YY = Ref_to_loc(ni,x_quad(kk))
+                    quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
+                END DO
+            ELSE 
+                DO kk =size_quad_nodes,1,-1
+                    quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
+                END DO
+            END IF
+
+        ELSE
             DO kk =size_quad_nodes,1,-1
-                YY = Ref_to_loc(ni,x_quad(kk))
-                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
-            END DO
-            
-        ELSE 
-            DO kk =size_quad_nodes,1,-1
-                quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
+                YY = Ref_to_loc(ni,x_quad(kk),n_sub)
+                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(ni)/2._prec
             END DO
             
         END IF
@@ -192,6 +226,81 @@ CONTAINS
         END DO
 
     END FUNCTION Lagrange_basis
+
+    SUBROUTINE sub_cells_init
+        IMPLICIT NONE
+        INTEGER :: i,j
+        REAL(prec), DIMENSION(size_base)    :: phi
+        REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
+        
+        DO i =1,nb_subcell+1 
+            x_subcell(i) = -1._prec + (i-1)*sub_dx
+        END DO
+        DO i =1,nb_subcell
+            subcell_size(i)= x_subcell(i+1)-x_subcell(i)  
+            x_submiddle(i) = x_subcell(i) + subcell_size(i)/2._prec
+        END DO
+        
+        DO j =1,nb_subcell
+        Projection_VF(j,i)= quadrature(0,DG_base,0,unit,0,j)/subcell_size(j)
+        END DO
+
+        IF(nb_subcell == size_base) THEN
+            CALL inv_mat(Masse,Masse_inv,0)
+        END IF
+
+
+        DO i=1,nb_cell
+            sol(i)%val_subcells =MATMUL(Projection_VF, sol(i)%base_poly)
+        END DO
+
+        phi_val = 0._prec
+        DO i=1,nb_subcell
+            phi = unit_pk(i)
+            DO j = 1,size_base
+                phi_val(i,1) = phi_val(i,1) + phi(j) * DG_base(-1._prec,j)
+                phi_val(i,2) = phi_val(i,2) + phi(j) * DG_base(-1._prec,j)
+            END DO
+        END DO
+
+        C_m =0._prec; C_p = 0._prec
+        DO i=1,nb_subcell
+            DO j=1,i
+                C_p(i) = C_p(i) + phi_val(j,2)
+            END DO
+            DO j=i+1,nb_subcell
+                C_m(i) = C_m(i) + phi_val(j,1)
+            END DO
+        END DO
+    
+    END SUBROUTINE sub_cells_init
+
+    FUNCTION unit_pk(n_sub)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: n_sub
+        REAL(prec), DIMENSION(size_base) :: unit_pk
+
+        CALL Projection_Pk(unit_sm,unit_pk,0)
+
+        CONTAINS 
+        FUNCTION unit_sm(x,ni)
+            IMPLICIT NONE
+            REAL(prec), INTENT(IN) :: x
+            INTEGER,    INTENT(IN) :: ni
+            REAL(prec) :: xls, xrs
+            REAL(prec) :: unit_sm
+
+            xls = Ref_to_loc(ni, x_subcell(n_sub), n_sub)
+            xrs = Ref_to_loc(ni, x_subcell(n_sub+1), n_sub)
+
+            unit_sm = 0._prec
+
+            if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
+
+        END FUNCTION unit_sm
+
+
+    END FUNCTION unit_pk
 
 
     SUBROUTINE Coeff_DG_init
@@ -547,26 +656,34 @@ CONTAINS
 
     END FUNCTION dDG_base
 
-    FUNCTION Ref_to_loc(ni,XX) result(YY)
+    FUNCTION Ref_to_loc(ni,XX, n_sub) result(YY)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni
+        INTEGER, INTENT(IN), optional :: n_sub
         REAL(prec), INTENT(IN) :: XX
         REAL(prec) :: xL,xR
         REAL(prec) :: YY
 
-        xL = x_cell(ni); xR= x_cell(ni+1)
-
-        YY = XX*(xR-xL)/2._prec + (xR+xL)/2._prec 
+        IF(.not. present(n_sub)) THEN
+            YY = XX*cell_size(ni)/2._prec + x_middle(ni)
+        ELSE 
+            YY = XX*subcell_size(ni)/2._prec + x_submiddle(n_sub) + x_cell(ni) 
+        END IF
 
     END FUNCTION Ref_to_loc
 
-    FUNCTION Loc_to_Ref(ni,YY) result(XX)
+    FUNCTION Loc_to_Ref(ni,YY, n_sub) result(XX)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni
+        INTEGER, INTENT(IN), optional :: n_sub
         REAL(prec), INTENT(IN) :: YY
         REAL(prec) :: XX
 
-        XX = 2._prec * (YY-x_middle(ni))/(x_cell(ni+1)-x_cell(ni))
+        IF(.not. present(n_sub)) THEN
+            XX = 2._prec * (YY-x_middle(ni))/cell_size(ni)
+        ELSE
+            XX = 2._prec * (YY-(x_submiddle(n_sub)+x_cell(ni)))/subcell_size(ni)
+        END IF
 
     END FUNCTION Loc_to_Ref
 
