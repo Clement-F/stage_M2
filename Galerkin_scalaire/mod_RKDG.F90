@@ -211,13 +211,23 @@ CONTAINS
                                     & - C_m(jj)*(eval_poly(x_cell(ni),ni,  flux_h(ni)%base_poly)-flux_h(ni)%inter(1)) &
                                     & - C_p(jj)*(eval_poly(x_cell(ni+1),ni,flux_h(ni)%base_poly)-flux_h(ni)%inter(2))
         END DO
+
+        flux_h(ni)%val_subcells(1)            = flux_h(ni)%inter(1)
+        flux_h(ni)%val_subcells(nb_subcell+1) = flux_h(ni)%inter(2)
+
+        ! print *,flux_h(ni)%val_subcells
       END DO
+
 
       DO ni = 1,nb_cell
         DO jj =1,nb_subcell
-          sol_step(ni)%val_subcells(jj)= RK_alpha(tni,1) * sol(ni)%val_subcells(jj) &
-                                    & + RK_alpha(tni,2) * sol_step(ni)%val_subcells(jj) &
-                                    & - RK_beta(tni) *(dt/subcell_size(jj)) * (flux_h(ni)%val_subcells(jj)- flux_h(ni)%val_subcells(jj-1))
+          ! print *,"------------------------"
+          ! print *,sol_step(ni)%val_subcells(jj)
+          sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
+                                    & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
+                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+          
+          ! print *,sol_step(ni)%val_subcells(jj)
         END DO
       END DO
 
@@ -300,12 +310,15 @@ CONTAINS
 
     REAL(prec) :: out1, out2,xi
     REAL(prec) :: err1 , err2, errLi
+    INTEGER :: kk
 
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec
 
     IF(time .GE.  REAL(n_imp,prec)*t_imp-eps0)  THEN
       write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
+
+        IF(.NOT.subcell_use) THEN
           DO j=1,size_base
               xi = Ref_to_loc(i,x_quad(j))
               out1 = sol(i)%val_nodes(j)
@@ -322,6 +335,27 @@ CONTAINS
               err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
               err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
           END DO
+        ELSE 
+          DO j=1,nb_subcell
+            DO kk=1,2
+              IF(kk ==1 )xi = Ref_to_loc(i,-1._prec,j)
+              IF(kk ==2 )xi = Ref_to_loc(i, 1._prec,j)
+              out1 = sol(i)%val_subcells(j)
+
+              IF(TRIM(flux_name) == "advection") THEN 
+                out2 =Q_init(xi - time*vit_adv,0)
+              ELSE 
+                call pied_charact(xi,time,out2)
+              END IF
+
+              write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+
+              errLi = max(errLi , abs(out1-out2))
+              err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+              err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
+            END DO
+          END DO
+        END IF
 
       END DO
 

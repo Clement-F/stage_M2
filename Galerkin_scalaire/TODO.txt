@@ -2,7 +2,7 @@
         MODULE à rajouter 
 ===================================
 
-1) sous cellules compatibilité
+1) sous cellules burgers
 2) schéma monolithique
 
 ===================================
@@ -12,5 +12,3 @@
 1) Lobatto (quad) + Neumann en burgers -> explosion lorsque le choc rencontre le bords
 -> pb traitement des interfaces (valide pour VF pas à DG ordre 2) 
 -> semble prolonger la pente si il existe une pente
-
-2) sous-cellules -> disparition de la solution (dès le premiers pas de temps ? )

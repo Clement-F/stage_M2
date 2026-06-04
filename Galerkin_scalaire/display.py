@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 with open('file_data.txt') as f:
     lines = f.readlines()
 order = int(lines[0][10:16])
-nx = int(lines[2][5:11])*order
+nx = int(lines[2][5:11])
 sm = int(lines[3][5:11])
 
 T=[]
@@ -33,9 +33,9 @@ for k in range(0,sm):
         
     err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
     #plt.plot(X,err[k],'r')
-    #plt.plot(X,U_ex[k],'g')
+    plt.plot(X,U_ex[k],'g')
     plt.plot(X,U_t[k],'b')
-    #plt.ylim(-.2,1.2)
+    plt.ylim(-1.2,1.2)
     plt.show()         
         
 #for k in range(1,sm):

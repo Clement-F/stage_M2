@@ -159,10 +159,19 @@ CONTAINS
             END IF
 
         ELSE
-            DO kk =size_quad_nodes,1,-1
-                YY = Ref_to_loc(ni,x_quad(kk),n_sub)
-                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(ni)/2._prec
-            END DO
+            IF(ni .GT. 0) THEN 
+                DO kk =size_quad_nodes,1,-1
+                    YY = Ref_to_loc(ni,x_quad(kk),n_sub)
+                    quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(n_sub)/2._prec
+                END DO
+            ELSE 
+                DO kk =size_quad_nodes,1,-1
+                    YY = Refsub_to_Ref(x_quad(kk),n_sub)
+                    ! print *,YY
+                    quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(n_sub)/2._prec
+                    
+                END DO
+            END IF
             
         END IF
 
@@ -227,9 +236,27 @@ CONTAINS
 
     END FUNCTION Lagrange_basis
 
+    SUBROUTINE print_mat(Mat,t1,t2)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: t1,t2
+        REAL(prec), DIMENSION(t1,t2) :: Mat
+        INTEGER :: ii,jj
+
+        DO ii=1,t1
+            write(*,fmt ='()')
+            write(*,fmt ='(a)', advance="no") '|'
+            DO jj =1,t2
+                write(*,fmt ='(f16.6,a)',advance="no") Mat(ii,jj), '|'
+            END DO
+        END DO
+            write(*,fmt ='()')
+
+    END SUBROUTINE print_mat
+
     SUBROUTINE sub_cells_init
         IMPLICIT NONE
         INTEGER :: i,j
+        REAL(prec) :: temp
         REAL(prec), DIMENSION(size_base)    :: phi
         REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
         
@@ -242,16 +269,20 @@ CONTAINS
         END DO
         
         DO j =1,nb_subcell
-        Projection_VF(j,i)= quadrature(0,DG_base,0,unit,0,j)/subcell_size(j)
+            DO i=1,size_base
+                Projection_VF(j,i)= quadrature(0,DG_base,i,unit,0,j)/subcell_size(j)
+            END DO
         END DO
 
+        CALL print_mat(Projection_VF,nb_subcell,size_base)
+
         IF(nb_subcell == size_base) THEN
-            CALL inv_mat(Masse,Masse_inv,0)
+            CALL inv_mat(Projection_VF,Projection_VF_inv,0)
         END IF
 
 
         DO i=1,nb_cell
-            sol(i)%val_subcells =MATMUL(Projection_VF, sol(i)%base_poly)
+            sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
         END DO
 
         phi_val = 0._prec
@@ -264,14 +295,17 @@ CONTAINS
         END DO
 
         C_m =0._prec; C_p = 0._prec
+        print *,phi_val
         DO i=1,nb_subcell
-            DO j=1,i
+            DO j=1,i-1
                 C_p(i) = C_p(i) + phi_val(j,2)
             END DO
             DO j=i+1,nb_subcell
                 C_m(i) = C_m(i) + phi_val(j,1)
             END DO
         END DO
+        print *,"Cp =",C_p
+        print *,"Cm =",C_m
     
     END SUBROUTINE sub_cells_init
 
@@ -290,19 +324,18 @@ CONTAINS
             REAL(prec) :: xls, xrs
             REAL(prec) :: unit_sm
 
-            xls = Ref_to_loc(ni, x_subcell(n_sub), n_sub)
-            xrs = Ref_to_loc(ni, x_subcell(n_sub+1), n_sub)
+            xls = x_subcell(n_sub)
+            xrs = x_subcell(n_sub+1)
 
             unit_sm = 0._prec
-
+            print *,xls,xrs,x
             if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
 
         END FUNCTION unit_sm
 
 
     END FUNCTION unit_pk
-
-
+    
     SUBROUTINE Coeff_DG_init
         IMPLICIT NONE
 
@@ -656,6 +689,26 @@ CONTAINS
 
     END FUNCTION dDG_base
 
+    FUNCTION Ref_to_Refsub(XX,n_sub)  result(ZZ)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: XX
+        INTEGER,    INTENT(IN) :: n_sub
+        REAL(prec)  :: ZZ
+
+        ZZ = 2._prec * (XX-x_submiddle(n_sub))/subcell_size(n_sub)
+
+    END FUNCTION Ref_to_Refsub
+
+    FUNCTION Refsub_to_Ref(ZZ,n_sub)  result(XX)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: ZZ
+        INTEGER,    INTENT(IN) :: n_sub
+        REAL(prec)  :: XX
+
+        XX = ZZ*subcell_size(n_sub)/2._prec + x_submiddle(n_sub)
+
+    END FUNCTION Refsub_to_Ref
+
     FUNCTION Ref_to_loc(ni,XX, n_sub) result(YY)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni
@@ -667,7 +720,7 @@ CONTAINS
         IF(.not. present(n_sub)) THEN
             YY = XX*cell_size(ni)/2._prec + x_middle(ni)
         ELSE 
-            YY = XX*subcell_size(ni)/2._prec + x_submiddle(n_sub) + x_cell(ni) 
+            YY = Refsub_to_Ref(XX,n_sub)*cell_size(ni)/2._prec + x_middle(ni)
         END IF
 
     END FUNCTION Ref_to_loc
@@ -682,7 +735,8 @@ CONTAINS
         IF(.not. present(n_sub)) THEN
             XX = 2._prec * (YY-x_middle(ni))/cell_size(ni)
         ELSE
-            XX = 2._prec * (YY-(x_submiddle(n_sub)+x_cell(ni)))/subcell_size(ni)
+            XX = 2._prec * (YY-x_middle(ni))/cell_size(ni)
+            XX = Ref_to_Refsub(XX,n_sub)
         END IF
 
     END FUNCTION Loc_to_Ref
@@ -711,22 +765,38 @@ CONTAINS
         xL = x_cell(ni); xR= x_cell(ni+1)
 
         f_prod = 0._prec
-        
-        IF(.not. present(fct_val)) THEN
-            DO jj =size_base,1,-1
-                DO kk =1,size_quad_nodes
-                    YY = Ref_to_loc(ni,x_quad(kk))
-                    f_prod(jj) = f_prod(jj) + fct(YY,ni)*sig_quad(jj,kk)*w_quad(kk)
+        IF(ni .GT. 0) THEN
+            IF(.not. present(fct_val)) THEN
+                DO jj =size_base,1,-1
+                    DO kk =1,size_quad_nodes
+                        YY = Ref_to_loc(ni,x_quad(kk))
+                        f_prod(jj) = f_prod(jj) + fct(YY,ni)*sig_quad(jj,kk)*w_quad(kk)
+                    END DO
                 END DO
-            END DO
 
+            ELSE 
+                DO jj =size_base,1,-1
+                    DO kk =1,size_quad_nodes
+                        f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
+                    END DO
+                END DO
+            END IF
         ELSE 
-            DO jj =size_base,1,-1
-                DO kk =1,size_quad_nodes
-                    f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
-                END DO
-            END DO
 
+            IF(.not. present(fct_val)) THEN
+                DO jj =size_base,1,-1
+                    DO kk =1,size_quad_nodes
+                        f_prod(jj) = f_prod(jj) + fct(x_quad(kk),ni)*sig_quad(jj,kk)*w_quad(kk)
+                    END DO
+                END DO
+
+            ELSE 
+                DO jj =size_base,1,-1
+                    DO kk =1,size_quad_nodes
+                        f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
+                    END DO
+                END DO
+            END IF
         END IF
 
         fct_h = MATMUL(Masse_inv,f_prod)

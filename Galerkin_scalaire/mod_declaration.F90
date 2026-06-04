@@ -81,7 +81,7 @@ MODULE mod_declaration
       ALLOCATE(sol(i)%base_poly(size_base));      ALLOCATE(sol(i)%val_nodes(size_quad_nodes));      ALLOCATE(sol(i)%val_subcells(nb_subcell))
       ALLOCATE(sol_exa(i)%base_poly(size_base));  ALLOCATE(sol_exa(i)%val_nodes(size_quad_nodes));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell)) 
       ALLOCATE(sol_step(i)%base_poly(size_base)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell))
-      ALLOCATE(flux_h(i)%base_poly(size_base));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell))
+      ALLOCATE(flux_h(i)%base_poly(size_base));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1))
     
     END DO
     

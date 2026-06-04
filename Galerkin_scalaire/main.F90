@@ -12,11 +12,13 @@ PROGRAM MAIN
    
     write(unit= numfile_data, fmt='("ordre x = "i5)') order_x
     write(unit= numfile_data, fmt='("ordre t = "i5)') order_t
-    write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
+
+    IF(subcell_use)         write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*nb_subcell*2
+    IF(.not. subcell_use)   write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
         
     CALL writout
 
-    
+
     DO WHILE (time .LT. tmax)     
         CALL dt_calc
 
@@ -29,6 +31,7 @@ PROGRAM MAIN
         
         CALL writout 
     END DO
+    
     CALL writout 
 
     write(unit= numfile_data, fmt='("nt = "i5)') n_imp
