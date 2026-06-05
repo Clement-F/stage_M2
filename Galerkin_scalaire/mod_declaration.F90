@@ -43,7 +43,9 @@ MODULE mod_declaration
   REAL(prec) :: vit_adv 
   REAL(prec) :: err_L1, err_L2, err_Li
 
-  CHARACTER(LEN=32) :: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond
+  CHARACTER(Len=8) :: LRef = "Ref", LLoc = "Loc", Lsub = "SubRef" 
+
+  CHARACTER(LEN=32):: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond
 
   INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4
   CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt', & 
@@ -72,7 +74,7 @@ MODULE mod_declaration
     ALLOCATE( Time_stemp(print_rule+1))
     
     ALLOCATE( pts_DG(size_base)) 
-    ALLOCATE( C_m(nb_subcell), C_p(nb_subcell))
+    ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
     ALLOCATE( Projection_VF(nb_subcell,size_base),  Projection_VF_inv(size_base,size_base))
     ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 

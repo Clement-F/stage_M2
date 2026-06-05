@@ -14,7 +14,7 @@ PROGRAM MAIN
     write(unit= numfile_data, fmt='("ordre t = "i5)') order_t
 
     IF(subcell_use)         write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*nb_subcell*2
-    IF(.not. subcell_use)   write(unit= numfile_data, fmt='("nx = "i5)') nb_cell
+    IF(.not. subcell_use)   write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*order_x
         
     CALL writout
 
@@ -22,9 +22,10 @@ PROGRAM MAIN
     DO WHILE (time .LT. tmax)     
         CALL dt_calc
 
-        IF(subcell_use) THEN;   CALL Time_step_subcell
-        ELSE;                   CALL Time_step
-        END IF
+        ! IF(subcell_use) THEN;   CALL Time_step_subcell
+        ! ELSE;  
+                             CALL Time_step
+        ! END IF
 
         time = time +dt
         n_time = n_time +1

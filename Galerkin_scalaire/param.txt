@@ -1,13 +1,13 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-100            | noeuds du maillage 
-0.            | xd
-1.             | xf
-1.             | T
+100              | noeuds du maillage 
+-1.              | xd
+1.              | xf
+2.             | T
 ---------------------------------------------------
-True            | sous maillage     (True, False)
-3               | noeuds du sous maillage
+False            | sous maillage     (True, False)
+2               | noeuds du sous maillage
 sym             | repartition des noeuds
 ---------------------------------------------------
 0.9             | cfl
@@ -18,12 +18,12 @@ sym             | repartition des noeuds
 ---------------------------------------------------
 3               | ordre espace
 3               | ordre temps
-Legendre        | polynomes  (Legendre,Lobatto)
-Legendre        | quadrature (Legendre,Lobatto)
+Lobatto        | polynomes  (Legendre,Lobatto)
+Lobatto        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-sinus           | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
+Riemann           | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
 advection         | problème (advection, burgers, Buckley)
 1.             | vitesse advection (si pb = advection)
-period         | condition au bord (period, Neumann)
+Neumann         | condition au bord (period, Neumann)

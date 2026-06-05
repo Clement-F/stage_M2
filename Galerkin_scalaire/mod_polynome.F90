@@ -47,36 +47,45 @@ CONTAINS
 
 ! ---------------------------------------------------------------
 
-    FUNCTION eval_poly(YY,ni, base_poly, kk)
+    FUNCTION eval_poly(YY,ni, base_poly, kk, LOC)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
         INTEGER, INTENT(in), optional :: kk
+        CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec), INTENT(in) :: YY
         REAL(prec), DIMENSION(size_base), INTENT(IN) :: base_poly
         REAL(prec)  :: eval_poly
         INTEGER :: ii
         eval_poly= 0._prec
 
+
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
-            DO ii = 1,size_base
-                eval_poly = eval_poly + base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
-            END DO
+            IF(TRIM(LOC) == "Loc") THEN
+                DO ii = 1,size_base
+                    eval_poly = eval_poly + base_poly(ii) * DG_base(YY,ii,LOC,ni)
+                END DO
+            ELSE IF(TRIM(LOC) == "Ref") THEN
+                DO ii = 1,size_base
+                    eval_poly = eval_poly + base_poly(ii) * DG_base(YY,ii,LOC,ni)
+                END DO
+            END IF
         ELSE 
             counter2 = counter2 +1
-            DO ii = 1,size_base
-                eval_poly = eval_poly + base_poly(ii) * sig_quad(ii,kk)
-            END DO
+            IF(TRIM(LOC) == "Loc") THEN
+                DO ii = 1,size_base
+                    eval_poly = eval_poly + base_poly(ii) * sig_quad(ii,kk)
+                END DO
+            END IF
         END IF
-
-
 
     END FUNCTION eval_poly
 
-    FUNCTION eval_sol(YY,ni, kk)
+    FUNCTION eval_sol(YY,ni, kk, LOC)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
         INTEGER, INTENT(in), optional :: kk
+        CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_sol 
         INTEGER :: ii
@@ -85,7 +94,7 @@ CONTAINS
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
             DO ii = 1,size_base
-                eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+                eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(YY,ii,LOC,ni)
             END DO
         ELSE 
             counter2 = counter2 +1
@@ -96,10 +105,11 @@ CONTAINS
 
     END FUNCTION eval_sol
     
-    FUNCTION eval_step(YY,ni, kk)
+    FUNCTION eval_step(YY,ni,kk, LOC)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
         INTEGER, INTENT(in), optional :: kk
+        CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_step 
         INTEGER :: ii
@@ -107,7 +117,7 @@ CONTAINS
         
         IF(.not. present(kk)) THEN
             DO ii = 1,size_base
-                eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(Loc_to_Ref(ni,YY),ii)
+                eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(YY,ii, LOC,ni)
             END DO
         ELSE 
             DO ii = 1,size_base
@@ -117,10 +127,11 @@ CONTAINS
 
     END FUNCTION eval_step
 
-    FUNCTION quadrature(ni,fct1,opt1,fct2,opt2,n_sub) 
+    FUNCTION quadrature(fct1,opt1,fct2,opt2,LOC,ni,n_sub) 
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni
         INTEGER, INTENT(IN), optional :: n_sub 
+        CHARACTER (len=8), INTENT(IN) :: LOC
         INTERFACE
             FUNCTION fct1(YY,opt)
                 USE precis
@@ -145,35 +156,23 @@ CONTAINS
         
         quadrature = 0._prec
 
-        IF(.not.present(n_sub)) THEN
+            IF(TRIM(LOC) == "Loc") THEN
+            DO kk =size_quad_nodes,1,-1
+                YY = Ref_to_loc(ni,x_quad(kk))
+                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
+            END DO
 
-            IF(ni .GT. 0) THEN 
-                DO kk =size_quad_nodes,1,-1
-                    YY = Ref_to_loc(ni,x_quad(kk))
-                    quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
-                END DO
-            ELSE 
-                DO kk =size_quad_nodes,1,-1
-                    quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
-                END DO
-            END IF
+        ELSEIF(TRIM(LOC) == "Ref") THEN
+            DO kk =size_quad_nodes,1,-1
+                quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
+            END DO
 
-        ELSE
-            IF(ni .GT. 0) THEN 
-                DO kk =size_quad_nodes,1,-1
-                    YY = Ref_to_loc(ni,x_quad(kk),n_sub)
-                    quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(n_sub)/2._prec
-                END DO
-            ELSE 
-                DO kk =size_quad_nodes,1,-1
-                    YY = Refsub_to_Ref(x_quad(kk),n_sub)
-                    ! print *,YY
-                    quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(n_sub)/2._prec
-                    
-                END DO
-            END IF
-            
-        END IF
+        ELSEIF(TRIM(LOC) == "SubRef") THEN
+            DO kk =size_quad_nodes,1,-1
+                YY = Ref_to_loc(ni,x_quad(kk),n_sub)
+                quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*subcell_size(n_sub)/2._prec
+            END DO
+        END IF   
 
     END FUNCTION quadrature
 
@@ -204,7 +203,7 @@ CONTAINS
         integration = 0._prec
 
         DO ni = 1,nb_cell
-            integration = integration + quadrature(ni, fct1,opt1, fct2,opt2)
+            integration = integration + quadrature(fct1,opt1, fct2,opt2,LLoc,ni)
         END DO
 
 
@@ -253,88 +252,113 @@ CONTAINS
 
     END SUBROUTINE print_mat
 
-    SUBROUTINE sub_cells_init
-        IMPLICIT NONE
-        INTEGER :: i,j
-        REAL(prec) :: temp
-        REAL(prec), DIMENSION(size_base)    :: phi
-        REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
+    ! SUBROUTINE sub_cells_init
+    !     IMPLICIT NONE
+    !     INTEGER :: i,j
+    !     REAL(prec) :: temp
+    !     REAL(prec), DIMENSION(size_base)    :: phi
+    !     REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
         
-        DO i =1,nb_subcell+1 
-            x_subcell(i) = -1._prec + (i-1)*sub_dx
-        END DO
-        DO i =1,nb_subcell
-            subcell_size(i)= x_subcell(i+1)-x_subcell(i)  
-            x_submiddle(i) = x_subcell(i) + subcell_size(i)/2._prec
-        END DO
+    !     DO i =1,nb_subcell+1 
+    !         x_subcell(i) = -1._prec + (i-1)*sub_dx
+    !     END DO
+    !     DO i =1,nb_subcell
+    !         subcell_size(i)= x_subcell(i+1)-x_subcell(i)  
+    !         x_submiddle(i) = x_subcell(i) + subcell_size(i)/2._prec
+    !     END DO
         
-        DO j =1,nb_subcell
-            DO i=1,size_base
-                Projection_VF(j,i)= quadrature(0,DG_base,i,unit,0,j)/subcell_size(j)
-            END DO
-        END DO
+    !     DO j =1,nb_subcell
+    !         DO i=1,size_base
+    !             Projection_VF(j,i)= quadrature(1,DG_base,i,unit,0,j)/subcell_size(j)
+    !         END DO
+    !     END DO
 
-        CALL print_mat(Projection_VF,nb_subcell,size_base)
+    !     CALL print_mat(Projection_VF,nb_subcell,size_base)
 
-        IF(nb_subcell == size_base) THEN
-            CALL inv_mat(Projection_VF,Projection_VF_inv,0)
-        END IF
+    !     IF(nb_subcell == size_base) THEN
+    !         CALL inv_mat(Projection_VF,Projection_VF_inv,0)
+    !     END IF
 
 
-        DO i=1,nb_cell
-            sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
-        END DO
+    !     DO i=1,nb_cell
+    !         sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
+    !     END DO
 
-        phi_val = 0._prec
-        DO i=1,nb_subcell
-            phi = unit_pk(i)
-            DO j = 1,size_base
-                phi_val(i,1) = phi_val(i,1) + phi(j) * DG_base(-1._prec,j)
-                phi_val(i,2) = phi_val(i,2) + phi(j) * DG_base(-1._prec,j)
-            END DO
-        END DO
+    !     CALL print_mat(Masse,       size_base,size_base)
+    !     CALL print_mat(Masse_inv,   size_base,size_base)
 
-        C_m =0._prec; C_p = 0._prec
-        print *,phi_val
-        DO i=1,nb_subcell
-            DO j=1,i-1
-                C_p(i) = C_p(i) + phi_val(j,2)
-            END DO
-            DO j=i+1,nb_subcell
-                C_m(i) = C_m(i) + phi_val(j,1)
-            END DO
-        END DO
-        print *,"Cp =",C_p
-        print *,"Cm =",C_m
+    !     phi_val = 0._prec
+    !     DO i=1,nb_subcell
+    !         phi = unit_pk(i)
+    !         print *,phi
+    !         DO j = 1,size_base
+    !             phi_val(i,1) = phi_val(i,1) + phi(j) * DG_base(-1._prec,j)
+    !             phi_val(i,2) = phi_val(i,2) + phi(j) * DG_base( 1._prec,j)
+    !         END DO
+    !     END DO
+
+    !     C_m =0._prec; 
+    !     C_p = 0._prec;
+    !     print *,phi_val
+    !     DO i=1,nb_subcell+1
+    !         DO j=1,i-1
+    !             C_p(i) = C_p(i) + phi_val(j,2)
+    !         END DO
+    !         DO j=1,i-1
+    !             C_m(i) = C_m(i) + phi_val(j,1)
+    !         END DO
+    !         C_m(i) = 1._prec -C_m(i)
+    !     END DO
+
+    !     ! C_p(1)            =0._prec; C_m(1)            =1._prec
+    !     ! C_p(nb_subcell+1) =1._prec; C_m(nb_subcell+1) =0._prec
+
+    !     print *,"Cp =",C_p
+    !     print *,"Cm =",C_m
     
-    END SUBROUTINE sub_cells_init
+    ! END SUBROUTINE sub_cells_init
 
-    FUNCTION unit_pk(n_sub)
+    ! FUNCTION unit_pk(n_sub)
+    !     IMPLICIT NONE
+    !     INTEGER, INTENT(IN) :: n_sub
+    !     REAL(prec), DIMENSION(size_base) :: unit_pk
+
+    !     CALL Projection_Pk(unit_sm,unit_pk,0)
+
+    !     CONTAINS 
+    !     FUNCTION unit_sm(x,ni)
+    !         IMPLICIT NONE
+    !         REAL(prec), INTENT(IN) :: x
+    !         INTEGER,    INTENT(IN) :: ni
+    !         REAL(prec) :: xls, xrs
+    !         REAL(prec) :: unit_sm
+
+    !         xls = x_subcell(n_sub)
+    !         xrs = x_subcell(n_sub+1)
+
+    !         unit_sm = 0._prec
+    !         if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
+
+    !     END FUNCTION unit_sm
+
+
+    ! END FUNCTION unit_pk
+
+    
+    FUNCTION unit_sm(x,n_sub)
         IMPLICIT NONE
-        INTEGER, INTENT(IN) :: n_sub
-        REAL(prec), DIMENSION(size_base) :: unit_pk
+        REAL(prec), INTENT(IN) :: x
+        INTEGER,    INTENT(IN) :: n_sub
+        REAL(prec) :: xls, xrs
+        REAL(prec) :: unit_sm
 
-        CALL Projection_Pk(unit_sm,unit_pk,0)
+        xls = x_subcell(n_sub)
+        xrs = x_subcell(n_sub+1)
 
-        CONTAINS 
-        FUNCTION unit_sm(x,ni)
-            IMPLICIT NONE
-            REAL(prec), INTENT(IN) :: x
-            INTEGER,    INTENT(IN) :: ni
-            REAL(prec) :: xls, xrs
-            REAL(prec) :: unit_sm
+        unit_sm = 0._prec
+        if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
 
-            xls = x_subcell(n_sub)
-            xrs = x_subcell(n_sub+1)
-
-            unit_sm = 0._prec
-            print *,xls,xrs,x
-            if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
-
-        END FUNCTION unit_sm
-
-
-    END FUNCTION unit_pk
+    END FUNCTION unit_sm
     
     SUBROUTINE Coeff_DG_init
         IMPLICIT NONE
@@ -441,9 +465,6 @@ CONTAINS
         coeff_Taylor(8,1)=127._prec/3840._prec
 
     END SUBROUTINE base_Taylor_init
-
-    SUBROUTINE base_Lagrange_init ! TODO
-    END SUBROUTINE base_Lagrange_init
 
     SUBROUTINE quad_1D_lobatto(n_quad_1D,x_quad,w_quad)
         IMPLICIT NONE
@@ -636,12 +657,20 @@ CONTAINS
 ! ---------------------------------------------------------------
 ! ---------------------------------------------------------------
 
-    FUNCTION DG_base(XX,ordre_poly)
+    FUNCTION DG_base(x,ordre_poly,LOC,ni)
         IMPLICIT NONE
-        INTEGER, INTENT(IN) :: ordre_poly
-        REAL(prec), INTENT(IN) :: XX
+        INTEGER,            INTENT(IN) :: ordre_poly
+        REAL(prec),         INTENT(IN) :: x
+        CHARACTER (len=8),  INTENT(IN) :: LOC
+        INTEGER,            INTENT(IN) :: ni
+
+        REAL(PREC) :: xx
         REAL(prec) :: DG_base
         INTEGER :: ii
+
+        IF(TRIM(LOC) == "Loc")      XX = Loc_to_Ref(ni,x)
+        IF(TRIM(LOC) == "Ref")      XX = x
+        IF(TRIM(LOC) == "subRef")   XX = Refsub_to_Ref(x,ni)
 
         DG_base = 0._prec
 
@@ -658,13 +687,21 @@ CONTAINS
 
     END FUNCTION DG_base
     
-    FUNCTION dDG_base(XX,ordre_poly)
+    FUNCTION dDG_base(x,ordre_poly, LOC,ni)
         IMPLICIT NONE
-        INTEGER, INTENT(IN) :: ordre_poly
-        REAL(prec), INTENT(IN) :: XX
+        INTEGER,            INTENT(IN) :: ordre_poly
+        CHARACTER (len=8),  INTENT(IN) :: LOC
+        INTEGER,            INTENT(IN) :: ni
+        REAL(Prec),         INTENT(IN) :: x
+
+        REAL(prec) :: XX
         REAL(prec) :: dDG_base
         REAL(prec) :: temp
         INTEGER :: ii,jj
+
+        IF(TRIM(LOC) == "Loc")      XX = Loc_to_Ref(ni,x)
+        IF(TRIM(LOC) == "Ref")      XX = x
+        IF(TRIM(LOC) == "subRef")   XX = Refsub_to_Ref(x,ni)
 
         dDG_base = 0._prec
 
@@ -741,7 +778,7 @@ CONTAINS
 
     END FUNCTION Loc_to_Ref
 
-    SUBROUTINE Projection_Pk(fct, fct_h, ni,fct_val)
+    SUBROUTINE Projection_Pk(fct, fct_h ,LOC ,ni ,fct_val)
         IMPLICIT NONE
         
         INTERFACE
@@ -755,50 +792,36 @@ CONTAINS
 
         INTEGER, INTENT(IN) :: ni
         REAL(prec), DIMENSION(size_base), INTENT(OUT) :: fct_h
+        CHARACTER (len=8),  INTENT(IN) :: LOC
         REAL(prec), DIMENSION(size_quad_nodes), INTENT(IN), optional :: fct_val
 
         REAL(prec), DIMENSION(size_base) :: f_prod
         REAL(prec) :: YY
-        REAL(prec) :: xR, xL
         INTEGER :: jj, kk
 
-        xL = x_cell(ni); xR= x_cell(ni+1)
 
         f_prod = 0._prec
-        IF(ni .GT. 0) THEN
-            IF(.not. present(fct_val)) THEN
-                DO jj =size_base,1,-1
-                    DO kk =1,size_quad_nodes
-                        YY = Ref_to_loc(ni,x_quad(kk))
-                        f_prod(jj) = f_prod(jj) + fct(YY,ni)*sig_quad(jj,kk)*w_quad(kk)
-                    END DO
-                END DO
+        IF(.not. present(fct_val)) THEN
+        DO jj =size_base,1,-1
+            DO kk =1,size_quad_nodes
 
-            ELSE 
-                DO jj =size_base,1,-1
-                    DO kk =1,size_quad_nodes
-                        f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
-                    END DO
-                END DO
-            END IF
-        ELSE 
+                IF(TRIM(LOC) == "Loc") YY = Ref_to_loc(ni,x_quad(kk))
+                IF(TRIM(LOC) == "Ref") YY = x_quad(kk)
 
-            IF(.not. present(fct_val)) THEN
-                DO jj =size_base,1,-1
-                    DO kk =1,size_quad_nodes
-                        f_prod(jj) = f_prod(jj) + fct(x_quad(kk),ni)*sig_quad(jj,kk)*w_quad(kk)
-                    END DO
-                END DO
+                f_prod(jj) = f_prod(jj) + fct(YY,ni)*sig_quad(jj,kk)*w_quad(kk)
+            END DO
+        END DO
 
-            ELSE 
-                DO jj =size_base,1,-1
-                    DO kk =1,size_quad_nodes
-                        f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
-                    END DO
-                END DO
-            END IF
+        ELSEIF(  present(fct_val)) THEN
+        DO jj =size_base,1,-1
+            DO kk =1,size_quad_nodes
+
+                f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
+
+            END DO
+        END DO
+
         END IF
-
         fct_h = MATMUL(Masse_inv,f_prod)
 
     END SUBROUTINE Projection_Pk
@@ -832,10 +855,26 @@ CONTAINS
 
         DO ii = 1,size_base
             DO jj = 1,size_base
-                Rigid(jj,ii) = quadrature(0,DG_base,ii,dDG_base,jj)
+                Rigid(jj,ii) = quadrature(T_DG_base,ii,T_dDG_base,jj,LRef,0)
             END DO
         END DO
         
+        CONTAINS
+            FUNCTION T_DG_base(x,ordre_poly)
+                IMPLICIT NONE
+                REAL(prec), INTENT(IN) :: x
+                INTEGER,    INTENT(IN) :: ordre_poly
+                REAL(prec) :: T_DG_base
+                T_DG_base  = DG_base(x,ordre_poly,LRef,0)
+            END FUNCTION T_DG_base
+            
+            FUNCTION T_dDG_base(x,ordre_poly)
+                IMPLICIT NONE
+                REAL(prec), INTENT(IN) :: x
+                INTEGER,    INTENT(IN) :: ordre_poly
+                REAL(prec) :: T_dDG_base
+                T_dDG_base  = dDG_base(x,ordre_poly,LRef,0)
+            END FUNCTION T_dDG_base
         ! CALL inv_mat(Rigid,Rigid_inv,1)
 
 

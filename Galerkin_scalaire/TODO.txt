@@ -2,7 +2,8 @@
         MODULE à rajouter 
 ===================================
 
-1) sous cellules burgers
+¤) sous cellules convergence
+¤) optimiser le calcule sur sous-cellules
 2) schéma monolithique
 
 ===================================
