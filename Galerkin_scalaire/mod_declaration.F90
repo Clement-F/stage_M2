@@ -43,7 +43,7 @@ MODULE mod_declaration
   REAL(prec) :: vit_adv 
   REAL(prec) :: err_L1, err_L2, err_Li
 
-  CHARACTER(Len=8) :: LRef = "Ref", LLoc = "Loc", Lsub = "SubRef" 
+  CHARACTER(Len=8) :: LRef = "Ref", LLoc = "Loc", LSub = "SubRef" 
 
   CHARACTER(LEN=32):: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond
 
@@ -51,13 +51,14 @@ MODULE mod_declaration
   CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt', & 
                         & nomfile_conv= 'convergence_err.txt' 
 
-  INTEGER :: i,j
 
 
   CONTAINS
 
   SUBROUTINE ALLOCATE_all
     IMPLICIT NONE
+
+    INTEGER :: i
 
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
 
@@ -92,6 +93,8 @@ MODULE mod_declaration
   SUBROUTINE DEALLOCATE_all
     IMPLICIT NONE
 
+    INTEGER :: i
+    
     DO i =1,nb_cell
       DEALLOCATE(sol(i)%base_poly);      DEALLOCATE(sol(i)%val_nodes)
       DEALLOCATE(sol_exa(i)%base_poly);  DEALLOCATE(sol_exa(i)%val_nodes) 

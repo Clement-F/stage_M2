@@ -8,6 +8,7 @@ CONTAINS
         IMPLICIT NONE
 
         INTEGER :: ni,ii,jj
+        INTEGER :: i
 
         CALL READ_DATA
         
@@ -76,7 +77,7 @@ CONTAINS
 
         END DO
         
-        ! cALL sub_cells_init
+        cALL sub_cells_init
         
         IF(TRIM(flux_name) == "advection") THEN 
             max_dflux = abs(vit_adv)

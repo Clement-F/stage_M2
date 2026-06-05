@@ -105,26 +105,26 @@ CONTAINS
     ! print *, flux_h(1)      %inter(1),flux(sol_step(1)%inter(1))
     ! print *, flux_h(nb_cell)%inter(2),flux(sol_step(nb_cell)%inter(2))
 
-      ! DO ni = 1,nb_cell
-      !   fh_L = eval_poly(x_cell(ni)  ,ni,flux_h(ni)%base_poly)
-      !   fh_R = eval_poly(x_cell(ni+1),ni,flux_h(ni)%base_poly)
-      !   ! print *,fh_L,fh_R
+      DO ni = 1,nb_cell
+        fh_L = eval_poly(x_cell(ni)  ,ni,flux_h(ni)%base_poly, LOC= LLoc)
+        fh_R = eval_poly(x_cell(ni+1),ni,flux_h(ni)%base_poly, LOC= LLoc)
+        ! print *,fh_L,fh_R
 
-      !   DO jj =1,nb_subcell+1
+        DO jj =1,nb_subcell+1
 
-      !     x_s = x_subcell(jj);  x_s_loc = Ref_to_loc(ni,x_s)
-      !     ! print *,x_s,x_s_loc
+          x_s = x_subcell(jj);
+          ! print *,x_s,x_s_loc
 
-      !     flux_h(ni)%val_subcells(jj) = eval_poly(x_s_loc,ni, flux_h(ni)%base_poly) &
-      !                               & - C_m(jj)*(fh_L-flux_h(ni)%inter(1)) &
-      !                               & - C_p(jj)*(fh_R-flux_h(ni)%inter(2))
-      !   END DO
+          flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
+                                    & - C_m(jj)*(fh_L-flux_h(ni)%inter(1)) &
+                                    & - C_p(jj)*(fh_R-flux_h(ni)%inter(2))
+        END DO
 
-      !   flux_h(ni)%val_subcells(1)            = flux_h(ni)%inter(1)
-      !   flux_h(ni)%val_subcells(nb_subcell+1) = flux_h(ni)%inter(2)
+        flux_h(ni)%val_subcells(1)            = flux_h(ni)%inter(1)
+        flux_h(ni)%val_subcells(nb_subcell+1) = flux_h(ni)%inter(2)
 
-      !   ! print *,flux_h(ni)%val_subcells
-      ! END DO
+        ! print *,flux_h(ni)%val_subcells
+      END DO
 
   END SUBROUTINE flux_numerique
 
@@ -205,96 +205,100 @@ CONTAINS
 
   END SUBROUTINE Time_step
 
-  ! SUBROUTINE Time_step_subcell
-  !   IMPLICIT NONE
-  !   INTEGER :: ni, tni
+  SUBROUTINE Time_step_subcell
+    IMPLICIT NONE
+    INTEGER :: ni, tni
 
-  !   INTEGER :: ii,jj,kk
-  !   REAL(prec) :: ti
-  !   REAL(prec) ::  BB
-  !   REAL(prec), DIMENSION(size_base)    :: phi
-  !   REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
+    INTEGER :: ii,jj,kk,i
+    REAL(prec) :: ti
+    REAL(prec) ::  BB,vm
+    REAL(prec), DIMENSION(size_base)    :: phi
+    REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
 
-  !   ! print *, "subcells"
+    ! print *, "subcells"
 
-  !   DO ni=1,nb_cell
-  !     sol_step(ni)%base_poly  = sol(ni)%base_poly
-  !     sol_step(ni)%val_nodes  = sol(ni)%val_nodes
-  !     sol_step(ni)%val_subcells=sol(ni)%val_subcells
-  !     sol_step(ni)%inter      = sol(ni)%inter
-  !   END DO
+    DO ni=1,nb_cell
+      sol_step(ni)%base_poly  = sol(ni)%base_poly
+      sol_step(ni)%val_nodes  = sol(ni)%val_nodes
+      sol_step(ni)%val_subcells=sol(ni)%val_subcells
+      sol_step(ni)%inter      = sol(ni)%inter
+    END DO
 
-  !   DO ii=1,order_t
-  !     CALL flux_numerique
+    DO ii=1,order_t
+      CALL flux_numerique
 
       
 
-  !     DO ni = 1,nb_cell
-  !       DO jj =1,nb_subcell
+      DO ni = 1,nb_cell
+        DO jj =1,nb_subcell
           
-  !         phi_val = 0._prec
-  !         DO i=1,nb_subcell
-  !             phi = unit_pk(i)
-  !             ! print *,phi
-  !             DO j = 1,size_base
-  !                 phi_val(i,1) = phi_val(i,1) + phi(j) * DG_base(-1._prec,j)
-  !                 phi_val(i,2) = phi_val(i,2) + phi(j) * DG_base( 1._prec,j)
-  !             END DO
-  !         END DO
+        ! phi_val = 0._prec
+        ! DO i=1,nb_subcell
+        !     CALL Projection_Pk(unit_sm,phi,LOC =LRef,ni= i)
+            
+        !     phi_val(i,1) = eval_poly(-1._prec,ni=0, base_poly=phi, LOC=LRef)
+        !     phi_val(i,2) = eval_poly( 1._prec,ni=0, base_poly=phi, LOC=LRef)
+            ! print *,phi
+            ! DO j = 1,size_base
+            !     phi_val(i,1) = phi_val(i,1) + phi(j) * DG_base(-1._prec,j, LOC=LRef,ni=0)
+            !     phi_val(i,2) = phi_val(i,2) + phi(j) * DG_base( 1._prec,j, LOC=LRef,ni=0)
+            ! END DO
+        ! END DO
 
-  !         BB = (eval_poly(Ref_to_loc(ni,x_subcell(jj+1)),ni, flux_h(ni)%base_poly) - eval_poly(Ref_to_loc(ni,x_subcell(jj)),ni, flux_h(ni)%base_poly))  &
-  !         &  +((phi_val(i,2) * (eval_poly(x_cell(ni+1),  ni, flux_h(ni)%base_poly) - flux_h(ni)%inter(2))) & 
-  !         &  - (phi_val(i,1) * (eval_poly(x_cell(ni),    ni, flux_h(ni)%base_poly) - flux_h(ni)%inter(1))))   
+          ! BB = (eval_poly(x_subcell(jj+1),ni, flux_h(ni)%base_poly, LOC=LRef) - eval_poly(x_subcell(jj),ni, flux_h(ni)%base_poly, LOC= LRef))  &
+          ! &  +((phi_val(i,2) * (eval_poly(x_cell(ni+1),  ni, flux_h(ni)%base_poly, LOC= LLoc) - flux_h(ni)%inter(2))) & 
+          ! &  - (phi_val(i,1) * (eval_poly(x_cell(ni),    ni, flux_h(ni)%base_poly, LOC= LLoc) - flux_h(ni)%inter(1))))   
 
-  !         ! print *,"------------------------"
-  !         ! print *,BB
-  !         ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-  !         ! print *,BB -(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-  !         ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj)) -(flux_h(ni)%inter(2)- flux_h(ni)%inter(1))
-  !         ! print *,"------------------------"
+          ! print *,"------------------------"
+          ! print *,BB
+          ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+          ! print *,BB -(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+          ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj)) -(flux_h(ni)%inter(2)- flux_h(ni)%inter(1))
+          ! print *,"------------------------"
 
-  !         ! print *,sol_step(ni)%val_subcells(jj)
-  !         sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
-  !                                   & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-  !                                   ! & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-  !                                   & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * BB
-  !         ! print *,sol_step(ni)%val_subcells(jj)
-  !       END DO
-  !     END DO
+          ! print *,sol_step(ni)%val_subcells(jj)
+          sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
+                                    & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
+                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+                                    ! & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * BB
+          ! print *,sol_step(ni)%val_subcells(jj)
+        END DO
+      END DO
 
-  !     DO ni = 1,nb_cell
-  !       sol_step(ni)%base_poly = MATMUL(Projection_VF_inv, sol_step(ni)%val_subcells)
+      DO ni = 1,nb_cell
+        sol_step(ni)%base_poly = MATMUL(Projection_VF_inv, sol_step(ni)%val_subcells)
 
-  !       DO jj=1,size_quad_nodes
-  !         sol_step(ni)%val_nodes(jj)  = eval_step(Ref_to_loc(ni,x_quad(jj)),ni, jj)
-  !       END DO
-  !       IF(TRIM(quad_meth)=="Lobatto") THEN
-  !         sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
-  !         sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
-  !       ELSE 
-  !         sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni)
-  !         sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni)
-  !       END IF
-  !     END DO
+        DO jj=1,size_quad_nodes
+          sol_step(ni)%val_nodes(jj)  = eval_step(x_quad(jj),ni, jj, LOC= LRef)
+        END DO
+        IF(TRIM(quad_meth)=="Lobatto") THEN
+          sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
+          sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
+        ELSE 
+          sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni,  LOC= LLoc)
+          sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni,LOC= LLoc)
+        END IF
+      END DO
 
-  !   END DO
+    END DO
 
     
-  !   DO ni=1,nb_cell
-  !     sol(ni)%base_poly  = sol_step(ni)%base_poly
-  !     sol(ni)%val_nodes  = sol_step(ni)%val_nodes
-  !     sol(ni)%val_subcells=sol_step(ni)%val_subcells
-  !     sol(ni)%inter      = sol_step(ni)%inter
-  !   END DO
+    DO ni=1,nb_cell
+      sol(ni)%base_poly  = sol_step(ni)%base_poly
+      sol(ni)%val_nodes  = sol_step(ni)%val_nodes
+      sol(ni)%val_subcells=sol_step(ni)%val_subcells
+      sol(ni)%inter      = sol_step(ni)%inter
+    END DO
 
 
 
 
-  ! END SUBROUTINE Time_step_subcell
+  END SUBROUTINE Time_step_subcell
 
 
   SUBROUTINE dt_calc
     IMPLICIT NONE
+    INTEGER :: i,j
     REAL(prec) :: max_u,min_u,u_step
 
     IF(TRIM(flux_name) == "advection") THEN
@@ -339,6 +343,7 @@ CONTAINS
   SUBROUTINE writout
     IMPLICIT NONE
 
+    INTEGER :: i,j
     REAL(prec) :: out1, out2,xi
     REAL(prec) :: err1 , err2, errLi
     INTEGER :: kk
@@ -349,7 +354,7 @@ CONTAINS
       write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
 
-        IF(.NOT.subcell_use) THEN
+        ! IF(.NOT.subcell_use) THEN
           DO j=1,size_base
               xi = Ref_to_loc(i,x_quad(j))
               out1 = sol(i)%val_nodes(j)
@@ -366,27 +371,27 @@ CONTAINS
               err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
               err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
           END DO
-        ELSE 
-          DO j=1,nb_subcell
-            DO kk=1,2
-              IF(kk ==1 )xi = Ref_to_loc(i,-1._prec,j)
-              IF(kk ==2 )xi = Ref_to_loc(i, 1._prec,j)
-              out1 = sol(i)%val_subcells(j)
+        ! ELSE 
+        !   DO j=1,nb_subcell
+        !     DO kk=1,2
+        !       IF(kk ==1 )xi = Ref_to_loc(i,-1._prec,j)
+        !       IF(kk ==2 )xi = Ref_to_loc(i, 1._prec,j)
+        !       out1 = sol(i)%val_subcells(j)
 
-              IF(TRIM(flux_name) == "advection") THEN 
-                out2 =Q_init(xi - time*vit_adv,0)
-              ELSE 
-                call pied_charact(xi,time,out2)
-              END IF
+        !       IF(TRIM(flux_name) == "advection") THEN 
+        !         out2 =Q_init(xi - time*vit_adv,0)
+        !       ELSE 
+        !         call pied_charact(xi,time,out2)
+        !       END IF
 
-              write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+        !       write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
 
-              errLi = max(errLi , abs(out1-out2))
-              err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
-              err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
-            END DO
-          END DO
-        END IF
+        !       errLi = max(errLi , abs(out1-out2))
+        !       err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+        !       err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
+        !     END DO
+        !   END DO
+        ! END IF
 
       END DO
 
