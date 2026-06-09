@@ -61,22 +61,14 @@ CONTAINS
 
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
-            IF(TRIM(LOC) == "Loc") THEN
-                DO ii = 1,size_base
-                    eval_poly = eval_poly + base_poly(ii) * DG_base(YY,ii,LOC,ni)
-                END DO
-            ELSE IF(TRIM(LOC) == "Ref") THEN
-                DO ii = 1,size_base
-                    eval_poly = eval_poly + base_poly(ii) * DG_base(YY,ii,LOC,ni)
-                END DO
-            END IF
+            DO ii = 1,size_base
+                eval_poly = eval_poly + base_poly(ii) * DG_base(YY,ii,LOC,ni)
+            END DO
         ELSE 
             counter2 = counter2 +1
-            IF(TRIM(LOC) == "Loc") THEN
-                DO ii = 1,size_base
-                    eval_poly = eval_poly + base_poly(ii) * sig_quad(ii,kk)
-                END DO
-            END IF
+            DO ii = 1,size_base
+                eval_poly = eval_poly + base_poly(ii) * sig_quad(ii,kk)
+            END DO
         END IF
 
     END FUNCTION eval_poly
@@ -251,125 +243,6 @@ CONTAINS
             write(*,fmt ='()')
 
     END SUBROUTINE print_mat
-
-    SUBROUTINE Projection_VF_init
-        IMPLICIT NONE
-        INTEGER ::i,j,kk
-        REAL(prec) ::YY
-
-        Projection_VF = 0._prec
-        DO j =1,nb_subcell
-            DO i=1,size_base
-                DO kk =size_quad_nodes,1,-1
-                    YY = x_quad(kk)
-                    Projection_VF(j,i) = Projection_VF(j,i) + DG_base(YY,i,LOC=LSub, ni=j)*w_quad(kk)/2._prec
-
-                END DO
-            END DO
-        END DO
-
-        IF(nb_subcell == size_base) THEN
-            CALL inv_mat(Projection_VF,Projection_VF_inv,0)
-        END IF
-
-
-
-    END SUBROUTINE Projection_VF_init
-
-    SUBROUTINE sub_cells_init
-        IMPLICIT NONE
-        INTEGER :: i,j
-        REAL(prec) :: temp
-        REAL(prec), DIMENSION(size_base)    :: phi
-        REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
-        
-        DO i =1,nb_subcell+1 
-            x_subcell(i) = -1._prec + (i-1)*sub_dx
-        END DO
-        DO i =1,nb_subcell
-            subcell_size(i)= x_subcell(i+1)-x_subcell(i)  
-            x_submiddle(i) = x_subcell(i) + subcell_size(i)/2._prec
-        END DO
-
-        CALL Projection_VF_init
-        CALL print_mat(Projection_VF,nb_subcell,size_base)
-        ! CALL print_mat( MATMUL(Projection_VF, Projection_VF_inv), size_base, size_base)
-
-
-        DO i=1,nb_cell
-            sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
-        END DO
-
-        phi_val = 0._prec
-        DO i=1,nb_subcell
-            CALL Projection_Pk(unit_sm,phi,LOC =LRef,ni= i)
-            
-            ! print '( "phi" ,i2," =",f8.4, f8.4)', i,phi
-            phi_val(i,1) = eval_poly(-1._prec,0, phi, LOC=LRef)
-            phi_val(i,2) = eval_poly( 1._prec,0, phi, LOC=LRef)
-        END DO
-
-        C_m =0._prec; 
-        C_p = 0._prec;
-        print *,phi_val
-        DO i=1,nb_subcell+1
-            DO j=1,i-1
-                C_p(i) = C_p(i) + phi_val(j,2)
-            END DO
-            DO j=1,i-1
-                C_m(i) = C_m(i) + phi_val(j,1)
-            END DO
-            C_m(i) = 1._prec -C_m(i)
-        END DO
-
-        ! C_p(1)            =0._prec; C_m(1)            =1._prec
-        ! C_p(nb_subcell+1) =1._prec; C_m(nb_subcell+1) =0._prec
-
-        print *,"Cp =",C_p
-        print *,"Cm =",C_m
-    
-    END SUBROUTINE sub_cells_init
-
-    ! FUNCTION unit_pk(n_sub)
-    !     IMPLICIT NONE
-    !     INTEGER, INTENT(IN) :: n_sub
-    !     REAL(prec), DIMENSION(size_base) :: unit_pk
-
-    !     CALL Projection_Pk(unit_sm,unit_pk,0)
-
-    !     CONTAINS 
-    !     FUNCTION unit_sm(x,ni)
-    !         IMPLICIT NONE
-    !         REAL(prec), INTENT(IN) :: x
-    !         INTEGER,    INTENT(IN) :: ni
-    !         REAL(prec) :: xls, xrs
-    !         REAL(prec) :: unit_sm
-
-    !         xls = x_subcell(n_sub)
-    !         xrs = x_subcell(n_sub+1)
-
-    !         unit_sm = 0._prec
-    !         if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
-
-    !     END FUNCTION unit_sm
-
-
-    ! END FUNCTION unit_pk
-
-    FUNCTION unit_sm(x,n_sub)
-        IMPLICIT NONE
-        REAL(prec), INTENT(IN) :: x
-        INTEGER,    INTENT(IN) :: n_sub
-        REAL(prec) :: xls, xrs
-        REAL(prec) :: unit_sm
-
-        xls = x_subcell(n_sub)
-        xrs = x_subcell(n_sub+1)
-
-        unit_sm = 0._prec
-        if((x .LT. xrs ) .and. (x .GT. xls)) unit_sm =1._prec
-
-    END FUNCTION unit_sm
     
     SUBROUTINE Coeff_DG_init
         IMPLICIT NONE
@@ -891,6 +764,123 @@ CONTAINS
 
     END SUBROUTINE Matrice_Rigid_init
 
+
+! ---------------------------------------------------------------
+! ---------------------------------------------------------------
+    
+    SUBROUTINE Projection_VF_init
+        IMPLICIT NONE
+        INTEGER ::i,j,m,kk
+        integer :: ord
+        REAL(prec) ::YY
+        REAL(prec), DIMENSION(size_base)    :: phi_m
+
+        ! Projection_VF = 0._prec
+        ! DO m =1,nb_subcell
+        !     CALL Projection_Pk(unit_sm,phi_m,LOC =LRef,ni= m) <- Projection Pk+1 nécessaire !!!!
+        !     write (*,fmt='(3(f10.6))')  phi_m
+        !     Projection_VF(m,:) = MATMUL(Masse,phi_m)/(subcell_size(m))
+        ! END DO
+
+        Projection_VF = 0._prec
+        DO j =1,nb_subcell
+            DO i=1,size_base
+                DO kk =size_quad_nodes,1,-1
+                    YY = x_quad(kk)
+                    Projection_VF(j,i) = Projection_VF(j,i) + DG_base(YY,i,LOC=LSub, ni=j)*w_quad(kk)/2._prec
+                END DO
+            END DO
+        END DO
+
+        CALL print_mat(Projection_VF,nb_subcell,size_base )        
+
+        IF(nb_subcell == size_base) THEN
+            CALL inv_mat(Projection_VF,Projection_VF_inv,0)
+        ELSE 
+            CALL inv_mat(MATMUL(Transpose(Projection_VF),Projection_VF),Projection_VF_inv,0)
+            Projection_VF_inv = MATMUL(Projection_VF_inv, Transpose(Projection_VF))
+        END IF
+
+        CALL print_mat(MATMUL(Transpose(Projection_VF),Projection_VF), size_base, size_base)
+        CALL print_mat(Projection_VF_inv,size_base,nb_subcell)
+
+
+    END SUBROUTINE Projection_VF_init
+
+    SUBROUTINE sub_cells_init
+        IMPLICIT NONE
+        INTEGER :: i,j
+        REAL(prec) :: temp
+        REAL(prec), DIMENSION(size_base)    :: phi
+        REAL(prec), DIMENSION(nb_subcell)   :: phi_m
+        REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
+        
+        DO i =1,nb_subcell+1 
+            x_subcell(i) = -1._prec + (i-1)*sub_dx
+        END DO
+
+        print *,x_subcell
+
+        DO i =1,nb_subcell
+            subcell_size(i)= x_subcell(i+1)-x_subcell(i)  
+            x_submiddle(i) = x_subcell(i) + subcell_size(i)/2._prec
+        END DO
+
+        CALL Projection_VF_init
+        CALL print_mat(Projection_VF,nb_subcell,size_base)
+
+
+        DO i=1,nb_cell
+            sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
+        END DO
+
+        phi_val = 0._prec
+        DO i=1,nb_subcell
+            phi_m = 0._prec; phi_m(i) = 1._prec
+            phi = MATMUL(Projection_VF_inv,phi_m)
+            
+            print *,"phi",i,phi
+            
+            phi_val(i,1) = eval_poly(-1._prec,0, phi, LOC=LRef)
+            phi_val(i,2) = eval_poly( 1._prec,0, phi, LOC=LRef)
+        END DO
+
+        C_m =0._prec; 
+        C_p = 0._prec;
+        print *,1,phi_val(:,1)
+        print *,2,phi_val(:,2)
+        DO i=1,nb_subcell+1
+            DO j=1,i-1
+                C_p(i) = C_p(i) + phi_val(j,2)
+            END DO
+            DO j=1,i-1
+                C_m(i) = C_m(i) + phi_val(j,1)
+            END DO
+            C_m(i) = 1._prec -C_m(i)
+        END DO
+
+        ! C_p(1)            =0._prec; C_m(1)            =1._prec
+        ! C_p(nb_subcell+1) =1._prec; C_m(nb_subcell+1) =0._prec
+
+        print *,"Cp =",C_p
+        print *,"Cm =",C_m
+    
+    END SUBROUTINE sub_cells_init
+
+    FUNCTION unit_sm(x,n_sub)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: x
+        INTEGER,    INTENT(IN) :: n_sub
+        REAL(prec) :: xls, xrs
+        REAL(prec) :: unit_sm
+
+        xls = x_subcell(n_sub)
+        xrs = x_subcell(n_sub+1)
+
+        unit_sm = 0._prec
+        if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
+
+    END FUNCTION unit_sm
 ! ---------------------------------------------------------------
 ! ---------------------------------------------------------------
 

@@ -15,6 +15,7 @@ T=[]
 with open('file_sol.txt') as f:
     lines = f.readlines()
 
+
 U_t = np.zeros((sm,nx))
 X   = np.zeros(nx)
 dec = 0
@@ -35,9 +36,25 @@ for k in range(0,sm):
     #plt.plot(X,err[k],'r')
     plt.plot(X,U_ex[k],'g')
     plt.plot(X,U_t[k],'b')
-    #plt.ylim(-1.2,1.2)
+    plt.ylim(-1.2,1.2)
     plt.show()         
+
+
+if(False):
+    with open('buckley.dat') as f:
+        lines = f.readlines()
         
+    X_B   = np.zeros(30000)
+    U_B   = np.zeros(30000)
+    for i in range(0,30000):
+        X_B[i] = lines[i][0:16]
+        U_B[i] = lines[i][17:32]
+        
+    plt.plot(X_B,U_B, 'r')
+    
+plt.plot(X,U_t[k],'b')
+plt.ylim(-1.2,1.2)
+plt.show()     
 #for k in range(1,sm):
     #err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
     #plt.plot(X,err[1],'r')

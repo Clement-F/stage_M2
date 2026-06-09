@@ -55,6 +55,10 @@ CONTAINS
 
         CALL Coeff_RK_init(order_t)
         CALL Matrice_Masse_init
+
+        print *, "masse matrix "
+        CALL print_mat(Masse, size_base, size_base)
+
         CALL Matrice_Rigid_init
         
         print *,"matrices"
@@ -77,10 +81,17 @@ CONTAINS
 
         END DO
         
-        cALL sub_cells_init
+        IF(subcell_use) CALL sub_cells_init
         
         IF(TRIM(flux_name) == "advection") THEN 
             max_dflux = abs(vit_adv)
+            convex_flux = .TRUE.
+        ELSE IF(TRIM(flux_name) == "burgers") THEN
+            convex_flux = .TRUE.
+        ELSE IF(TRIM(flux_name) == "Buckley") THEN
+            convex_flux = .False.
+        ELSE
+            convex_flux = .False.
         END IF
 
         err_L1 = 0._prec; err_L2 =0._prec;  err_Li=0._prec

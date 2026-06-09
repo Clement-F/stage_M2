@@ -14,24 +14,28 @@ PROGRAM MAIN
     write(unit= numfile_data, fmt='("ordre x = "i5)') order_x
     write(unit= numfile_data, fmt='("ordre t = "i5)') order_t
 
-    IF(subcell_use)         write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*nb_subcell*2
+    IF(subcell_use)         write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*order_x
     IF(.not. subcell_use)   write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*order_x
         
     CALL writout
 
 
-    DO WHILE (time .LT. tmax)     
-        CALL dt_calc
+    ! DO WHILE (time .LT. tmax)     
+    !     CALL dt_calc
 
+    !     IF(subcell_use) THEN;   CALL Time_step_subcell
+    !     ELSE;                   CALL Time_step
+    !     END IF
+
+    !     time = time +dt
+    !     n_time = n_time +1
+        
+    !     CALL writout 
+    ! END DO
+    
         IF(subcell_use) THEN;   CALL Time_step_subcell
         ELSE;                   CALL Time_step
         END IF
-
-        time = time +dt
-        n_time = n_time +1
-        
-        CALL writout 
-    END DO
     
     CALL writout 
 
@@ -40,7 +44,6 @@ PROGRAM MAIN
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 
-    ! print *,"_"
     close(unit=numfile_sol)
     close(unit=numfile_data)
 

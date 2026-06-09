@@ -57,4 +57,31 @@ CONTAINS
         minmod = min(0.,max(x,y,z)) + max(0.,min(x,y,z))
 
     END FUNCTION
+
+    ! FUNCTION Moindre_carre(A,b,n1,n2, A_inv) result(X)
+    !     IMPLICIT NONE
+    !     INTEGER,  INTENT(IN)  :: n1,n2
+    !     REAL(prec), DIMENSION(n1,n2), INTENT(IN) :: A
+    !     REAL(prec), DIMENSION(n2,n1), INTENT(IN),  optional :: A_inv
+    !     REAL(prec), DIMENSION(n2),    INTENT(IN)  :: b
+
+    !     REAL(prec), DIMENSION(n1,n2) :: mat_inv
+    !     REAL(prec), DIMENSION(n1) :: X
+
+
+    !     IF(n1 == n2) THEN 
+    !         IF(.not.present(A_inv)) THEN; CALL inv_mat(A,mat_inv,0);    X = MATMUL(mat_inv,b)
+    !         ELSE IF(present(A_inv)) THEN; X = MATMUL(A_inv,b)
+    !         END IF
+    !     ELSE
+    !         IF(.not.present(A_inv)) THEN; 
+    !             CALL inv_mat(MATMUL(Transpose(A),A),mat_inv,0);
+    !             X = MATMUL(mat_inv,MATMUL(Transpose(A),b) )
+    !         ELSE IF(present(A_inv)) THEN; X = MATMUL(A_inv,MATMUL(Transpose(A),b))
+    !         END IF
+
+    !     END IF
+
+    ! END FUNCTION Moindre_carre
+
 END MODULE mod_Divers

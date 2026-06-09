@@ -7,10 +7,12 @@ MODULE mod_declaration
      REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG
      REAL(prec),DIMENSION(:),POINTER :: val_nodes   ! valeurs aux points de quadratures
      REAL(prec),DIMENSION(:),POINTER :: val_subcells   ! valeurs aux points de quadratures
-     REAL(prec),DIMENSION(2) :: inter
+     REAL(prec),DIMENSION(:),POINTER :: inter
   END TYPE var_type
 
   TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa
+
+  REAL(prec), DIMENSION(:),   POINTER :: g
 
   REAL(prec), DIMENSION(:),   POINTER :: x_cell, x_middle, cell_size
   REAL(prec), DIMENSION(:),   POINTER :: x_subcell, x_submiddle, subcell_size
@@ -29,7 +31,7 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
-  LOGICAL*1 :: subcell_use 
+  LOGICAL*1 :: subcell_use, convex_flux 
 
 
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 
@@ -61,6 +63,7 @@ MODULE mod_declaration
     INTEGER :: i
 
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
+    ALLOCATE( g(nb_cell +1))
 
     ALLOCATE( x_cell(nb_cell+1),        x_middle(nb_cell),        cell_size(nb_cell)) 
     ALLOCATE( x_subcell(nb_subcell+1),  x_submiddle(nb_subcell),  subcell_size(nb_subcell))
@@ -85,7 +88,7 @@ MODULE mod_declaration
       ALLOCATE(sol_exa(i)%base_poly(size_base));  ALLOCATE(sol_exa(i)%val_nodes(size_quad_nodes));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell)) 
       ALLOCATE(sol_step(i)%base_poly(size_base)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell))
       ALLOCATE(flux_h(i)%base_poly(size_base));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1))
-    
+      ALLOCATE(sol(i)%inter(2));                  ALLOCATE(sol_exa(i)%inter(2));                    ALLOCATE(sol_step(i)%inter(2))
     END DO
     
   END SUBROUTINE ALLOCATE_all
