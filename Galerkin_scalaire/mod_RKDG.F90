@@ -104,13 +104,13 @@ CONTAINS
         flux_uh_val(ii) = flux(sol_step(ni)%val_nodes(ii))
       END DO
 
-      CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,LLoc,ni,flux_uh_val)
+      CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,LOC= LLoc,ni =ni,fct_val=flux_uh_val)
     END DO
     
     IF(subcell_use) THEN
       DO ni = 1,nb_cell
-        fh_L = eval_poly(x_cell(ni)  ,ni,flux_h(ni)%base_poly, LOC= LLoc)
-        fh_R = eval_poly(x_cell(ni+1),ni,flux_h(ni)%base_poly, LOC= LLoc)
+        fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
+        fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
 
         DO jj =1,nb_subcell+1
           x_s = x_subcell(jj);
@@ -118,7 +118,8 @@ CONTAINS
                                     & - C_m(jj)*(fh_L-g(ni  )) &
                                     & - C_p(jj)*(fh_R-g(ni+1))
         END DO
-
+        ! print *,"------------",ni,"-----------------"
+        ! print *,g(ni), g(ni+1)
         ! print *, flux_h(ni)%val_subcells
         
       END DO
@@ -200,12 +201,12 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: ni, tni
 
-    INTEGER :: ii,jj,kk,i,j
+    INTEGER :: ii,jj,kk
     REAL(prec) :: ti
     REAL(prec), DIMENSION(nb_subcell) :: phi_m
     REAL(prec), DIMENSION(size_base)  :: phi
     REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
-    REAL(prec), DIMENSION(size_base) :: BB
+    REAL(prec) :: BB
 
     ! print *, "subcells"
 
@@ -219,18 +220,54 @@ CONTAINS
     DO ii=1,order_t
       CALL flux_numerique
       
+
       DO ni = 1,nb_cell
         DO jj =1,nb_subcell
+          
+        ! phi_val = 0._prec
+        ! phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
+        ! phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))
 
-          sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol     (ni)%val_subcells(jj) &
-                                    & +  RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-                                    & -  RK_beta (ii  ) * (2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+        ! print *, "BB"
+          ! BB = (eval_poly(x_subcell(jj+1),ni, flux_h(ni)%base_poly, LOC=LRef) - eval_poly(x_subcell(jj),ni, flux_h(ni)%base_poly, LOC= LRef))  &
+          ! &  +((phi_val(jj,2) * (eval_poly(x_cell(ni+1),  ni, flux_h(ni)%base_poly, LOC= LLoc) - g(ni+1))) & 
+          ! &  - (phi_val(jj,1) * (eval_poly(x_cell(ni),    ni, flux_h(ni)%base_poly, LOC= LLoc) - g(ni)  )))   
+
+          ! print *,"------------------------"
+          ! print *,BB
+          ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+          ! print *,BB -(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+          ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj)) -(g(ni+1)- g(ni))
+          ! print *,"------------------------"
+
+          ! print *,sol_step(ni)%val_subcells(jj)
+
+          ! print *,"=============================================="
+          ! print *,RK_alpha(ii,1) * sol(ni)%val_subcells(jj)
+          ! print *,RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj)
+          ! print *,RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+          ! print *,"=============================================="
+
+
+          sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
+                                    & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
+                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+                                    ! & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * BB
+          ! print *,sol_step(ni)%val_subcells(jj)
         END DO
       END DO
 
+
       DO ni = 1,nb_cell
-        
-        sol_step(ni)%base_poly = MATMUL(Projection_VF_inv, sol_step(ni)%val_subcells)
+        ! print *,"----------------------------------"
+        ! print *,sol_step(ni)%val_subcells 
+
+        DO jj=1,size_base
+          ! print*,Projection_VF_inv(:,jj)
+          sol_step(ni)%base_poly(jj) = DOT_PRODUCT(Projection_VF_inv_plus(jj,:), sol_step(ni)%val_subcells)
+        END DO
+
+        ! print *,sol_step(ni)%base_poly
 
         DO jj=1,size_quad_nodes
           sol_step(ni)%val_nodes(jj)  = eval_step(x_quad(jj),ni, jj, LOC= LRef)

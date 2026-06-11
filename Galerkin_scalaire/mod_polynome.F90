@@ -773,14 +773,6 @@ CONTAINS
         INTEGER ::i,j,m,kk
         integer :: ord
         REAL(prec) ::YY
-        REAL(prec), DIMENSION(size_base)    :: phi_m
-
-        ! Projection_VF = 0._prec
-        ! DO m =1,nb_subcell
-        !     CALL Projection_Pk(unit_sm,phi_m,LOC =LRef,ni= m) 
-        !     write (*,fmt='(3(f10.6))')  phi_m
-        !     Projection_VF(m,:) = MATMUL(Masse,phi_m)/(subcell_size(m))
-        ! END DO
 
         Projection_VF = 0._prec
         DO j =1,nb_subcell
@@ -792,13 +784,14 @@ CONTAINS
             END DO
         END DO
 
+
         CALL print_mat(Projection_VF,nb_subcell,size_base )        
 
         IF(nb_subcell == size_base) THEN
             CALL inv_mat(Projection_VF,Projection_VF_inv,0)
         ELSE 
             CALL inv_mat(MATMUL(Transpose(Projection_VF),Projection_VF),Projection_VF_inv,0)
-            Projection_VF_inv = MATMUL(Projection_VF_inv, Transpose(Projection_VF))
+            Projection_VF_inv_plus = MATMUL(Projection_VF_inv, Transpose(Projection_VF))
         END IF
 
         CALL print_mat(MATMUL(Transpose(Projection_VF),Projection_VF), size_base, size_base)
@@ -810,14 +803,16 @@ CONTAINS
     SUBROUTINE sub_cells_init
         IMPLICIT NONE
         INTEGER :: i,j
-        REAL(prec) :: temp
-        REAL(prec), DIMENSION(size_base)    :: phi
-        REAL(prec), DIMENSION(nb_subcell)   :: phi_m
+        REAL(prec), DIMENSION(nb_subcell+1) :: temp
         REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
         
-        DO i =1,nb_subcell+1 
-            x_subcell(i) = -1._prec + (i-1)*sub_dx
-        END DO
+        IF(TRIM(subcell_repartition)=="Unif") THEN
+            DO i =1,nb_subcell+1 
+                x_subcell(i) = -1._prec + (i-1)*sub_dx
+            END DO
+        ELSEIF(TRIM(subcell_repartition)=="Lobatto") THEN
+            CALL quad_1D_lobatto(nb_subcell+1,x_subcell,temp)
+        END IF
 
         print *,x_subcell
 

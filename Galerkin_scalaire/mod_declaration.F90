@@ -28,7 +28,7 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:),   POINTER :: Time_stemp
 
   REAL(prec), DIMENSION(:),   POINTER :: C_m, C_p
-  REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv
+  REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv, Projection_VF_inv_plus
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
   LOGICAL*1 :: subcell_use, convex_flux 
@@ -47,7 +47,7 @@ MODULE mod_declaration
 
   CHARACTER(Len=8) :: LRef = "Ref", LLoc = "Loc", LSub = "SubRef" 
 
-  CHARACTER(LEN=32):: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond
+  CHARACTER(LEN=32):: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond, subcell_repartition
 
   INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4
   CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt', & 
@@ -79,7 +79,7 @@ MODULE mod_declaration
     
     ALLOCATE( pts_DG(size_base)) 
     ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
-    ALLOCATE( Projection_VF(nb_subcell,size_base),  Projection_VF_inv(size_base,size_base))
+    ALLOCATE( Projection_VF(nb_subcell,size_base),  Projection_VF_inv(size_base,size_base), Projection_VF_inv_plus(size_base,nb_subcell))
     ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 

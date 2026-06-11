@@ -129,10 +129,9 @@ CONTAINS
 
         read(numfile_param,  *) subcell_use
         read(numfile_param,  *) nb_subcell
-        ! read(numfile_param,  *) subcell_repartition
-        CALL Skip_lines(numfile_param,1) 
+        read(numfile_param,  *) subcell_repartition
 
-        CALL Skip_lines(numfile_param,1) 
+        CALL Skip_lines(numfile_param,3) 
         read(numfile_param,  *) cfl;   
         read(numfile_param,  *) frame_rule; 
         read(numfile_param,  *) print_rule;     
