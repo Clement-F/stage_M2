@@ -119,7 +119,7 @@ CONTAINS
                                     & - C_p(jj)*(fh_R-g(ni+1))
         END DO
 
-        print *, flux_h(ni)%val_subcells
+        ! print *, flux_h(ni)%val_subcells
         
       END DO
     END IF
@@ -153,12 +153,6 @@ CONTAINS
         S_B = -(g(ni+1)*sig_2 - g(ni)*sig_1)
         BB  = (V_B + S_B)
         
-        ! IF(ni == nb_cell) THEN 
-        !   print *, S_b
-        !   print *, sig_1, sig_2
-        !   print *, flux_h(ni)%inter
-        ! END IF
-
         L_step = MATMUL(Masse_inv, BB  )*(2._prec/(cell_size(ni))) 
 
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
@@ -170,13 +164,13 @@ CONTAINS
           sol_step(ni)%val_nodes(ii)  = eval_step(x_quad(ii),ni, ii,LOC= LRef )
         END DO
 
-        ! IF(TRIM(quad_meth)=="Lobatto") THEN
-        !   sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
-        !   sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
-        ! ELSE 
+        IF(TRIM(quad_meth)=="Lobatto") THEN
+          sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
+          sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(size_quad_nodes)
+        ELSE 
           sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni,   LOC= LLoc)
           sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni, LOC= LLoc)
-        ! END IF
+        END IF
 
       END DO
     END DO
@@ -206,8 +200,12 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: ni, tni
 
-    INTEGER :: ii,jj,kk,i
+    INTEGER :: ii,jj,kk,i,j
     REAL(prec) :: ti
+    REAL(prec), DIMENSION(nb_subcell) :: phi_m
+    REAL(prec), DIMENSION(size_base)  :: phi
+    REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
+    REAL(prec), DIMENSION(size_base) :: BB
 
     ! print *, "subcells"
 
@@ -223,11 +221,10 @@ CONTAINS
       
       DO ni = 1,nb_cell
         DO jj =1,nb_subcell
-          
+
           sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol     (ni)%val_subcells(jj) &
                                     & +  RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
                                     & -  RK_beta (ii  ) * (2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-                                   
         END DO
       END DO
 
@@ -304,10 +301,12 @@ CONTAINS
     END IF
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    IF(dt .LT. 10._prec**(-6)) THEN
-      write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
-      ! print *, min_u, max_u
-    END IF
+    ! IF(order_x .GT. order_t) dt = dt**(order_x/order_t)
+
+    ! IF(dt .LT. 10._prec**(-10)) THEN
+    !   write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
+    !   CALL Emergency_stop
+    ! END IF
 
 
   END SUBROUTINE dt_calc
@@ -321,9 +320,12 @@ CONTAINS
     INTEGER :: kk
 
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec
+    IF(modulo(n_time,500) == 0)  THEN
+      write(*,fmt='("---------------",i7," ",f8.6," ",e16.6, "--------------")') n_time, time, dt
+    END IF
 
     IF(time .GE.  REAL(n_imp,prec)*t_imp-eps0)  THEN
-      write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
+      write(*,fmt='("---------------",i7," ",f8.6," ",e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
         DO j=1,size_base
           xi = Ref_to_loc(i,x_quad(j))
@@ -357,8 +359,6 @@ CONTAINS
       write(unit=numfile_sol, fmt='("------------------------")' ) 
     END IF
   END SUBROUTINE writout
-
-
   
   subroutine pied_charact(x,t,sol)
 
@@ -408,4 +408,71 @@ CONTAINS
 
   END FUNCTION Newton_search
 
+  SUBROUTINE Emergency_stop
+    INTEGER :: i,j
+    REAL(prec) :: out1, out2,xi
+    REAL(prec) :: err1 , err2, errLi
+    INTEGER :: kk
+
+    write(*,fmt='("--------------",i5," ",f8.4," ",e16.6, "--------------")') n_time, time, dt
+    DO i=1,nb_cell
+      DO j=1,size_base
+        xi = Ref_to_loc(i,x_quad(j))
+        out1 = sol(i)%val_nodes(j)
+
+        IF(TRIM(flux_name) == "advection") THEN 
+          out2 =Q_init(xi - time*vit_adv,0)
+        ELSE 
+          call pied_charact(xi,time,out2)
+        END IF
+
+        write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+
+        errLi = max(errLi , abs(out1-out2))
+        err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+        err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
+      END DO
+    END DO
+
+    err2 = sqrt(err2)
+    
+    write(*, fmt ='("err L1 = ", e20.12)')  err1
+    write(*, fmt ='("err L2 = ", e20.12)')  err2
+    write(*, fmt ='("err Li = ", e20.12)')  errLi
+
+    err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
+
+    n_imp = n_imp +1
+    Time_stemp(n_imp) = time
+    
+    write(unit=numfile_sol, fmt='("------------------------")' ) 
+
+    write(unit= numfile_data, fmt='("nt = "i5)') n_imp
+    DO i=1,n_imp
+        write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
+    END DO
+
+    close(unit=numfile_sol)
+    close(unit=numfile_data)
+
+    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
+    write(unit=numfile_conv, fmt='("=====================")') 
+    write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) size_base-1, order_t
+    write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nb_cell
+    write(unit=numfile_conv, fmt='("err_L1 :" e20.12 )') err_L1
+    write(unit=numfile_conv, fmt='("err_L2 :" e20.12 )') err_L2
+    write(unit=numfile_conv, fmt='("err_Li :" e20.12 )') err_Li
+    write(unit=numfile_conv, fmt='("=====================")') 
+    close(unit=numfile_conv)
+
+    print *,"closed"
+    print *, counter1, counter2
+    
+
+    CALL DEALLOCATE_all
+
+
+    print *, "EMERGENCY STOP"
+  END SUBROUTINE Emergency_stop
+  
 END MODULE

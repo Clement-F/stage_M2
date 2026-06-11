@@ -8,8 +8,8 @@ PROGRAM MAIN
     INTEGER :: i
 
     CALL INIT_ALL
-    open(unit=numfile_data, file=nomfile_data, form ='formatted', status ='old')
-    open(unit=numfile_sol,  file=nomfile_sol, form ='formatted', status ='old')
+    open(unit=numfile_data, file=nomfile_data,  form ='formatted', status ='old')
+    open(unit=numfile_sol,  file=nomfile_sol,   form ='formatted', status ='unknown')
    
     write(unit= numfile_data, fmt='("ordre x = "i5)') order_x
     write(unit= numfile_data, fmt='("ordre t = "i5)') order_t
@@ -20,23 +20,19 @@ PROGRAM MAIN
     CALL writout
 
 
-    ! DO WHILE (time .LT. tmax)     
-    !     CALL dt_calc
+    DO WHILE (time .LT. tmax)     
+        CALL dt_calc
 
-    !     IF(subcell_use) THEN;   CALL Time_step_subcell
-    !     ELSE;                   CALL Time_step
-    !     END IF
-
-    !     time = time +dt
-    !     n_time = n_time +1
-        
-    !     CALL writout 
-    ! END DO
-    
         IF(subcell_use) THEN;   CALL Time_step_subcell
         ELSE;                   CALL Time_step
         END IF
-    
+
+        time = time +dt
+        n_time = n_time +1
+        
+        CALL writout 
+    END DO
+        
     CALL writout 
 
     write(unit= numfile_data, fmt='("nt = "i5)') n_imp

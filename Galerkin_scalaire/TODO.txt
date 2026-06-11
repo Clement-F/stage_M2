@@ -2,7 +2,7 @@
         MODULE à rajouter 
 ===================================
 
-¤) optimiser le calcule sur sous-cellules ?
+¤) optimiser le calcule sur sous-cellules (?)
 ¤) more subcells !!!
 2) schéma monolithique
 
@@ -10,3 +10,8 @@
         BUG à corriger
 ===================================
 
+
+
+===================================
+        à faire
+===================================

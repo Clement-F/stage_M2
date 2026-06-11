@@ -12,6 +12,10 @@ CONTAINS
 
         CALL READ_DATA
         
+        IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
+
+        nomfile_sol = TRIM(nomfile_sol)//".txt"
+
         print *, "init"
 
         IF(TRIM(DG_meth)=="Lobatto")  size_base = order_x 
@@ -132,6 +136,7 @@ CONTAINS
         read(numfile_param,  *) cfl;   
         read(numfile_param,  *) frame_rule; 
         read(numfile_param,  *) print_rule;     
+        read(numfile_param,  *) nomfile_sol;     
 
         CALL Skip_lines(numfile_param,3)
         

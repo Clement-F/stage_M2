@@ -777,7 +777,7 @@ CONTAINS
 
         ! Projection_VF = 0._prec
         ! DO m =1,nb_subcell
-        !     CALL Projection_Pk(unit_sm,phi_m,LOC =LRef,ni= m) <- Projection Pk+1 nécessaire !!!!
+        !     CALL Projection_Pk(unit_sm,phi_m,LOC =LRef,ni= m) 
         !     write (*,fmt='(3(f10.6))')  phi_m
         !     Projection_VF(m,:) = MATMUL(Masse,phi_m)/(subcell_size(m))
         ! END DO
@@ -834,16 +834,19 @@ CONTAINS
             sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
         END DO
 
-        phi_val = 0._prec
-        DO i=1,nb_subcell
-            phi_m = 0._prec; phi_m(i) = 1._prec
-            phi = MATMUL(Projection_VF_inv,phi_m)
+        ! phi_val = 0._prec
+        ! DO i=1,nb_subcell
+        !     phi_m = 0._prec; phi_m(i) = 1._prec
+        !     phi = MATMUL(Projection_VF_inv,phi_m)
             
-            print *,"phi",i,phi
+        !     print *,"phi",i,phi
             
-            phi_val(i,1) = eval_poly(-1._prec,0, phi, LOC=LRef)
-            phi_val(i,2) = eval_poly( 1._prec,0, phi, LOC=LRef)
-        END DO
+        !     phi_val(i,1) = eval_poly(-1._prec,0, phi, LOC=LRef)
+        !     phi_val(i,2) = eval_poly( 1._prec,0, phi, LOC=LRef)
+        ! END DO
+
+        phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
+        phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))
 
         C_m =0._prec; 
         C_p = 0._prec;

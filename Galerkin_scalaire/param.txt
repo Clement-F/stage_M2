@@ -1,29 +1,30 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-10             | noeuds du maillage 
+200             | noeuds du maillage 
 -1.             | xd
 1.              | xf
-1.              | T
+0.5              | T
 ---------------------------------------------------
-True           | sous maillage     (True, False)
+True            | sous maillage     (True, False)
 2               | noeuds du sous maillage
 sym             | repartition des noeuds
 ---------------------------------------------------
-0.6             | cfl
+0.7             | cfl
 10              | frame rule
-60              | print rule
+10              | print rule
+solSub           | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 --------------------------------------------------
-1               | ordre espace
-1               | ordre temps
-Legendre        | polynomes  (Legendre,Lobatto)
-Legendre        | quadrature (Legendre,Lobatto)
+2               | ordre espace
+2               | ordre temps
+Lobatto        | polynomes  (Legendre,Lobatto)
+Lobatto        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-sinus         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
-advection         | problème (advection, burgers, Buckley)
+creneau         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
+Buckley       | problème (advection, burgers, Buckley)
 1.              | vitesse advection (si pb = advection)
 period          | condition au bord (period, Neumann)
