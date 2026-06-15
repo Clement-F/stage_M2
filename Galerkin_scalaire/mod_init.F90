@@ -69,6 +69,19 @@ CONTAINS
         
         print *,"matrices"
 
+        IF     (TRIM(sol_ini_name)=="sinus") THEN
+            max_glob = 1._prec; min_glob = -1._prec
+        ELSE IF(TRIM(sol_ini_name)=="unit") THEN
+            max_glob = 1._prec; min_glob = 1._prec
+        ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
+            min_glob = 0._prec; max_glob = 1._prec
+        ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
+            min_glob = 0._prec; max_glob = 1._prec
+        ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
+            min_glob =-1._prec; max_glob = 0.5_prec
+        END IF
+
+
 
         DO ni=1,nb_cell
             CALL Projection_Pk(Q_init,sol(ni)%base_poly, LOC=LLoc, ni= ni)
@@ -131,6 +144,8 @@ CONTAINS
 
         read(numfile_param,  *) subcell_use
         read(numfile_param,  *) monolithique
+        read(numfile_param,  *) max_rule
+        read(numfile_param,  *) coeff_smooth
         read(numfile_param,  *) nb_subcell
         read(numfile_param,  *) subcell_repartition
 

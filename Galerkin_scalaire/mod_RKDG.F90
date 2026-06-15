@@ -1,70 +1,10 @@
 MODULE mod_RKDG 
-   use mod_polynome
+   use mod_Monolith
    use mod_Divers
   IMPLICIT NONE
 
 CONTAINS
 
-  FUNCTION flux(u)
-    IMPLICIT NONE
-    REAL(prec), INTENT(in) :: u
-    REAL(prec) :: flux
-
-    SELECT CASE (TRIM(flux_name))
-    CASE("advection")
-      flux = vit_adv*u
-    CASE("burgers")
-      flux = 0.5_prec * u**2  
-    CASE("Buckley")
-      flux = 4._prec*u**2/((4._prec*u**2)+ (1._prec-u)**2 )
-    CASE DEFAULT
-       WRITE(*,*) "flux non reconnu ",flux_name
-       flux = 0._prec
-       STOP
-    END SELECT
-
-
-  END FUNCTION flux
-
-  FUNCTION flux_d(u)
-    IMPLICIT NONE
-    REAL(prec), INTENT(in) :: u
-    REAL(prec) :: flux_d
-
-    SELECT CASE (TRIM(flux_name))
-    CASE("advection")
-      flux_d = vit_adv
-    CASE("burgers")
-      flux_d = u  
-    CASE("Buckley")
-      flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u)))/(4._prec*u**2 + (1._prec-u)**2)**2
-    CASE DEFAULT
-       WRITE(*,*) "flux_d non reconnu ",flux_name
-       flux_d = 0._prec
-       STOP
-    END SELECT
-
-
-  END FUNCTION flux_d
-
-  FUNCTION flux_uh(x,ni)
-    IMPLICIT NONE
-    INTEGER, INTENT(IN) :: ni
-    REAL(prec), INTENT(IN) :: x
-    REAL(prec) :: flux_uh
-
-    flux_uh = flux(eval_step(x,ni, LOC=LLoc))
-
-  END FUNCTION flux_uh
-
-  FUNCTION Flux_FV(u,v)
-    IMPLICIT NONE
-    REAL(prec), INTENT(IN) :: u,v
-    REAL(prec) :: Flux_FV
-
-    Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
-
-  END FUNCTION Flux_FV
   
   SUBROUTINE flux_numerique
     IMPLICIT NONE
@@ -85,7 +25,7 @@ CONTAINS
         IF (TRIM(bdry_cond) == "period") THEN 
           ug = sol_step(nb_cell)  %inter(2)
           ud = sol_step(1)        %inter(1)
-        ELSE IF(TRIM(bdry_cond) == "Neumann") THEN
+        ELSE IF(TRIM(bdry_cond) == "Sym") THEN
           ug = sol_step(1)        %inter(1)
           ud = sol_step(1)        %inter(1)
         ELSE 
@@ -96,7 +36,7 @@ CONTAINS
         IF (TRIM(bdry_cond) == "period") THEN 
           ug = sol_step(nb_cell)  %inter(2)
           ud = sol_step(1)        %inter(1)
-        ELSE IF(TRIM(bdry_cond) == "Neumann") THEN
+        ELSE IF(TRIM(bdry_cond) == "Sym") THEN
           ug = sol_step(nb_cell)  %inter(2)
           ud = sol_step(nb_cell)  %inter(2)
         ELSE 
@@ -122,78 +62,30 @@ CONTAINS
     END DO
     
     IF(subcell_use) THEN
-      DO ni = 1,nb_cell
-        fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
-        fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
+    DO ni = 1,nb_cell
+      fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
+      fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
 
-        DO jj =1,nb_subcell+1
-          x_s = x_subcell(jj)
+      DO jj =1,nb_subcell+1
+        x_s = x_subcell(jj)
 
-          flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
-                                    & - C_m(jj)*(fh_L-g(ni  )) &
-                                    & - C_p(jj)*(fh_R-g(ni+1))
-          IF(monolithique) THEN
-            voi = Voisin_Face(ni,jj,'L'); ug = sol_step(voi(1))%val_subcells(voi(2))
-            voi = Voisin_Face(ni,jj,'R'); ud = sol_step(voi(1))%val_subcells(voi(2))
-            f_FV = Flux_FV(ug,ud);        gamma_loc = gamma_calc(ug,ud)
-            u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_loc)
+        flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
+                                  & - C_m(jj)*(fh_L-g(ni  )) &
+                                  & - C_p(jj)*(fh_R-g(ni+1))
+        IF(monolithique) THEN
+          voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
+          voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
+          f_FV = Flux_FV(ug,ud);      
 
-            DF = flux_h(ni)%val_subcells(jj) - f_FV
+          DF = flux_h(ni)%val_subcells(jj) - f_FV          
+          theta_loc = theta(voi_L,voi_R)
 
-            ! print *,ni,jj
-
-            IF(DF < 0._prec) THEN
-
-              voi = Voisin_Face(ni,jj,'L');
-              voi_L = subcells_(voi(1),voi(2))%L;
-              voi_R = subcells_(voi(1),voi(2))%R;  
-
-              ! print *,'L',voi
-              beta_loc  = max(sol_step(voi  (1))%val_subcells(voi  (2)), &
-                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-              voi = Voisin_Face(ni,jj,'R');           
-              voi_L = subcells_(voi(1),voi(2))%L;
-              voi_R = subcells_(voi(1),voi(2))%R;  
-
-              ! print *,'R',voi
-              alpha_loc  = min(sol_step(voi  (1))%val_subcells(voi  (2)), &
-                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-              param =     min(beta_loc - u_Riemann, u_Riemann- alpha_loc)
-            ELSE
-
-              voi = Voisin_Face(ni,jj,'L');           
-              voi_L = subcells_(voi(1),voi(2))%L;
-              voi_R = subcells_(voi(1),voi(2))%R;  
-              ! print *,'L',voi
-              alpha_loc  = min(sol_step(voi  (1))%val_subcells(voi  (2)), &
-                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-              voi = Voisin_Face(ni,jj,'R');           
-              voi_L = subcells_(voi(1),voi(2))%L;
-              voi_R = subcells_(voi(1),voi(2))%R;  
-              ! print *,'R',voi
-              beta_loc  = max(sol_step(voi  (1))%val_subcells(voi  (2)), &
-                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-              param =     max(min(beta_loc - u_Riemann, u_Riemann- alpha_loc),0._prec)
-            END IF
-
-            ! theta_loc = min(1._prec, (gamma_loc-max_dflux)*(ud-ug)/(flux_h(ni)%val_subcells(jj) - f_FV))
-            theta_loc = 0.5
-            ! theta_loc = min(1._prec, abs(gamma_loc/DF) * param)
-
-            flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
-          END IF                  
-        END DO
-
-        
+          flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
+        END IF                  
       END DO
+
+      
+    END DO
     END IF
 
   END SUBROUTINE flux_numerique
@@ -295,50 +187,17 @@ CONTAINS
       DO ni = 1,nb_cell
         DO jj =1,nb_subcell
           
-        ! phi_val = 0._prec
-        ! phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
-        ! phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))
-
-        ! print *, "BB"
-          ! BB = (eval_poly(x_subcell(jj+1),ni, flux_h(ni)%base_poly, LOC=LRef) - eval_poly(x_subcell(jj),ni, flux_h(ni)%base_poly, LOC= LRef))  &
-          ! &  +((phi_val(jj,2) * (eval_poly(x_cell(ni+1),  ni, flux_h(ni)%base_poly, LOC= LLoc) - g(ni+1))) & 
-          ! &  - (phi_val(jj,1) * (eval_poly(x_cell(ni),    ni, flux_h(ni)%base_poly, LOC= LLoc) - g(ni)  )))   
-
-          ! print *,"------------------------"
-          ! print *,BB
-          ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-          ! print *,BB -(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-          ! print *,(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj)) -(g(ni+1)- g(ni))
-          ! print *,"------------------------"
-
-          ! print *,sol_step(ni)%val_subcells(jj)
-
-          ! print *,"=============================================="
-          ! print *,RK_alpha(ii,1) * sol(ni)%val_subcells(jj)
-          ! print *,RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj)
-          ! print *,RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-          ! print *,"=============================================="
-
-
           sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
                                     & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-                                    ! & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * BB
-          ! print *,sol_step(ni)%val_subcells(jj)
+                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))                                   
         END DO
       END DO
 
 
       DO ni = 1,nb_cell
-        ! print *,"----------------------------------"
-        ! print *,sol_step(ni)%val_subcells 
-
         DO jj=1,size_base
-          ! print*,Projection_VF_inv(:,jj)
           sol_step(ni)%base_poly(jj) = DOT_PRODUCT(Projection_VF_inv_plus(jj,:), sol_step(ni)%val_subcells)
         END DO
-
-        ! print *,sol_step(ni)%base_poly
 
         DO jj=1,size_quad_nodes
           sol_step(ni)%val_nodes(jj)  = eval_step(x_quad(jj),ni, jj, LOC= LRef)
@@ -367,32 +226,6 @@ CONTAINS
 
   END SUBROUTINE Time_step_subcell
 
-  FUNCTION gamma_calc(u,v)
-    IMPLICIT NONE
-    REAL(prec), INTENT(IN) :: u,v
-    REAL(prec) :: gamma_calc
-
-    REAL(prec) :: u_step
-    INTEGER :: i 
-    
-    gamma_calc = 0._prec
-    
-    IF(TRIM(flux_name) == "advection") THEN
-      gamma_calc = abs(vit_adv)
-
-    ELSE
-      gamma_calc = max( abs(flux_d(u)), abs(flux_d(v)))
-
-      IF(.NOT. convex_flux) THEN
-        u_step = (max(u,v)-min(u,v))/10._prec
-        DO i=1,10
-          IF(gamma_calc .LT. abs(flux_d(min(u,v)+REAL(i,prec)*u_step)) ) THEN
-            gamma_calc = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
-          END IF
-        END DO
-      END IF
-    END IF
-  END FUNCTION gamma_calc
 
   SUBROUTINE dt_calc
     IMPLICIT NONE
@@ -458,6 +291,27 @@ CONTAINS
     IF(time .GE.  REAL(n_imp,prec)*t_imp-eps0)  THEN
       write(*,fmt='("---------------",i7," ",f8.6," ",e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
+        IF(subcell_use) THEN
+
+        DO j=1,nb_subcell
+          xi = Ref_to_loc(i,x_submiddle(j))
+          out1 = sol(i)%val_subcells(j)
+
+          IF(TRIM(flux_name) == "advection") THEN 
+            out2 =Q_init(xi - time*vit_adv,0)
+          ELSE 
+            call pied_charact(xi,time,out2)
+          END IF
+
+          write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+
+          errLi = max(errLi , abs(out1-out2))
+          err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+          err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
+        END DO
+
+        ELSE
+          
         DO j=1,size_base
           xi = Ref_to_loc(i,x_quad(j))
           out1 = sol(i)%val_nodes(j)
@@ -474,6 +328,8 @@ CONTAINS
           err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
           err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
         END DO
+
+        END IF
       END DO
 
       err2 = sqrt(err2)

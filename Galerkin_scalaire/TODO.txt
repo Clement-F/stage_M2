@@ -3,7 +3,11 @@
 ===================================
 
 ¤) optimiser le calcule sur sous-cellules (?)
-¤) voisins sous-cellules -> brut (sans calcul à chaque dt)
+
+¤) max local 
+¤) max global 
+¤) relaxation extrema smooth
+
 2) schéma monolithique
 
 ===================================
@@ -17,3 +21,5 @@
 ===================================
         à faire
 ===================================
+
+preuve theta loc / global

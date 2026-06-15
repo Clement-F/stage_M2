@@ -37,7 +37,10 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv, Projection_VF_inv_plus
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
+  REAL(prec) :: min_glob, max_glob
+
   LOGICAL*1 :: subcell_use, convex_flux, monolithique 
+  INTEGER   :: max_rule, coeff_smooth
 
 
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 

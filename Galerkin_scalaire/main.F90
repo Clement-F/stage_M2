@@ -1,5 +1,4 @@
 PROGRAM MAIN
-
    use mod_RKDG
    use mod_init
    implicit none
@@ -7,6 +6,8 @@ PROGRAM MAIN
     REAL(prec) :: t,xi
     INTEGER :: i
 
+
+    
     CALL INIT_ALL
     open(unit=numfile_data, file=nomfile_data,  form ='formatted', status ='old')
     open(unit=numfile_sol,  file=nomfile_sol,   form ='formatted', status ='unknown')
@@ -14,7 +15,7 @@ PROGRAM MAIN
     write(unit= numfile_data, fmt='("ordre x = "i5)') order_x
     write(unit= numfile_data, fmt='("ordre t = "i5)') order_t
 
-    IF(subcell_use)         write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*order_x
+    IF(subcell_use)         write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*nb_subcell
     IF(.not. subcell_use)   write(unit= numfile_data, fmt='("nx = "i5)') nb_cell*order_x
         
     CALL writout

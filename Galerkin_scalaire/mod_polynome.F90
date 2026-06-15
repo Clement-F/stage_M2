@@ -856,7 +856,7 @@ CONTAINS
             END DO
         END DO
 
-    
+
     END SUBROUTINE sub_cells_init
 
     FUNCTION unit_sm(x,n_sub)
@@ -873,7 +873,7 @@ CONTAINS
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm
-    
+
   FUNCTION Voisin_Face(ni,ns,LR)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: ni,ns
@@ -886,7 +886,7 @@ CONTAINS
       IF(ni == 1 .AND. ns == 1) THEN 
         IF(TRIM(bdry_cond) == "period") THEN
           Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
-        ELSE IF(TRIM(bdry_cond)=="Neumann") THEN 
+        ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
           Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
         END IF
 
@@ -900,7 +900,7 @@ CONTAINS
       IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
         IF(TRIM(bdry_cond) == "period") THEN
           Voisin_Face(1) = 1; Voisin_Face(2) = 1
-        ELSE IF(TRIM(bdry_cond)=="Neumann") THEN 
+        ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
           Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
         END IF
         
