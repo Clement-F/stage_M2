@@ -57,13 +57,27 @@ CONTAINS
 
   END FUNCTION flux_uh
 
+  FUNCTION Flux_FV(u,v)
+    IMPLICIT NONE
+    REAL(prec), INTENT(IN) :: u,v
+    REAL(prec) :: Flux_FV
+
+    Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
+
+  END FUNCTION Flux_FV
+  
   SUBROUTINE flux_numerique
     IMPLICIT NONE
     INTEGER :: ni,ii,jj
+    REAL(prec), DIMENSION(size_quad_nodes) :: flux_uh_val
+
     REAL(prec) :: ug,ud
     REAL(prec) :: x_s
-    REAL(prec) :: fh_L, fh_R
-    REAL(prec), DIMENSION(size_quad_nodes) :: flux_uh_val
+    REAL(prec) :: fh_L, fh_R, f_FV
+    REAL(prec) :: gamma_loc, theta_loc, DF
+    REAL(prec) :: u_Riemann, param
+    REAL(prec) :: alpha_loc, beta_loc
+    INTEGER, DIMENSION(2) :: voi, voi_L, voi_R
 
     DO ni = 1,nb_cell+1
       IF (ni ==1) THEN 
@@ -113,14 +127,71 @@ CONTAINS
         fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
 
         DO jj =1,nb_subcell+1
-          x_s = x_subcell(jj);
+          x_s = x_subcell(jj)
+
           flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
                                     & - C_m(jj)*(fh_L-g(ni  )) &
                                     & - C_p(jj)*(fh_R-g(ni+1))
+          IF(monolithique) THEN
+            voi = Voisin_Face(ni,jj,'L'); ug = sol_step(voi(1))%val_subcells(voi(2))
+            voi = Voisin_Face(ni,jj,'R'); ud = sol_step(voi(1))%val_subcells(voi(2))
+            f_FV = Flux_FV(ug,ud);        gamma_loc = gamma_calc(ug,ud)
+            u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_loc)
+
+            DF = flux_h(ni)%val_subcells(jj) - f_FV
+
+            ! print *,ni,jj
+
+            IF(DF < 0._prec) THEN
+
+              voi = Voisin_Face(ni,jj,'L');
+              voi_L = subcells_(voi(1),voi(2))%L;
+              voi_R = subcells_(voi(1),voi(2))%R;  
+
+              ! print *,'L',voi
+              beta_loc  = max(sol_step(voi  (1))%val_subcells(voi  (2)), &
+                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
+
+              voi = Voisin_Face(ni,jj,'R');           
+              voi_L = subcells_(voi(1),voi(2))%L;
+              voi_R = subcells_(voi(1),voi(2))%R;  
+
+              ! print *,'R',voi
+              alpha_loc  = min(sol_step(voi  (1))%val_subcells(voi  (2)), &
+                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
+
+              param =     min(beta_loc - u_Riemann, u_Riemann- alpha_loc)
+            ELSE
+
+              voi = Voisin_Face(ni,jj,'L');           
+              voi_L = subcells_(voi(1),voi(2))%L;
+              voi_R = subcells_(voi(1),voi(2))%R;  
+              ! print *,'L',voi
+              alpha_loc  = min(sol_step(voi  (1))%val_subcells(voi  (2)), &
+                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
+
+              voi = Voisin_Face(ni,jj,'R');           
+              voi_L = subcells_(voi(1),voi(2))%L;
+              voi_R = subcells_(voi(1),voi(2))%R;  
+              ! print *,'R',voi
+              beta_loc  = max(sol_step(voi  (1))%val_subcells(voi  (2)), &
+                          &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                          &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
+
+              param =     max(min(beta_loc - u_Riemann, u_Riemann- alpha_loc),0._prec)
+            END IF
+
+            ! theta_loc = min(1._prec, (gamma_loc-max_dflux)*(ud-ug)/(flux_h(ni)%val_subcells(jj) - f_FV))
+            theta_loc = 0.5
+            ! theta_loc = min(1._prec, abs(gamma_loc/DF) * param)
+
+            flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
+          END IF                  
         END DO
-        ! print *,"------------",ni,"-----------------"
-        ! print *,g(ni), g(ni+1)
-        ! print *, flux_h(ni)%val_subcells
+
         
       END DO
     END IF
@@ -296,20 +367,46 @@ CONTAINS
 
   END SUBROUTINE Time_step_subcell
 
+  FUNCTION gamma_calc(u,v)
+    IMPLICIT NONE
+    REAL(prec), INTENT(IN) :: u,v
+    REAL(prec) :: gamma_calc
+
+    REAL(prec) :: u_step
+    INTEGER :: i 
+    
+    gamma_calc = 0._prec
+    
+    IF(TRIM(flux_name) == "advection") THEN
+      gamma_calc = abs(vit_adv)
+
+    ELSE
+      gamma_calc = max( abs(flux_d(u)), abs(flux_d(v)))
+
+      IF(.NOT. convex_flux) THEN
+        u_step = (max(u,v)-min(u,v))/10._prec
+        DO i=1,10
+          IF(gamma_calc .LT. abs(flux_d(min(u,v)+REAL(i,prec)*u_step)) ) THEN
+            gamma_calc = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
+          END IF
+        END DO
+      END IF
+    END IF
+  END FUNCTION gamma_calc
 
   SUBROUTINE dt_calc
     IMPLICIT NONE
     INTEGER :: i,j
     REAL(prec) :: max_u,min_u,u_step
 
+
+
     IF(TRIM(flux_name) == "advection") THEN
       max_dflux = abs(vit_adv)
     ELSE !IF(TRIM(flux_name) == "burgers") THEN
-      !boucle pour max de u ? 
-      max_dflux = 0._prec
+      !boucle pour max de u ?
       DO i=1,nb_cell
         DO j=1,size_quad_nodes
-
           IF(max_u .LT. sol(i)%val_nodes(j) ) THEN
             max_u = sol(i)%val_nodes(j)
           END IF
@@ -317,33 +414,30 @@ CONTAINS
           IF(min_u .GT. sol(i)%val_nodes(j) ) THEN
             min_u = sol(i)%val_nodes(j)
           END IF
-
         END DO
       END DO
 
-      max_dflux = max( abs(flux_d(min_u)), abs(flux_d(max_u)))
+      max_dflux = gamma_calc(min_u,max_u)
 
-      IF(.NOT. convex_flux) THEN
-        u_step = (max_u-min_u)/10._prec
-        DO i=1,10
-          IF(max_dflux .LT. abs(flux_d(min_u+REAL(i,prec)*u_step)) ) THEN
-            max_dflux = abs(flux_d(min_u+REAL(i,prec)*u_step))
-          END IF
-        END DO
-      END IF
 
-    ! ELSE 
-    !   print *,"flux non reconnue"
-    !   max_dflux = 1._prec
     END IF
+    dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    ! IF(order_x .GT. order_t) dt = dt**(order_x/order_t)
+    dt = min(dt, 1.05_prec * dt_old)
 
-    ! IF(dt .LT. 10._prec**(-10)) THEN
+    IF(order_x .GT. order_t) dt = dt**(order_x/order_t)
+
+    ! IF(dt .LT. 10._prec**(-20)) THEN
     !   write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
     !   CALL Emergency_stop
     ! END IF
+
+    
+    IF(sol(1)%val_nodes(1) .NE. sol(1)%val_nodes(1) ) THEN
+      write(*, fmt ='("NAN found emergency stop")')
+      CALL Emergency_stop
+    END IF
 
 
   END SUBROUTINE dt_calc

@@ -829,17 +829,6 @@ CONTAINS
             sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
         END DO
 
-        ! phi_val = 0._prec
-        ! DO i=1,nb_subcell
-        !     phi_m = 0._prec; phi_m(i) = 1._prec
-        !     phi = MATMUL(Projection_VF_inv,phi_m)
-            
-        !     print *,"phi",i,phi
-            
-        !     phi_val(i,1) = eval_poly(-1._prec,0, phi, LOC=LRef)
-        !     phi_val(i,2) = eval_poly( 1._prec,0, phi, LOC=LRef)
-        ! END DO
-
         phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
         phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))
 
@@ -857,11 +846,16 @@ CONTAINS
             C_m(i) = 1._prec -C_m(i)
         END DO
 
-        ! C_p(1)            =0._prec; C_m(1)            =1._prec
-        ! C_p(nb_subcell+1) =1._prec; C_m(nb_subcell+1) =0._prec
 
-        print *,"Cp =",C_p
-        print *,"Cm =",C_m
+        DO i=1,nb_cell
+            DO j=1, nb_subcell
+                subcells_(i,j)%index_m = i; subcells_(i,j)%index_m = j;  
+                subcells_(i,j)%L = Voisin_Face(i,j,'L') ; subcells_(i,j)%R = Voisin_Face(i,j,'R');
+                subcells_(i,j)%R = Voisin_Face(subcells_(i,j)%L(1),subcells_(i,j)%L(2),'R'); 
+                subcells_(i,j)%R = Voisin_Face(subcells_(i,j)%R(1),subcells_(i,j)%R(2),'R');   
+            END DO
+        END DO
+
     
     END SUBROUTINE sub_cells_init
 
@@ -879,6 +873,52 @@ CONTAINS
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm
+    
+  FUNCTION Voisin_Face(ni,ns,LR)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: ni,ns
+    CHARACTER(len =1) :: LR
+    INTEGER, DIMENSION(2):: Voisin_Face
+
+    ! print *,ni,ns,LR
+
+    IF(LR == "L") THEN
+      IF(ni == 1 .AND. ns == 1) THEN 
+        IF(TRIM(bdry_cond) == "period") THEN
+          Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
+        ELSE IF(TRIM(bdry_cond)=="Neumann") THEN 
+          Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
+        END IF
+
+      ELSE IF(ns ==1 ) THEN
+        Voisin_Face(1) = ni-1 ; Voisin_Face(2) = nb_subcell
+      ELSE 
+        Voisin_Face(1) = ni ; Voisin_Face(2) = ns-1
+      END IF
+
+    ELSE IF(LR == "R") THEN
+      IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
+        IF(TRIM(bdry_cond) == "period") THEN
+          Voisin_Face(1) = 1; Voisin_Face(2) = 1
+        ELSE IF(TRIM(bdry_cond)=="Neumann") THEN 
+          Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
+        END IF
+        
+      ELSE IF(ns == nb_subcell+1 ) THEN
+        Voisin_Face(1) = ni+1 ; Voisin_Face(2) = 1
+      ELSE 
+        Voisin_Face(1) = ni ; Voisin_Face(2) = ns
+      END IF
+
+    ELSE 
+      print *,"direction non reconnue"
+      STOP
+    END IF
+
+    ! print *,Voisin_Face
+
+  END FUNCTION Voisin_Face
+
 ! ---------------------------------------------------------------
 ! ---------------------------------------------------------------
 

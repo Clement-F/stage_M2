@@ -4,13 +4,19 @@ MODULE mod_declaration
   IMPLICIT NONE
 
   TYPE var_type
-     REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG
-     REAL(prec),DIMENSION(:),POINTER :: val_nodes   ! valeurs aux points de quadratures
-     REAL(prec),DIMENSION(:),POINTER :: val_subcells   ! valeurs aux points de quadratures
-     REAL(prec),DIMENSION(:),POINTER :: inter
+    REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG
+    REAL(prec),DIMENSION(:),POINTER :: val_nodes   ! valeurs aux points de quadratures
+    REAL(prec),DIMENSION(:),POINTER :: val_subcells   ! valeurs aux points de quadratures
+    REAL(prec),DIMENSION(:),POINTER :: inter
   END TYPE var_type
 
+  Type subcells
+    INTEGER :: index_s, index_m
+    INTEGER, DIMENSION(2) :: L, LL, R, RR
+  END TYPE subcells
+
   TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa
+  TYPE(subcells), DIMENSION(:,:), POINTER :: subcells_
 
   REAL(prec), DIMENSION(:),   POINTER :: g
 
@@ -31,14 +37,14 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv, Projection_VF_inv_plus
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
-  LOGICAL*1 :: subcell_use, convex_flux 
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique 
 
 
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 
   INTEGER :: size_base, size_quad_nodes
   INTEGER :: n_imp, n_time, frame_rule, print_rule
   INTEGER :: counter1, counter2
-  REAL(prec) :: time, tmax,t_ini,dt, t_imp
+  REAL(prec) :: time, tmax,t_ini,dt, dt_old, t_imp
   REAL(prec) :: xL,xR,CFL,max_dflux,dx, sub_dx
   REAL(prec), parameter :: pi = acos(-1._prec)
   REAL(prec), parameter :: eps0=0.1_prec**(2*prec-3)
@@ -64,6 +70,8 @@ MODULE mod_declaration
 
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
     ALLOCATE( g(nb_cell +1))
+
+    ALLOCATE (subcells_(nb_cell, nb_subcell))
 
     ALLOCATE( x_cell(nb_cell+1),        x_middle(nb_cell),        cell_size(nb_cell)) 
     ALLOCATE( x_subcell(nb_subcell+1),  x_submiddle(nb_subcell),  subcell_size(nb_subcell))

@@ -43,6 +43,8 @@ CONTAINS
         n_imp = 0
         t_imp = tmax/Real(print_rule,prec)
 
+        dt = 10._prec**(-6)
+
 
         CALL Coeff_quad_init
         CALL Coeff_DG_init
@@ -128,6 +130,7 @@ CONTAINS
         CALL Skip_lines(numfile_param,1) 
 
         read(numfile_param,  *) subcell_use
+        read(numfile_param,  *) monolithique
         read(numfile_param,  *) nb_subcell
         read(numfile_param,  *) subcell_repartition
 

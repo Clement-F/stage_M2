@@ -3,13 +3,15 @@
 ===================================
 
 ¤) optimiser le calcule sur sous-cellules (?)
-¤) more subcells !!!
+¤) voisins sous-cellules -> brut (sans calcul à chaque dt)
 2) schéma monolithique
 
 ===================================
         BUG à corriger
 ===================================
 
+¤) theta < 0. dans le shcéma monolithique max local
+¤) max local -> pas de max local
 
 
 ===================================
