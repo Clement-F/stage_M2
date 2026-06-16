@@ -9,13 +9,11 @@ MODPATH =
 
 PROG = DG.exe
 
-SRCS =	precis.F90 mod_declaration.F90 mod_init.F90 mod_Monolith.F90\
-	    mod_RKDG.F90 mod_polynome.F90 tests.F90 main.F90  \
-		mod_divers.F90
+SRCS =	precis.F90 mod_declaration.F90 mod_init.F90 mod_Monolith.F90 \
+	    mod_RKDG.F90 mod_polynome.F90 tests.F90 main.F90 mod_divers.F90
 
-OBJS =	precis.o mod_declaration.o  mod_init.o mod_Monolith.o \
-		mod_RKDG.o mod_polynome.o  main.o \
-		mod_divers.o 
+OBJS =	precis.o mod_declaration.o mod_init.o mod_Monolith.o \
+		mod_RKDG.o mod_polynome.o main.o mod_divers.o 
 
 all: $(PROG)
 

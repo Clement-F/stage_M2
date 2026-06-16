@@ -9,6 +9,9 @@ PROGRAM MAIN
 
     
     CALL INIT_ALL
+
+    CALL print_submesh
+
     open(unit=numfile_data, file=nomfile_data,  form ='formatted', status ='old')
     open(unit=numfile_sol,  file=nomfile_sol,   form ='formatted', status ='unknown')
    

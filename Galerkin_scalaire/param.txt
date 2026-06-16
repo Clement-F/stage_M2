@@ -1,35 +1,35 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-100              | noeuds du maillage 
+20             | noeuds du maillage 
 -1.             | xd
 1.              | xf
-.4             | T
+0.6              | T
 ---------------------------------------------------
 True            | sous maillage     (True, False)
-True            | Monolithique      (True, False)
-0               | Max global(2), local(1), Null(0)
+False           | Monolithique      (True, False)
+2               | Max global(2), local(1), Null(0)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
-3               | noeuds du sous maillage
+2               | nb subcellules du sous maillage
 Unif            | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
-0.9             | cfl
+0.5             | cfl
 10              | frame rule
-20              | print rule
-solSub          | nom file_sol
+10              | print rule
+solSub           | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 --------------------------------------------------
 2               | ordre espace
 2               | ordre temps
-Lobatto        | polynomes  (Legendre,Lobatto)
-Lobatto        | quadrature (Legendre,Lobatto)
+Legendre        | polynomes  (Legendre,Lobatto)
+Legendre        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-creneau           | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
-Buckley         | problème (advection, burgers, Buckley)
+sinus           | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
+burgers       | problème (advection, burgers, Buckley)
 1.              | vitesse advection (si pb = advection)
 Sym          | condition au bord (period, Sym)

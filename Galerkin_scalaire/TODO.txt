@@ -14,6 +14,9 @@
         BUG à corriger
 ===================================
 
+¤) !NON BUG! Convergence d'un ordre de moins pour la sous-cellule 
+             Erreur calculé aux points milieu et non aux points de quad   
+
 ¤) theta < 0. dans le shcéma monolithique max local
 ¤) max local -> pas de max local
 

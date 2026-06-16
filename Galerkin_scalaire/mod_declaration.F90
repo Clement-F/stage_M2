@@ -11,8 +11,9 @@ MODULE mod_declaration
   END TYPE var_type
 
   Type subcells
-    INTEGER :: index_s, index_m
+    INTEGER :: index_m, index_s
     INTEGER, DIMENSION(2) :: L, LL, R, RR
+    REAL(prec) :: theta_cm
   END TYPE subcells
 
   TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa

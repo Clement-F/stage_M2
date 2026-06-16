@@ -68,6 +68,7 @@ CONTAINS
     IMPLICIT NONE
     REAL(prec), INTENT(IN) :: u,v
     REAL(prec) :: gamma_calc
+    REAL(prec) :: gamma_temp
 
     REAL(prec) :: u_step
     INTEGER :: i 
@@ -82,12 +83,17 @@ CONTAINS
 
       IF(.NOT. convex_flux) THEN
         u_step = (max(u,v)-min(u,v))/10._prec
+
         DO i=1,10
-          IF(gamma_calc .LT. abs(flux_d(min(u,v)+REAL(i,prec)*u_step)) ) THEN
-            gamma_calc = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
+          gamma_temp = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
+
+          IF(gamma_calc .LT. gamma_temp ) THEN
+             gamma_calc = gamma_temp
           END IF
+
         END DO
       END IF
+
     END IF
   END FUNCTION gamma_calc
 
@@ -99,7 +105,7 @@ CONTAINS
       REAL(prec) :: ug,ud, f_FV
       REAL(prec) :: gamma_mp, DF, param
       REAL(prec) :: alpha,beta, u_Riemann
-      INTEGER, DIMENSION(2) :: voi, voi_L, voi_R
+      INTEGER, DIMENSION(2) :: voi_L, voi_R
 
       IF(max_rule == 0) THEN 
         theta = 1._prec
@@ -108,64 +114,70 @@ CONTAINS
           ug = sol_step(mc(1))%val_subcells(mc(2))
           ud = sol_step(pv(1))%val_subcells(pv(2))
           f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
+
           DF = flux_h(pv(1))%val_subcells(pv(2)) - f_FV    
           u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
           param = min(max_glob -u_Riemann, u_Riemann - min_glob)
-
           theta = min(1._prec, abs(gamma_mp/DF)*param)
 
 
       ELSE IF(max_rule == 1) THEN
+      
+        ug = sol_step(mc(1))%val_subcells(mc(2))
+        ud = sol_step(pv(1))%val_subcells(pv(2))
+        f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
+        DF = flux_h(pv(1))%val_subcells(pv(2)) - f_FV    
+        u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
+
+        IF(DF .LT. 0._prec) THEN
+
+          voi_L = subcells_(mc(1),mc(2))%L;
+          voi_R = subcells_(mc(1),mc(2))%R;  
+          beta  = max( sol_step(mc   (1))%val_subcells(mc   (2)), &
+                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
         
-          ! ug = sol_step(mc(1))%val_subcells(mc(2))
-          ! ud = sol_step(pv(1))%val_subcells(pv(2))
-          ! f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
-          ! u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
-          ! IF(DF < 0._prec) THEN
+          voi_L = subcells_(pv(1),pv(2))%L;
+          voi_R = subcells_(pv(1),pv(2))%R;  
+          alpha = min( sol_step(pv   (1))%val_subcells(pv   (2)), &
+                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
 
-          !     voi = Voisin_Face(ni,jj,'L');
-          !     voi_L = subcells_(voi(1),voi(2))%L;
-          !     voi_R = subcells_(voi(1),voi(2))%R;  
+        param = min(beta - u_Riemann, u_Riemann- alpha)
+        theta = min(1._prec, abs(gamma_mp/DF) * param)
 
-          !     ! print *,'L',voi
-          !     beta  = max(sol_step(voi  (1))%val_subcells(voi  (2)), &
-          !                 &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-          !                 &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
+        ELSE IF(DF .GT. 0._prec) THEN
+          
+          voi_L = subcells_(mc(1),mc(2))%L;
+          voi_R = subcells_(mc(1),mc(2))%R;  
+          alpha  = min(sol_step(mc   (1))%val_subcells(mc   (2)), &
+                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
 
-          !     voi = Voisin_Face(ni,jj,'R');           
-          !     voi_L = subcells_(voi(1),voi(2))%L;
-          !     voi_R = subcells_(voi(1),voi(2))%R;  
+          voi_L = subcells_(pv(1),pv(2))%L;
+          voi_R = subcells_(pv(1),pv(2))%R;  
+          beta  = max( sol_step(pv    (1))%val_subcells(pv   (2)), &
+                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
 
-          !     ! print *,'R',voi
-          !     alpha  = min(sol_step(voi  (1))%val_subcells(voi  (2)), &
-          !                 &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-          !                 &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-          !     param =     min(beta - u_Riemann, u_Riemann- alpha)
-          ! ELSE
-
-          !     voi = Voisin_Face(ni,jj,'L');           
-          !     voi_L = subcells_(voi(1),voi(2))%L;
-          !     voi_R = subcells_(voi(1),voi(2))%R;  
-          !     ! print *,'L',voi
-          !     alpha  = min(sol_step(voi  (1))%val_subcells(voi  (2)), &
-          !                 &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-          !                 &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-          !     voi = Voisin_Face(ni,jj,'R');           
-          !     voi_L = subcells_(voi(1),voi(2))%L;
-          !     voi_R = subcells_(voi(1),voi(2))%R;  
-          !     ! print *,'R',voi
-          !     beta  = max(sol_step(voi  (1))%val_subcells(voi  (2)), &
-          !                 &   sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-          !                 &   sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-          !     param =     max(min(beta - u_Riemann, u_Riemann- alpha),0._prec)
-          ! END IF
-          !     theta = min(1._prec, abs(gamma_mp/DF) * param)
+        param = min(beta - u_Riemann, u_Riemann- alpha)
+        theta = min(1._prec, abs(gamma_mp/DF) * param)
       
+        ELSE 
+          theta = 1._prec
+        END IF
+        
       
+    
+      END IF
+
+      IF(coeff_smooth == 2) THEN
+        subcells_(mc(1),mc(2))%theta_cm = subcells_(mc(1),mc(2))%theta_cm + theta/2._prec
+        subcells_(pv(1),pv(2))%theta_cm = subcells_(pv(1),pv(2))%theta_cm + theta/2._prec
+      ELSE IF(coeff_smooth==1) THEN
+        subcells_(mc(1),mc(2))%theta_cm = min(subcells_(mc(1),mc(2))%theta_cm, theta)
+        subcells_(pv(1),pv(2))%theta_cm = min(subcells_(pv(1),pv(2))%theta_cm, theta)
       END IF
 
 

@@ -849,10 +849,10 @@ CONTAINS
 
         DO i=1,nb_cell
             DO j=1, nb_subcell
-                subcells_(i,j)%index_m = i; subcells_(i,j)%index_m = j;  
-                subcells_(i,j)%L = Voisin_Face(i,j,'L') ; subcells_(i,j)%R = Voisin_Face(i,j,'R');
-                subcells_(i,j)%R = Voisin_Face(subcells_(i,j)%L(1),subcells_(i,j)%L(2),'R'); 
-                subcells_(i,j)%R = Voisin_Face(subcells_(i,j)%R(1),subcells_(i,j)%R(2),'R');   
+                subcells_(i,j)%index_m = i; subcells_(i,j)%index_s = j;  
+                subcells_(i,j)%L = Voisin_Face(i,j,'L') ; subcells_(i,j)%R = Voisin_Face(i,j+1,'R');
+                subcells_(i,j)%LL = Voisin_Face(subcells_(i,j)%L(1),subcells_(i,j)%L(2),'L'); 
+                subcells_(i,j)%RR = Voisin_Face(subcells_(i,j)%R(1),subcells_(i,j)%R(2),'R');   
             END DO
         END DO
 
@@ -874,50 +874,70 @@ CONTAINS
 
     END FUNCTION unit_sm
 
-  FUNCTION Voisin_Face(ni,ns,LR)
-    IMPLICIT NONE
-    INTEGER, INTENT(IN) :: ni,ns
-    CHARACTER(len =1) :: LR
-    INTEGER, DIMENSION(2):: Voisin_Face
+    FUNCTION Voisin_Face(ni,ns,LR)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni,ns
+        CHARACTER(len =1) :: LR
+        INTEGER, DIMENSION(2):: Voisin_Face
 
-    ! print *,ni,ns,LR
+        ! print *,ni,ns,LR
 
-    IF(LR == "L") THEN
-      IF(ni == 1 .AND. ns == 1) THEN 
-        IF(TRIM(bdry_cond) == "period") THEN
-          Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
-        ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
-          Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
+        IF(LR == "L") THEN
+        IF(ni == 1 .AND. ns == 1) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
+            END IF
+
+        ELSE IF(ns ==1 ) THEN
+            Voisin_Face(1) = ni-1 ; Voisin_Face(2) = nb_subcell
+        ELSE 
+            Voisin_Face(1) = ni ; Voisin_Face(2) = ns-1
         END IF
 
-      ELSE IF(ns ==1 ) THEN
-        Voisin_Face(1) = ni-1 ; Voisin_Face(2) = nb_subcell
-      ELSE 
-        Voisin_Face(1) = ni ; Voisin_Face(2) = ns-1
-      END IF
-
-    ELSE IF(LR == "R") THEN
-      IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
-        IF(TRIM(bdry_cond) == "period") THEN
-          Voisin_Face(1) = 1; Voisin_Face(2) = 1
-        ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
-          Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
+        ELSE IF(LR == "R") THEN
+        IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_Face(1) = 1; Voisin_Face(2) = 1
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
+            END IF
+            
+        ELSE IF(ns == nb_subcell+1 ) THEN
+            Voisin_Face(1) = ni+1 ; Voisin_Face(2) = 1
+        ELSE 
+            Voisin_Face(1) = ni ; Voisin_Face(2) = ns
         END IF
+
+        ELSE 
+        print *,"direction non reconnue"
+        STOP
+        END IF
+
+        ! print *,Voisin_Face
+
+    END FUNCTION Voisin_Face
+
+    SUBROUTINE print_submesh
+        IMPLICIT NONE
+        INTEGER :: i,j
+
         
-      ELSE IF(ns == nb_subcell+1 ) THEN
-        Voisin_Face(1) = ni+1 ; Voisin_Face(2) = 1
-      ELSE 
-        Voisin_Face(1) = ni ; Voisin_Face(2) = ns
-      END IF
+            write(*,fmt="( ' ----------------------- ')")
+        DO i=1,nb_cell
+        DO j=1,nb_subcell
 
-    ELSE 
-      print *,"direction non reconnue"
-      STOP
-    END IF
+            write(*,fmt="( ' cell : (',i2,i2,')')", advance="no") i,j
+            write(*,fmt="( ' Left  cell : (',i2,i2,')')", advance="no") subcells_(i,j)%L
+            write(*,fmt="( ' Right cell : (',i2,i2,')')", advance="no") subcells_(i,j)%R
+            write(*,*)
 
-    ! print *,Voisin_Face
+        END DO
+            write(*,fmt="( ' ----------------------- ')")
+        END DO
 
-  END FUNCTION Voisin_Face
+    END SUBROUTINE print_submesh
 
 ! ---------------------------------------------------------------
 ! ---------------------------------------------------------------

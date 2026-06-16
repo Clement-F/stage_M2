@@ -230,41 +230,42 @@ CONTAINS
   SUBROUTINE dt_calc
     IMPLICIT NONE
     INTEGER :: i,j
-    REAL(prec) :: max_u,min_u,u_step
+    INTEGER, DIMENSION(2) :: next_subcell
+    REAL(prec) :: max_u,min_u,  gamma_temp
 
 
 
     IF(TRIM(flux_name) == "advection") THEN
       max_dflux = abs(vit_adv)
-    ELSE !IF(TRIM(flux_name) == "burgers") THEN
-      !boucle pour max de u ?
+    ELSE 
+      max_dflux =0._prec
       DO i=1,nb_cell
         DO j=1,size_quad_nodes
-          IF(max_u .LT. sol(i)%val_nodes(j) ) THEN
-            max_u = sol(i)%val_nodes(j)
-          END IF
 
-          IF(min_u .GT. sol(i)%val_nodes(j) ) THEN
-            min_u = sol(i)%val_nodes(j)
-          END IF
+          next_subcell = subcells_(i,j)%L
+          gamma_temp = gamma_calc(sol(i)%val_nodes(j), sol(next_subcell(1))%val_nodes(next_subcell(2)))
+          
+          max_dflux = max(max_dflux, gamma_temp)
+
         END DO
       END DO
-
-      max_dflux = gamma_calc(min_u,max_u)
 
 
     END IF
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
+    IF(order_x .GT. order_t) THEN
+    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(order_x * 1._prec/order_t) ,tmax-time) 
+    END IF 
+
     dt = min(dt, 1.05_prec * dt_old)
 
-    IF(order_x .GT. order_t) dt = dt**(order_x/order_t)
 
-    ! IF(dt .LT. 10._prec**(-20)) THEN
-    !   write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
-    !   CALL Emergency_stop
-    ! END IF
+    IF(dt .LT. 10._prec**(-20)) THEN
+      write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
+      CALL Emergency_stop
+    END IF
 
     
     IF(sol(1)%val_nodes(1) .NE. sol(1)%val_nodes(1) ) THEN

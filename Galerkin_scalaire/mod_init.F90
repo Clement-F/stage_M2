@@ -37,7 +37,7 @@ CONTAINS
             x_middle(i) = x_cell(i) + cell_size(i)/2._prec
         END DO
         
-        
+        tmax = REAL(tmax,prec)
         time = 0._prec
         n_time =1; 
         n_imp = 0

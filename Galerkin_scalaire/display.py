@@ -17,7 +17,7 @@ T=[]
 with open('SolSub.txt') as f:
     lines1 = f.readlines()
     
-with open('SolSub.txt') as f:
+with open('SolDG.txt') as f:
     lines2 = f.readlines()
 
 
@@ -41,13 +41,14 @@ for k in range(0,sm):
     err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
     #plt.plot(X,err[k],'r')
     plt.plot(X,U_t[k],'b')
-    plt.plot(X,U_t2[k],'go')
+    plt.plot(X,U_t2[k],'g')
+    print(max(U_t[k]), min(U_t[k]))
     #plt.plot(X,U_ex[k],'g')
     plt.ylim(-1.2,2.)
     plt.show()         
 
 
-if(True):
+if(False):
     with open('buckley.dat') as f:
         lines = f.readlines()
         
@@ -60,7 +61,7 @@ if(True):
     plt.plot(X_B,U_B, 'r')
     
     plt.plot(X,U_t[k],'b')
-    plt.plot(X,U_t2[k],'go')
+    plt.plot(X,U_t2[k],'g')
     plt.ylim(-1.2,1.2)
     plt.show()     
 #for k in range(1,sm):
