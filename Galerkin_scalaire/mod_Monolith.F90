@@ -63,6 +63,31 @@ CONTAINS
 
   END FUNCTION Flux_FV
 
+  FUNCTION minmax_loc(mc,minmax)
+    IMPLICIT NONE
+    CHARACTER(len=3) :: minmax
+    INTEGER, DIMENSION(2), INTENT(IN) :: mc
+    INTEGER, DIMENSION(2) :: voi_L, voi_R
+    REAL(prec) :: minmax_loc
+
+    voi_L = subcells_(mc(1),mc(2))%L
+    voi_R = subcells_(mc(1),mc(2))%R
+    IF(TRIM(minmax) == "min") THEN
+    IF(max_rule == 1)   minmax_loc= min( sol_step(mc   (1))%val_subcells(mc   (2)), &
+                                        &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                                        &sol_step(voi_R(1))%val_subcells(voi_R(2)))
+    IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = min_glob
+
+    ELSE IF(TRIM(minmax) == "max") THEN
+    IF(max_rule == 1)   minmax_loc= max( sol_step(mc   (1))%val_subcells(mc   (2)), &
+                                        &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
+                                        &sol_step(voi_R(1))%val_subcells(voi_R(2)))
+    IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = max_glob
+    END IF
+
+
+  END FUNCTION minmax_loc
+
 
   FUNCTION gamma_calc(u,v)
     IMPLICIT NONE
@@ -78,6 +103,9 @@ CONTAINS
     IF(TRIM(flux_name) == "advection") THEN
       gamma_calc = abs(vit_adv)
 
+    ! ELSE IF(TRIM(flux_name) == "Buckley") THEN
+    !   gamma_calc = 2.34_prec
+ 
     ELSE
       gamma_calc = max( abs(flux_d(u)), abs(flux_d(v)))
 
@@ -97,13 +125,14 @@ CONTAINS
     END IF
   END FUNCTION gamma_calc
 
-  FUNCTION theta(mc,pv)
+  FUNCTION theta(mc,pv, DF)
       IMPLICIT NONE
       INTEGER, DIMENSION(2), INTENT(IN) :: mc,pv
+      REAL(prec), INTENT(IN) :: DF
       REAL(prec) :: theta
 
       REAL(prec) :: ug,ud, f_FV
-      REAL(prec) :: gamma_mp, DF, param
+      REAL(prec) :: gamma_mp, param
       REAL(prec) :: alpha,beta, u_Riemann
       INTEGER, DIMENSION(2) :: voi_L, voi_R
 
@@ -111,15 +140,13 @@ CONTAINS
         theta = 1._prec
       ELSE IF(max_rule == 2) THEN
           
-          ug = sol_step(mc(1))%val_subcells(mc(2))
-          ud = sol_step(pv(1))%val_subcells(pv(2))
-          f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
+        ug = sol_step(mc(1))%val_subcells(mc(2))
+        ud = sol_step(pv(1))%val_subcells(pv(2))
+        f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
+   
+        u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
-          DF = flux_h(pv(1))%val_subcells(pv(2)) - f_FV    
-          u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
-
-          param = min(max_glob -u_Riemann, u_Riemann - min_glob)
-          theta = min(1._prec, abs(gamma_mp/DF)*param)
+        beta = max_glob; alpha = min_glob
 
 
       ELSE IF(max_rule == 1) THEN
@@ -127,49 +154,43 @@ CONTAINS
         ug = sol_step(mc(1))%val_subcells(mc(2))
         ud = sol_step(pv(1))%val_subcells(pv(2))
         f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
-        DF = flux_h(pv(1))%val_subcells(pv(2)) - f_FV    
         u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
-        IF(DF .LT. 0._prec) THEN
+        IF(DF .LT. -eps0) THEN
 
-          voi_L = subcells_(mc(1),mc(2))%L;
-          voi_R = subcells_(mc(1),mc(2))%R;  
-          beta  = max( sol_step(mc   (1))%val_subcells(mc   (2)), &
-                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
-        
-          voi_L = subcells_(pv(1),pv(2))%L;
-          voi_R = subcells_(pv(1),pv(2))%R;  
-          alpha = min( sol_step(pv   (1))%val_subcells(pv   (2)), &
-                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
+          beta = minmax_loc(mc,"max")
+          alpha= minmax_loc(pv,"min")
 
-        param = min(beta - u_Riemann, u_Riemann- alpha)
-        theta = min(1._prec, abs(gamma_mp/DF) * param)
-
-        ELSE IF(DF .GT. 0._prec) THEN
+        ELSE IF(DF .GT. eps0) THEN
           
-          voi_L = subcells_(mc(1),mc(2))%L;
-          voi_R = subcells_(mc(1),mc(2))%R;  
-          alpha  = min(sol_step(mc   (1))%val_subcells(mc   (2)), &
-                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
+          beta = minmax_loc(pv,"max")
+          alpha= minmax_loc(mc,"min")
 
-          voi_L = subcells_(pv(1),pv(2))%L;
-          voi_R = subcells_(pv(1),pv(2))%R;  
-          beta  = max( sol_step(pv    (1))%val_subcells(pv   (2)), &
-                      &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-                      &sol_step(voi_R(1))%val_subcells(voi_R(2)))
-
-        param = min(beta - u_Riemann, u_Riemann- alpha)
-        theta = min(1._prec, abs(gamma_mp/DF) * param)
-      
         ELSE 
-          theta = 1._prec
+          
+          theta = 0._prec
         END IF
         
       
     
+      END IF
+
+      param = min(beta - u_Riemann, u_Riemann- alpha); IF((param .LT. 10*eps0) .or.(DF .LT. 10*eps0)) param = 0._prec
+      theta = min(1._prec, abs(gamma_mp/DF) * param)
+
+      ! theta = max(theta, eps0)
+      
+      voi_L = subcells_(mc(1),mc(2))%L;
+      voi_R = subcells_(pv(1),pv(2))%R; 
+
+      IF(((theta .GT. 1._prec) .or. (theta .LT.  0._prec )) .or. (param .LT. 0._prec  ))THEN
+        print *,"================" ,mc,"---------", pv ,"============================"
+        print *,"voi_L : ", voi_L, "voi_R : ", voi_R
+        write(*, fmt="( 'stencil = (', e12.6, 2x,e12.6, 2x ,e12.6, 2x,e12.6 ')')") sol_step(voi_L(1))%val_subcells(voi_L(2)), ug, ud , sol_step(voi_R(1))%val_subcells(voi_R(2)) 
+        write(*, fmt="( 'sol Riemann : ', e12.6 )") u_Riemann
+        write(*, fmt="( 'alpha,beta = ',e12.6,2x, e12.6 )") alpha, beta
+        write(*, fmt="( 'theta = ', f10.6, ' gamma = ', f10.6)") theta, gamma_mp
+        write(* ,fmt="( 'param = ', e12.6, ' DF = ', e12.6)") param, DF
       END IF
 
       IF(coeff_smooth == 2) THEN

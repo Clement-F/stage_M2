@@ -1,35 +1,36 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-20             | noeuds du maillage 
--1.             | xd
-1.              | xf
-0.6              | T
+40             | noeuds du maillage 
+-.9             | xd
+3.              | xf
+0.4              | T
 ---------------------------------------------------
 True            | sous maillage     (True, False)
-False           | Monolithique      (True, False)
-2               | Max global(2), local(1), Null(0)
+True            | Monolithique      (True, False)
+1               | Max global(2), local(1), Null(0)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
-2               | nb subcellules du sous maillage
+5               | nb subcellules du sous maillage
 Unif            | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
-0.5             | cfl
-10              | frame rule
+0.7             | cfl
+True           | Error calc
+2               | max-rule check    (0,1,2) (only works on subcell use)
 10              | print rule
-solSub           | nom file_sol
+solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 --------------------------------------------------
-2               | ordre espace
-2               | ordre temps
+3               | ordre espace
+3               | ordre temps
 Legendre        | polynomes  (Legendre,Lobatto)
 Legendre        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-sinus           | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
-burgers       | problème (advection, burgers, Buckley)
-1.              | vitesse advection (si pb = advection)
-Sym          | condition au bord (period, Sym)
+creneau         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
+advection         | problème (advection, burgers, Buckley)
+5.              | vitesse advection (si pb = advection)
+Sym             | condition au bord (period, Sym)

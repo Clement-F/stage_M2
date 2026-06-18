@@ -14,10 +14,8 @@ CONTAINS
     REAL(prec) :: ug,ud
     REAL(prec) :: x_s
     REAL(prec) :: fh_L, fh_R, f_FV
-    REAL(prec) :: gamma_loc, theta_loc, DF
-    REAL(prec) :: u_Riemann, param
-    REAL(prec) :: alpha_loc, beta_loc
-    INTEGER, DIMENSION(2) :: voi, voi_L, voi_R
+    REAL(prec) :: theta_loc, DF
+    INTEGER, DIMENSION(2) :: voi_L, voi_R
 
     DO ni = 1,nb_cell+1
       IF (ni ==1) THEN 
@@ -73,12 +71,15 @@ CONTAINS
                                   & - C_m(jj)*(fh_L-g(ni  )) &
                                   & - C_p(jj)*(fh_R-g(ni+1))
         IF(monolithique) THEN
+
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
           f_FV = Flux_FV(ug,ud);      
 
           DF = flux_h(ni)%val_subcells(jj) - f_FV          
-          theta_loc = theta(voi_L,voi_R)
+          theta_loc = theta(voi_L,voi_R, DF)
+
+          
 
           flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
         END IF                  
@@ -106,10 +107,12 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
       
+    ! print *,"-----------------"
 
     DO tni =1,order_t
       
       CALL flux_numerique
+      ! print *,"========================="
 
       DO ni =1,nb_cell
 
@@ -122,7 +125,7 @@ CONTAINS
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
                              &+  RK_beta(tni) *dt * L_step
         
-        sol_step(ni)%val_nodes = 0._prec 
+        sol_step(ni)%val_nodes = eps0 
                   
         DO ii=1,size_quad_nodes          
           sol_step(ni)%val_nodes(ii)  = eval_step(x_quad(ii),ni, ii,LOC= LRef )
@@ -165,13 +168,9 @@ CONTAINS
     INTEGER :: ni, tni
 
     INTEGER :: ii,jj,kk
-    REAL(prec) :: ti
-    REAL(prec), DIMENSION(nb_subcell) :: phi_m
-    REAL(prec), DIMENSION(size_base)  :: phi
-    REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
-    REAL(prec) :: BB
+    REAL(prec), DIMENSION(nb_cell,nb_subcell) :: max_loc, min_loc
 
-    ! print *, "subcells"
+    ! print *,"---------------------"
 
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
@@ -183,6 +182,14 @@ CONTAINS
     DO ii=1,order_t
       CALL flux_numerique
       
+      IF(max_check == 1) THEN
+        DO ni=1,nb_cell
+          DO jj=1,nb_subcell
+            max_loc(ni,jj) = minmax_loc((/ni,jj/),"max")
+            min_loc(ni,jj) = minmax_loc((/ni,jj/),"min")
+          END DO 
+        END DO
+      END IF
 
       DO ni = 1,nb_cell
         DO jj =1,nb_subcell
@@ -193,10 +200,33 @@ CONTAINS
         END DO
       END DO
 
+      
+      IF(max_check .ne. 0) THEN
+        DO ni=1,nb_cell
+          DO jj=1,nb_subcell
+            IF(max_check == 1) THEN
+
+              IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
+                IF(sol_step(ni)%val_subcells(jj) > max_loc(ni,jj)*(1+10._prec**(-6))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) < min_loc(ni,jj)*(1-10._prec**(-6))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
+              END IF
+
+            ELSE IF(max_check == 2) THEN
+              
+              IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
+                IF(sol_step(ni)%val_subcells(jj) > max_glob*(1+10._prec**(-6))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_glob,sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) < min_glob*(1-10._prec**(-6))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_glob,sol_step(ni)%val_subcells(jj)  
+              END IF
+              
+            END IF
+          END DO
+        END DO
+      END IF
+
 
       DO ni = 1,nb_cell
         DO jj=1,size_base
-          sol_step(ni)%base_poly(jj) = DOT_PRODUCT(Projection_VF_inv_plus(jj,:), sol_step(ni)%val_subcells)
+          sol_step(ni)%base_poly(jj) = DOT_PRODUCT(Projection_VF_inv(jj,:), sol_step(ni)%val_subcells)
         END DO
 
         DO jj=1,size_quad_nodes
@@ -226,7 +256,6 @@ CONTAINS
 
   END SUBROUTINE Time_step_subcell
 
-
   SUBROUTINE dt_calc
     IMPLICIT NONE
     INTEGER :: i,j
@@ -238,17 +267,31 @@ CONTAINS
     IF(TRIM(flux_name) == "advection") THEN
       max_dflux = abs(vit_adv)
     ELSE 
-      max_dflux =0._prec
-      DO i=1,nb_cell
-        DO j=1,size_quad_nodes
-
-          next_subcell = subcells_(i,j)%L
-          gamma_temp = gamma_calc(sol(i)%val_nodes(j), sol(next_subcell(1))%val_nodes(next_subcell(2)))
-          
-          max_dflux = max(max_dflux, gamma_temp)
-
+      max_dflux =eps0
+      if(subcell_use) THEN
+        DO i=1,nb_cell
+          DO j=1,size_quad_nodes
+            next_subcell = subcells_(i,j)%L
+            gamma_temp = gamma_calc(sol(i)%val_nodes(j), sol(next_subcell(1))%val_nodes(next_subcell(2)))
+            
+            max_dflux = max(max_dflux, gamma_temp)
+          END DO
         END DO
-      END DO
+      ELSE
+        DO i=1,nb_cell        
+          DO j=1,size_quad_nodes
+            IF(max_u .LT. sol(i)%val_nodes(j) ) THEN
+              max_u = sol(i)%val_nodes(j)
+            END IF
+
+            IF(min_u .GT. sol(i)%val_nodes(j) ) THEN
+              min_u = sol(i)%val_nodes(j)
+            END IF
+          END DO
+        END DO
+
+        max_dflux = gamma_calc(min_u,max_u) 
+      END IF
 
 
     END IF
@@ -256,7 +299,7 @@ CONTAINS
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
     IF(order_x .GT. order_t) THEN
-    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(order_x * 1._prec/order_t) ,tmax-time) 
+    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
     END IF 
 
     dt = min(dt, 1.05_prec * dt_old)
@@ -268,7 +311,7 @@ CONTAINS
     END IF
 
     
-    IF(sol(1)%val_nodes(1) .NE. sol(1)%val_nodes(1) ) THEN
+    IF(ISNAN(sol(1)%val_nodes(1))) THEN
       write(*, fmt ='("NAN found emergency stop")')
       CALL Emergency_stop
     END IF
@@ -286,49 +329,38 @@ CONTAINS
 
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec
     IF(modulo(n_time,500) == 0)  THEN
-      write(*,fmt='("---------------",i7," ",f8.6," ",e16.6, "--------------")') n_time, time, dt
+      write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
     END IF
 
     IF(time .GE.  REAL(n_imp,prec)*t_imp-eps0)  THEN
-      write(*,fmt='("---------------",i7," ",f8.6," ",e16.6, "--------------")') n_time, time, dt
+      write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
-        IF(subcell_use) THEN
+        IF(subcell_use .and.(.not. error_calc)) THEN
 
-        DO j=1,nb_subcell
-          xi = Ref_to_loc(i,x_submiddle(j))
-          out1 = sol(i)%val_subcells(j)
-
-          IF(TRIM(flux_name) == "advection") THEN 
-            out2 =Q_init(xi - time*vit_adv,0)
-          ELSE 
-            call pied_charact(xi,time,out2)
-          END IF
-
-          write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
-
-          errLi = max(errLi , abs(out1-out2))
-          err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
-          err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
-        END DO
+          DO j=1,nb_subcell
+            xi = Ref_to_loc(i,x_submiddle(j))
+            out1 = sol(i)%val_subcells(j)
+            write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, 0._prec
+          END DO
 
         ELSE
           
-        DO j=1,size_base
-          xi = Ref_to_loc(i,x_quad(j))
-          out1 = sol(i)%val_nodes(j)
+          DO j=1,size_base
+            xi = Ref_to_loc(i,x_quad(j))
+            out1 = sol(i)%val_nodes(j)
 
-          IF(TRIM(flux_name) == "advection") THEN 
-            out2 =Q_init(xi - time*vit_adv,0)
-          ELSE 
-            call pied_charact(xi,time,out2)
-          END IF
+            IF(TRIM(flux_name) == "advection") THEN 
+              out2 =Q_init(xi - time*vit_adv,0)
+            ELSE 
+              call pied_charact(xi,time,out2)
+            END IF
 
-          write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+            write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
 
-          errLi = max(errLi , abs(out1-out2))
-          err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
-          err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
-        END DO
+            errLi = max(errLi , abs(out1-out2))
+            err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+            err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
+          END DO
 
         END IF
       END DO
@@ -372,30 +404,6 @@ CONTAINS
 
   END subroutine pied_charact
 
-  FUNCTION Newton_search(x,t) result(q)
-      implicit none
-      REAL(prec), INTENT(IN)    :: x,t
-      REAL(prec)                :: xk, err, q, epsi = 1e-20
-      integer             :: n=0
-      
-    !     n = 0
-    !     err = abs(flux(Q_init(xk))*t+ xk-x)
-    !     ! print *, err, epsi
-    !     xk = x
-
-    !     do while(err>epsi .and. n<50)
-    !         xk = xk -   (flux(Q_init(xk))*t + xk-x)/(flux_d(Q_init(xk))*Q_init_d(xk)*t +1)
-    !         err =    abs(flux(Q_init(xk))*t + xk-x)
-
-    !         n = n+1
-    !     END do
-        
-
-    !     q = Q_init(xk)
-    !     return
-
-  END FUNCTION Newton_search
-
   SUBROUTINE Emergency_stop
     INTEGER :: i,j
     REAL(prec) :: out1, out2,xi
@@ -429,9 +437,6 @@ CONTAINS
     write(*, fmt ='("err Li = ", e20.12)')  errLi
 
     err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
-
-    n_imp = n_imp +1
-    Time_stemp(n_imp) = time
     
     write(unit=numfile_sol, fmt='("------------------------")' ) 
 

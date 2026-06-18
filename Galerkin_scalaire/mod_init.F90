@@ -7,29 +7,36 @@ CONTAINS
     SUBROUTINE INIT_ALL
         IMPLICIT NONE
 
-        INTEGER :: ni,ii,jj
-        INTEGER :: i
+        INTEGER :: ni,ii,jj, kk
+        INTEGER :: i,j
+        REAL(prec) :: YY
+
+        print *,"read"
 
         CALL READ_DATA
-        
-        IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
+        ! print *, (nomfile_sol)
+        print *,"red"
+    
+        ! IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
 
         nomfile_sol = TRIM(nomfile_sol)//".txt"
 
         print *, "init"
 
-        IF(TRIM(DG_meth)=="Lobatto")  size_base = order_x 
-        IF(TRIM(DG_meth)=="Legendre") size_base = order_x 
+        IF((DG_meth)=="Lobatto")  size_base = order_x 
+        IF((DG_meth)=="Legendre") size_base = order_x 
 
-        if(TRIM(quad_meth)=="Lobatto") size_quad_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
-        if(TRIM(quad_meth)=="Legendre")size_quad_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
+        if((quad_meth)=="Lobatto") size_quad_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
+        if((quad_meth)=="Legendre")size_quad_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
+
+        print *, "allocation"
 
         CALL ALLOCATE_all
-        dx = REAL((xR-xL)/nb_cell, prec)
-        sub_dx = 2._prec/nb_subcell
+        dx = REAL((xR-xL)/Real(nb_cell,prec), prec)
+        sub_dx = 2._prec/Real(nb_subcell,prec)
 
         DO i =1,nb_cell+1 
-            x_cell(i) = xL + (i-1)*dx
+            x_cell(i) = xL + Real(i-1,prec)*dx
         END DO       
 
         DO i=1,nb_cell
@@ -43,7 +50,7 @@ CONTAINS
         n_imp = 0
         t_imp = tmax/Real(print_rule,prec)
 
-        dt = 10._prec**(-6)
+        dt = 10._prec**(-4)
 
 
         CALL Coeff_quad_init
@@ -69,28 +76,45 @@ CONTAINS
         
         print *,"matrices"
 
-        IF     (TRIM(sol_ini_name)=="sinus") THEN
-            max_glob = 1._prec; min_glob = -1._prec
-        ELSE IF(TRIM(sol_ini_name)=="unit") THEN
-            max_glob = 1._prec; min_glob = 1._prec
-        ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
+        IF     ((sol_ini_name)=="sinus") THEN
+            min_glob =-1._prec; max_glob = 1._prec;
+        ELSE IF((sol_ini_name)=="unit") THEN
+            min_glob = 1._prec; max_glob = 1._prec;
+        ELSE IF((sol_ini_name)=="Riemann") THEN
             min_glob = 0._prec; max_glob = 1._prec
-        ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
+        ELSE IF((sol_ini_name)=="creneau") THEN
             min_glob = 0._prec; max_glob = 1._prec
-        ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
+        ELSE IF((sol_ini_name)=="Burgers_choc") THEN
             min_glob =-1._prec; max_glob = 0.5_prec
         END IF
 
 
+        IF(subcell_use) CALL sub_cells_init
+
 
         DO ni=1,nb_cell
-            CALL Projection_Pk(Q_init,sol(ni)%base_poly, LOC=LLoc, ni= ni)
+            
+            IF(subcell_use) THEN
+                DO j =1,nb_subcell 
+                DO kk =1,size_quad_nodes
+                    YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
+                    sol(ni)%val_subcells(j) = sol(ni)%val_subcells(j) + Q_init(YY,ni)*w_quad(kk)/2._prec
+                END DO
+                END DO
+            
+                DO j=1,size_base
+                    sol(ni)%base_poly(j) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells)
+                END DO
+
+            ELSE 
+                CALL Projection_Pk(Q_init,sol(ni)%base_poly, LOC=LLoc, ni= ni)
+            END IF
 
             DO ii=1,size_quad_nodes
                 sol(ni)%val_nodes(ii)  = eval_sol(x_quad(ii),ni, ii, LOC= LRef)
             END DO
                         
-            IF(TRIM(quad_meth)=="Lobatto") THEN
+            IF((quad_meth)=="Lobatto") THEN
             sol(ni)%inter(1)      = sol(ni)%val_nodes(1)
             sol(ni)%inter(2)      = sol(ni)%val_nodes(size_quad_nodes)
             ELSE 
@@ -99,15 +123,13 @@ CONTAINS
             END IF
 
         END DO
-        
-        IF(subcell_use) CALL sub_cells_init
-        
-        IF(TRIM(flux_name) == "advection") THEN 
+                
+        IF((flux_name) == "advection") THEN 
             max_dflux = abs(vit_adv)
             convex_flux = .TRUE.
-        ELSE IF(TRIM(flux_name) == "burgers") THEN
+        ELSE IF((flux_name) == "burgers") THEN
             convex_flux = .TRUE.
-        ELSE IF(TRIM(flux_name) == "Buckley") THEN
+        ELSE IF((flux_name) == "Buckley") THEN
             convex_flux = .False.
         ELSE
             convex_flux = .False.
@@ -151,7 +173,8 @@ CONTAINS
 
         CALL Skip_lines(numfile_param,3) 
         read(numfile_param,  *) cfl;   
-        read(numfile_param,  *) frame_rule; 
+        read(numfile_param,  *) error_calc; 
+        read(numfile_param,  *) max_check; 
         read(numfile_param,  *) print_rule;     
         read(numfile_param,  *) nomfile_sol;     
 

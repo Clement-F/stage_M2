@@ -17,9 +17,9 @@ T=[]
 with open('SolSub.txt') as f:
     lines1 = f.readlines()
     
-with open('SolDG.txt') as f:
-    lines2 = f.readlines()
-
+#with open('SolDG.txt') as f:
+#    lines2 = f.readlines()
+    
 
 U_t = np.zeros((sm,nx));    U_t2 = np.zeros((sm,nx)); 
 X   = np.zeros(nx)
@@ -33,16 +33,17 @@ for k in range(0,sm):
     for i in range(0,(nx)):
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i]   = lines1[k*(nx+1) +i][11:23]
-        U_t2[k][i]   = lines2[k*(nx+1) +i][11:23]
+        #U_t2[k][i]   = lines2[k*(nx+1) +i][11:23]
         U_ex[k][i]  = lines1[k*(nx+1) +i][27:43]        
         err[k][i] = abs(U_t[k][i] - U_ex[k][i]) 
                    
         
     err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
     #plt.plot(X,err[k],'r')
-    plt.plot(X,U_t[k],'b')
-    plt.plot(X,U_t2[k],'g')
-    print(max(U_t[k]), min(U_t[k]))
+    plt.plot(X,U_t[k],'b-')
+    #plt.plot(X,U_t2[k],'g-')
+    
+    print(max(U_t[k]), min(U_t[k]), sum(U_t[k]))
     #plt.plot(X,U_ex[k],'g')
     plt.ylim(-1.2,2.)
     plt.show()         
@@ -61,7 +62,7 @@ if(False):
     plt.plot(X_B,U_B, 'r')
     
     plt.plot(X,U_t[k],'b')
-    plt.plot(X,U_t2[k],'g')
+    #plt.plot(X,U_t2[k],'go')
     plt.ylim(-1.2,1.2)
     plt.show()     
 #for k in range(1,sm):

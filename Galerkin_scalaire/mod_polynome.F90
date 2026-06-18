@@ -19,8 +19,8 @@ CONTAINS
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: creneau 
-        creneau = 0._prec
-        if(-0.5_prec<x .and. x<0._prec) creneau = 1._prec
+        creneau = eps0
+        if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
     END FUNCTION creneau
 
     FUNCTION Q_init(x,ni)
@@ -34,12 +34,12 @@ CONTAINS
         ELSE IF(TRIM(sol_ini_name)=="unit") THEN
             Q_init = unit(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
-            Q_init = 0._prec
-            if(x<0._prec) Q_init =1._prec
+            Q_init = eps0
+            if(x<eps0) Q_init =1._prec
         ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
             Q_init = creneau(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
-            Q_init = 0._prec
+            Q_init = eps0
             if(0.3_prec<x .and. x<0.7_prec) Q_init = -1._prec
             if(x>0.7_prec) Q_init = 0.5_prec
         END IF
@@ -56,7 +56,7 @@ CONTAINS
         REAL(prec), DIMENSION(size_base), INTENT(IN) :: base_poly
         REAL(prec)  :: eval_poly
         INTEGER :: ii
-        eval_poly= 0._prec
+        eval_poly= eps0
 
 
         IF(.not. present(kk)) THEN
@@ -81,7 +81,7 @@ CONTAINS
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_sol 
         INTEGER :: ii
-        eval_sol= 0._prec
+        eval_sol= eps0
 
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
@@ -105,7 +105,7 @@ CONTAINS
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_step 
         INTEGER :: ii
-        eval_step= 0._prec
+        eval_step= eps0
         
         IF(.not. present(kk)) THEN
             DO ii = 1,size_base
@@ -146,7 +146,7 @@ CONTAINS
         REAL(prec) :: YY
         INTEGER :: kk
         
-        quadrature = 0._prec
+        quadrature = eps0
 
             IF(TRIM(LOC) == "Loc") THEN
             DO kk =size_quad_nodes,1,-1
@@ -192,7 +192,7 @@ CONTAINS
         INTEGER :: ni
         REAL(prec) :: integration
 
-        integration = 0._prec
+        integration = eps0
 
         DO ni = 1,nb_cell
             integration = integration + quadrature(fct1,opt1, fct2,opt2,LLoc,ni)
@@ -556,7 +556,7 @@ CONTAINS
         IF(TRIM(LOC) == "Ref")      XX = x
         IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
 
-        DG_base = 0._prec
+        DG_base = eps0
 
         IF(DG_meth == "Legendre") THEN
             DO ii =ordre_poly,1,-1
@@ -587,11 +587,11 @@ CONTAINS
         IF(TRIM(LOC) == "Ref")      XX = x
         IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
 
-        dDG_base = 0._prec
+        dDG_base = eps0
 
         IF(DG_meth == "Legendre") THEN
         DO ii =ordre_poly,2,-1
-            dDG_base = dDG_base + (ii-1)*coeff_DG(ordre_poly,ii) * XX**(ii-2)
+            dDG_base = dDG_base + REAL(ii-1,prec)*coeff_DG(ordre_poly,ii) * XX**(ii-2)
         END DO
         ELSE IF(DG_meth == "Lobatto") THEN
         DO ii =1,size_base
@@ -684,7 +684,7 @@ CONTAINS
         INTEGER :: jj, kk
 
 
-        f_prod = 0._prec
+        f_prod = eps0
         IF(.not. present(fct_val)) THEN
         DO jj =size_base,1,-1
             DO kk =1,size_quad_nodes
@@ -714,7 +714,7 @@ CONTAINS
         IMPLICIT NONE
 
         INTEGER :: ii,jj,kk
-        Masse =0._prec
+        Masse =eps0
 
         DO ii = 1,size_base
             DO jj = ii,size_base
@@ -772,7 +772,8 @@ CONTAINS
         IMPLICIT NONE
         INTEGER ::i,j,m,kk
         integer :: ord
-        REAL(prec) ::YY
+        REAL(prec) :: YY
+        REAL(prec), DIMENSION(size_base, nb_subcell) :: Projection_VF_inv_temp
 
         Projection_VF = 0._prec
         DO j =1,nb_subcell
@@ -790,8 +791,8 @@ CONTAINS
         IF(nb_subcell == size_base) THEN
             CALL inv_mat(Projection_VF,Projection_VF_inv,0)
         ELSE 
-            CALL inv_mat(MATMUL(Transpose(Projection_VF),Projection_VF),Projection_VF_inv,0)
-            Projection_VF_inv_plus = MATMUL(Projection_VF_inv, Transpose(Projection_VF))
+            CALL inv_mat(MATMUL(Transpose(Projection_VF),Projection_VF),Projection_VF_inv_temp,0)
+            Projection_VF_inv = MATMUL(Projection_VF_inv_temp, Transpose(Projection_VF))
         END IF
 
         CALL print_mat(MATMUL(Transpose(Projection_VF),Projection_VF), size_base, size_base)
@@ -805,37 +806,35 @@ CONTAINS
         INTEGER :: i,j
         REAL(prec), DIMENSION(nb_subcell+1) :: temp
         REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
-        
+
+        ! Répartition des subpoints 
         IF(TRIM(subcell_repartition)=="Unif") THEN
             DO i =1,nb_subcell+1 
-                x_subcell(i) = -1._prec + (i-1)*sub_dx
+                x_subcell(i) = -1._prec + Real(i-1,prec)*sub_dx
             END DO
+
         ELSEIF(TRIM(subcell_repartition)=="Lobatto") THEN
             CALL quad_1D_lobatto(nb_subcell+1,x_subcell,temp)
         END IF
 
-        print *,x_subcell
-
+        ! attribution de la taille et des points milieux des subcellules
         DO i =1,nb_subcell
             subcell_size(i)= x_subcell(i+1)-x_subcell(i)  
             x_submiddle(i) = x_subcell(i) + subcell_size(i)/2._prec
         END DO
 
+        ! création de la matrice de Passage subcell <-> poly
         CALL Projection_VF_init
+        print *, "P"
         CALL print_mat(Projection_VF,nb_subcell,size_base)
-
-
-        DO i=1,nb_cell
-            sol(i)%val_subcells =MATMUL(Projection_VF,sol(i)%base_poly)
-        END DO
+        print *, "P_inv"
+        CALL print_mat(Projection_VF_inv,size_base,nb_subcell)
 
         phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
         phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))
 
-        C_m =0._prec; 
-        C_p = 0._prec;
-        print *,1,phi_val(:,1)
-        print *,2,phi_val(:,2)
+        C_m =eps0; 
+        C_p = eps0;
         DO i=1,nb_subcell+1
             DO j=1,i-1
                 C_p(i) = C_p(i) + phi_val(j,2)
@@ -869,7 +868,7 @@ CONTAINS
         xls = x_subcell(n_sub)
         xrs = x_subcell(n_sub+1)
 
-        unit_sm = 0._prec
+        unit_sm = eps0
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm

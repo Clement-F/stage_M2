@@ -35,13 +35,13 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:),   POINTER :: Time_stemp
 
   REAL(prec), DIMENSION(:),   POINTER :: C_m, C_p
-  REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv, Projection_VF_inv_plus
+  REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique 
-  INTEGER   :: max_rule, coeff_smooth
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc
+  INTEGER   :: max_rule, coeff_smooth, max_check
 
 
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 
@@ -91,7 +91,7 @@ MODULE mod_declaration
     
     ALLOCATE( pts_DG(size_base)) 
     ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
-    ALLOCATE( Projection_VF(nb_subcell,size_base),  Projection_VF_inv(size_base,size_base), Projection_VF_inv_plus(size_base,nb_subcell))
+    ALLOCATE( Projection_VF(nb_subcell,size_base),  Projection_VF_inv(size_base,nb_subcell))
     ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 
@@ -111,27 +111,34 @@ MODULE mod_declaration
     INTEGER :: i
     
     DO i =1,nb_cell
-      DEALLOCATE(sol(i)%base_poly);      DEALLOCATE(sol(i)%val_nodes)
-      DEALLOCATE(sol_exa(i)%base_poly);  DEALLOCATE(sol_exa(i)%val_nodes) 
-      DEALLOCATE(sol_step(i)%base_poly); DEALLOCATE(sol_step(i)%val_nodes)
-      DEALLOCATE(flux_h(i)%base_poly);   DEALLOCATE(flux_h(i)%val_nodes)
-    END DO 
+      DEALLOCATE(sol(i)%base_poly);      DEALLOCATE(sol(i)%val_nodes);      DEALLOCATE(sol(i)%val_subcells)
+      DEALLOCATE(sol_exa(i)%base_poly);  DEALLOCATE(sol_exa(i)%val_nodes);  DEALLOCATE(sol_exa(i)%val_subcells) 
+      DEALLOCATE(sol_step(i)%base_poly); DEALLOCATE(sol_step(i)%val_nodes); DEALLOCATE(sol_step(i)%val_subcells)
+      DEALLOCATE(flux_h(i)%base_poly);   DEALLOCATE(flux_h(i)%val_nodes);   DEALLOCATE(flux_h(i)%val_subcells)
+      DEALLOCATE(sol(i)%inter);          DEALLOCATE(sol_exa(i)%inter);      DEALLOCATE(sol_step(i)%inter)
+    END DO
+    
+    DEALLOCATE( sol, sol_step, flux_h, sol_exa, g)
 
-    DEALLOCATE( sol, sol_step, flux_h, sol_exa)
-    DEALLOCATE( x_cell, x_middle, cell_size) 
+    DEALLOCATE (subcells_)
+
+    DEALLOCATE( x_cell,     x_middle,     cell_size) 
+    DEALLOCATE( x_subcell,  x_submiddle,  subcell_size)
+
     DEALLOCATE( x_quad, w_quad ) 
-    ! DEALLOCATE( coeff_DG ) 
+    DEALLOCATE( sig_1, sig_2, sig_quad)
+    DEALLOCATE( coeff_DG ) 
 
     DEALLOCATE( coeff_Taylor, coeff_legendre )
     DEALLOCATE( RK_alpha, RK_beta, RK_time )
     DEALLOCATE( L_step)
     DEALLOCATE( Time_stemp)
     
-    DEALLOCATE( pts_DG ) 
-    DEALLOCATE( coeff_DG ) 
+    DEALLOCATE( pts_DG) 
+    DEALLOCATE( C_m, C_p)
+    DEALLOCATE( Projection_VF,  Projection_VF_inv)
     DEALLOCATE( Masse, Masse_inv ) 
     DEALLOCATE( Rigid, Rigid_inv ) 
-
     
   END SUBROUTINE DEALLOCATE_all
   
