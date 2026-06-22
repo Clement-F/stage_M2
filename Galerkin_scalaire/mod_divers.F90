@@ -83,45 +83,57 @@ CONTAINS
     !     END IF
 
     ! END FUNCTION Moindre_carre
-
     
-  FUNCTION Newton_search(fct, fct_d, x0) result(xk)
-        implicit none
+    FUNCTION Newton_search(fct, fct_d, x0) result(xk)
+            implicit none
 
-        REAL(prec), INTENT(IN), optional :: x0
+            REAL(prec), INTENT(IN), optional :: x0
 
 
-        interface
-            FUNCTION fct(x)
-                USE precis   
-                REAL(prec),INTENT(IN) :: x 
-                REAL(prec) fct 
-            END FUNCTION fct
+            interface
+                FUNCTION fct(x)
+                    USE precis   
+                    REAL(prec),INTENT(IN) :: x 
+                    REAL(prec) fct 
+                END FUNCTION fct
 
-            
-            FUNCTION fct_d(x)
-                USE precis   
-                REAL(prec),INTENT(IN) :: x 
-                REAL(prec) fct_d
-            END FUNCTION fct_d
-        END interface
+                
+                FUNCTION fct_d(x)
+                    USE precis   
+                    REAL(prec),INTENT(IN) :: x 
+                    REAL(prec) fct_d
+                END FUNCTION fct_d
+            END interface
 
-        REAL(prec) :: xk, err
-        integer    :: n=0
-      
-        n = 0
-        IF(present(x0)) THEN;   xk =x0
-        ELSE;                   xk =0._prec
-        END IF
-
-        err = abs(fct(xk))
-
-        do while(err>eps0 .and. n<50)
-            xk = xk -   (fct(xk))/(fct_d(xk))
-            err = abs(fct(xk))
-            n = n+1
-        END do
+            REAL(prec) :: xk, err
+            integer    :: n=0
         
-  END FUNCTION Newton_search
+            n = 0
+            IF(present(x0)) THEN;   xk =x0
+            ELSE;                   xk =0._prec
+            END IF
+
+            err = abs(fct(xk))
+
+            do while(err>eps0 .and. n<50)
+                xk = xk -   (fct(xk))/(fct_d(xk))
+                err = abs(fct(xk))
+                n = n+1
+            END do
+            
+    END FUNCTION Newton_search
   
+    FUNCTION factoriel(n,nb)
+        INTEGER, INTENT(IN) :: n,nb
+        REAL(prec) :: factoriel
+
+        INTEGER :: i
+
+        factoriel = 1._prec
+        DO i=n,(n-nb),-1
+            factoriel = REAL(i,prec)*factoriel
+        END DO
+
+    END FUNCTION factoriel
+
 END MODULE mod_Divers

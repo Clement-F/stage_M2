@@ -14,7 +14,7 @@ T=[]
 
 #   solDG   SolSub   file_sol    
 
-with open('SolSub.txt') as f:
+with open('solSub.txt') as f:
     lines1 = f.readlines()
     
 #with open('SolDG.txt') as f:
@@ -49,7 +49,7 @@ for k in range(0,sm):
     plt.show()         
 
 
-if(False):
+if(True):
     with open('buckley.dat') as f:
         lines = f.readlines()
         

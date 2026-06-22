@@ -169,6 +169,7 @@ CONTAINS
 
     INTEGER :: ii,jj,kk
     REAL(prec), DIMENSION(nb_cell,nb_subcell) :: max_loc, min_loc
+    REAL(prec) :: L
 
     ! print *,"---------------------"
 
@@ -194,28 +195,37 @@ CONTAINS
       DO ni = 1,nb_cell
         DO jj =1,nb_subcell
           
+          ! print *,flux_h(ni)%val_subcells(jj+1), flux_h(ni)%val_subcells(jj)
+
+          L = (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+
+          if( abs(L) .LT. 10*eps0) L = 0._prec
+
+
           sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
                                     & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) * (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))                                   
+                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) &
+                                    & * L                                   
         END DO
       END DO
 
       
       IF(max_check .ne. 0) THEN
+        ! print *,"--------------------------"
         DO ni=1,nb_cell
           DO jj=1,nb_subcell
             IF(max_check == 1) THEN
 
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) > max_loc(ni,jj)*(1+10._prec**(-6))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
-                IF(sol_step(ni)%val_subcells(jj) < min_loc(ni,jj)*(1-10._prec**(-6))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) > max_loc(ni,jj)*(1+10._prec**(-8))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) < min_loc(ni,jj)*(1-10._prec**(-8))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
               END IF
 
             ELSE IF(max_check == 2) THEN
               
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) > max_glob*(1+10._prec**(-6))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_glob,sol_step(ni)%val_subcells(jj)  
-                IF(sol_step(ni)%val_subcells(jj) < min_glob*(1-10._prec**(-6))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_glob,sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) > max_glob*(1+10._prec**(-8))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_glob,sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) < min_glob*(1-10._prec**(-8))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_glob,sol_step(ni)%val_subcells(jj)  
               END IF
               
             END IF
@@ -270,22 +280,22 @@ CONTAINS
       max_dflux =eps0
       if(subcell_use) THEN
         DO i=1,nb_cell
-          DO j=1,size_quad_nodes
+          DO j=1,nb_subcell
             next_subcell = subcells_(i,j)%L
-            gamma_temp = gamma_calc(sol(i)%val_nodes(j), sol(next_subcell(1))%val_nodes(next_subcell(2)))
+            gamma_temp = gamma_calc(sol(i)%val_subcells(j), sol(next_subcell(1))%val_subcells(next_subcell(2)))
             
             max_dflux = max(max_dflux, gamma_temp)
           END DO
         END DO
       ELSE
         DO i=1,nb_cell        
-          DO j=1,size_quad_nodes
-            IF(max_u .LT. sol(i)%val_nodes(j) ) THEN
-              max_u = sol(i)%val_nodes(j)
+          DO j=1,nb_subcell
+            IF(max_u .LT. sol(i)%val_subcells(j) ) THEN
+              max_u = sol(i)%val_subcells(j)
             END IF
 
-            IF(min_u .GT. sol(i)%val_nodes(j) ) THEN
-              min_u = sol(i)%val_nodes(j)
+            IF(min_u .GT. sol(i)%val_subcells(j) ) THEN
+              min_u = sol(i)%val_subcells(j)
             END IF
           END DO
         END DO
@@ -440,7 +450,7 @@ CONTAINS
     
     write(unit=numfile_sol, fmt='("------------------------")' ) 
 
-    write(unit= numfile_data, fmt='("nt = "i5)') n_imp
+    write(unit= numfile_data, fmt='("nt = ",i5)') n_imp
     DO i=1,n_imp
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
@@ -451,10 +461,10 @@ CONTAINS
     open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
     write(unit=numfile_conv, fmt='("=====================")') 
     write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) size_base-1, order_t
-    write(unit=numfile_conv, fmt='("for nx = "i5" we have error :")' ) nb_cell
-    write(unit=numfile_conv, fmt='("err_L1 :" e20.12 )') err_L1
-    write(unit=numfile_conv, fmt='("err_L2 :" e20.12 )') err_L2
-    write(unit=numfile_conv, fmt='("err_Li :" e20.12 )') err_Li
+    write(unit=numfile_conv, fmt='("for nx = ",i5," we have error :")' ) nb_cell
+    write(unit=numfile_conv, fmt='("err_L1 :", e20.12 )') err_L1
+    write(unit=numfile_conv, fmt='("err_L2 :", e20.12 )') err_L2
+    write(unit=numfile_conv, fmt='("err_Li :", e20.12 )') err_Li
     write(unit=numfile_conv, fmt='("=====================")') 
     close(unit=numfile_conv)
 

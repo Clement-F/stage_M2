@@ -34,7 +34,17 @@ CONTAINS
     CASE("burgers")
       flux_d = u  
     CASE("Buckley")
-      flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u)))/(4._prec*u**2 + (1._prec-u)**2)**2
+      ! print *,abs(u),eps0, (abs(u) .GT. eps0)
+      IF((abs(u) .GT. eps0) .and. (abs(u-1._prec) .GT. eps0) )THEN
+        ! print *,"hey"
+        flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u))) &
+              &/(4._prec*u**2 + (1._prec-u)**2)**2
+      ELSE 
+        flux_d = eps0
+      END IF
+
+      ! print *,flux_d
+
     CASE DEFAULT
       WRITE(*,*) "flux_d non reconnu ",flux_name
       flux_d = 0._prec
@@ -107,12 +117,12 @@ CONTAINS
     !   gamma_calc = 2.34_prec
  
     ELSE
-      gamma_calc = max( abs(flux_d(u)), abs(flux_d(v)))
+      gamma_calc = max(abs(flux_d(u)), abs(flux_d(v)))
 
       IF(.NOT. convex_flux) THEN
-        u_step = (max(u,v)-min(u,v))/10._prec
+        u_step = (max(u,v)-min(u,v))/20._prec
 
-        DO i=1,10
+        DO i=1,20
           gamma_temp = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
 
           IF(gamma_calc .LT. gamma_temp ) THEN
@@ -136,8 +146,16 @@ CONTAINS
       REAL(prec) :: alpha,beta, u_Riemann
       INTEGER, DIMENSION(2) :: voi_L, voi_R
 
+      LOGICAL    :: alpha_smooth 
+      REAL(prec) :: vL,vR, alpha_L, alpha_R
+
+      ! IF(smooth_extrema) THEN
+      ! END IF
+
+
       IF(max_rule == 0) THEN 
         theta = 1._prec
+
       ELSE IF(max_rule == 2) THEN
           
         ug = sol_step(mc(1))%val_subcells(mc(2))
@@ -175,18 +193,22 @@ CONTAINS
     
       END IF
 
-      param = min(beta - u_Riemann, u_Riemann- alpha); IF((param .LT. 10*eps0) .or.(DF .LT. 10*eps0)) param = 0._prec
-      theta = min(1._prec, abs(gamma_mp/DF) * param)
+      param = min(beta - u_Riemann, u_Riemann- alpha); IF((param .LT. 10._prec*eps0) .or.(DF .LT. 10*eps0)) param = 0._prec
+      IF(abs(DF) .LT. eps0) THEN 
+        theta = 1._prec
+      ELSE 
+        theta = min(1._prec, abs(gamma_mp/DF) * param)
+      END IF
 
       ! theta = max(theta, eps0)
       
       voi_L = subcells_(mc(1),mc(2))%L;
       voi_R = subcells_(pv(1),pv(2))%R; 
 
-      IF(((theta .GT. 1._prec) .or. (theta .LT.  0._prec )) .or. (param .LT. 0._prec  ))THEN
+      IF(((theta .GT. 1._prec) .or. (theta .LT.  0._prec)) .or. (param .LT. 0._prec))THEN
         print *,"================" ,mc,"---------", pv ,"============================"
         print *,"voi_L : ", voi_L, "voi_R : ", voi_R
-        write(*, fmt="( 'stencil = (', e12.6, 2x,e12.6, 2x ,e12.6, 2x,e12.6 ')')") sol_step(voi_L(1))%val_subcells(voi_L(2)), ug, ud , sol_step(voi_R(1))%val_subcells(voi_R(2)) 
+        write(*, fmt="( 'stencil = (', e12.6, 2x,e12.6, 2x ,e12.6, 2x,e12.6 ,')')") sol_step(voi_L(1))%val_subcells(voi_L(2)), ug, ud , sol_step(voi_R(1))%val_subcells(voi_R(2)) 
         write(*, fmt="( 'sol Riemann : ', e12.6 )") u_Riemann
         write(*, fmt="( 'alpha,beta = ',e12.6,2x, e12.6 )") alpha, beta
         write(*, fmt="( 'theta = ', f10.6, ' gamma = ', f10.6)") theta, gamma_mp

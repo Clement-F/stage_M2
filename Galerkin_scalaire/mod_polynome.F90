@@ -538,6 +538,7 @@ CONTAINS
 
     END SUBROUTINE quad_1D_legendre
 
+
 ! ---------------------------------------------------------------
 ! ---------------------------------------------------------------
 
@@ -609,6 +610,47 @@ CONTAINS
         
 
     END FUNCTION dDG_base
+
+
+    ! FUNCTION deriv_DG_base(x,ordre_poly, nb_deriv, LOC,ni)
+    !     IMPLICIT NONE
+    !     INTEGER,            INTENT(IN) :: ordre_poly
+    !     CHARACTER (len=8),  INTENT(IN) :: LOC
+    !     INTEGER,            INTENT(IN) :: nb_deriv
+    !     INTEGER,            INTENT(IN) :: ni
+    !     REAL(Prec),         INTENT(IN) :: x
+
+    !     REAL(prec) :: XX
+    !     REAL(prec) :: deriv_DG_base
+    !     REAL(prec) :: temp
+    !     INTEGER :: ii,jj
+
+    !     IF(TRIM(LOC) == "Loc")      XX = Loc_to_Ref(ni,x)
+    !     IF(TRIM(LOC) == "Ref")      XX = x
+    !     IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
+
+    !     deriv_DG_base = eps0
+
+    !     IF(DG_meth == "Legendre") THEN
+    !     DO ii =ordre_poly,(nb_deriv+1),-1
+    !         deriv_DG_base = deriv_DG_base + factoriel(ii,nb_deriv)*coeff_DG(ordre_poly,ii) * XX**(ii-nb_deriv)
+    !     END DO
+    !     ELSE IF(DG_meth == "Lobatto") THEN
+    !     DO ii =1,size_base
+    !         temp =1._prec
+
+    !         DO jj =1,size_base
+    !             IF((jj .NE. ii) .and. (jj .ne.ordre_poly)) THEN 
+    !             temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))
+    !             END IF
+    !         END DO
+
+    !         IF(ii .NE. ordre_poly)  dDG_base = dDG_base + temp/(pts_DG(ordre_poly)-pts_DG(ii))
+    !     END DO
+    !     END IF
+        
+
+    ! END FUNCTION deriv_DG_base
 
     FUNCTION Ref_to_Refsub(XX,n_sub)  result(ZZ)
         IMPLICIT NONE
@@ -726,6 +768,10 @@ CONTAINS
                 Masse(jj,ii) = Masse(ii,jj)
             END DO
         END DO
+
+        print *, w_quad
+        print *, "masse"
+        CALL print_mat(masse, size_base, size_base)
         
         CALL inv_mat(Masse,Masse_inv,1)
 
@@ -773,7 +819,7 @@ CONTAINS
         INTEGER ::i,j,m,kk
         integer :: ord
         REAL(prec) :: YY
-        REAL(prec), DIMENSION(size_base, nb_subcell) :: Projection_VF_inv_temp
+        REAL(prec), DIMENSION(size_base, size_base) :: Projection_VF_inv_temp
 
         Projection_VF = 0._prec
         DO j =1,nb_subcell
@@ -784,23 +830,53 @@ CONTAINS
                 END DO
             END DO
         END DO
-
-
-        CALL print_mat(Projection_VF,nb_subcell,size_base )        
+     
 
         IF(nb_subcell == size_base) THEN
             CALL inv_mat(Projection_VF,Projection_VF_inv,0)
         ELSE 
             CALL inv_mat(MATMUL(Transpose(Projection_VF),Projection_VF),Projection_VF_inv_temp,0)
-            Projection_VF_inv = MATMUL(Projection_VF_inv_temp, Transpose(Projection_VF))
+            Projection_VF_inv = MATMUL(Projection_VF_inv_temp,Transpose(Projection_VF))
         END IF
 
-        CALL print_mat(MATMUL(Transpose(Projection_VF),Projection_VF), size_base, size_base)
-        CALL print_mat(Projection_VF_inv,size_base,nb_subcell)
 
 
     END SUBROUTINE Projection_VF_init
 
+    SUBROUTINE Projection_VFd_init
+        IMPLICIT NONE
+        INTEGER ::i,j,m,kk
+        integer :: ord
+        REAL(prec) :: YY
+        REAL(prec), DIMENSION(size_base, size_base) :: inv_temp
+
+        Projection_VF_d = 0._prec
+        DO j =1,nb_subcell
+            DO i=1,size_base
+
+                DO kk =size_quad_nodes,1,-1
+                    YY = x_quad(kk)
+                    Projection_VF_d(j,i) = Projection_VF(j,i) + dDG_base(YY,i,LOC=LSub, ni=j)*w_quad(kk)/2._prec
+                END DO
+
+                Projection_VF_dd(j,i) = 0.5_prec * (dDG_base(1._prec,i, LOC=LSub,ni=j) - dDG_base(-1._prec,i, LOC=LSub,ni=j))
+            END DO
+        END DO
+ 
+
+        IF(nb_subcell == size_base) THEN
+            CALL inv_mat(Projection_VF_d,Projection_VF_inv_d,0)
+            CALL inv_mat(Projection_VF_dd,Projection_VF_inv_dd,0)
+        ELSE 
+            CALL inv_mat(MATMUL(Transpose(Projection_VF_d),Projection_VF_d),inv_temp,0)
+            Projection_VF_inv_d = MATMUL(inv_temp,Transpose(Projection_VF_d))
+
+            CALL inv_mat(MATMUL(Transpose(Projection_VF_dd),Projection_VF_dd),inv_temp,0)
+            Projection_VF_inv_dd = MATMUL(inv_temp,Transpose(Projection_VF_dd))
+        END IF
+
+    END SUBROUTINE Projection_VFd_init
+    
     SUBROUTINE sub_cells_init
         IMPLICIT NONE
         INTEGER :: i,j
@@ -825,10 +901,7 @@ CONTAINS
 
         ! création de la matrice de Passage subcell <-> poly
         CALL Projection_VF_init
-        print *, "P"
-        CALL print_mat(Projection_VF,nb_subcell,size_base)
-        print *, "P_inv"
-        CALL print_mat(Projection_VF_inv,size_base,nb_subcell)
+        IF(smooth_extrema) CALL Projection_VFd_init
 
         phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
         phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))

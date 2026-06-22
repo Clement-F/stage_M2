@@ -32,6 +32,8 @@
         à faire
 ===================================
 
+quadrature Legendre (ordre > 5)
+
 max-rule check implémenter sur le cas non subcell (?)
 -> check si l'on peut l'implémenter en regardant le max des valeurs aux points de quad sur chaque cellules ? 
 -> check si il existe une meilleur manière de l'implémenter 

@@ -36,11 +36,12 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:),   POINTER :: C_m, C_p
   REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv
+  REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF_d,Projection_VF_dd, Projection_VF_inv_d, Projection_VF_inv_dd
   REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, smooth_extrema
   INTEGER   :: max_rule, coeff_smooth, max_check
 
 
@@ -91,7 +92,9 @@ MODULE mod_declaration
     
     ALLOCATE( pts_DG(size_base)) 
     ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
-    ALLOCATE( Projection_VF(nb_subcell,size_base),  Projection_VF_inv(size_base,nb_subcell))
+    ALLOCATE( Projection_VF(nb_subcell,size_base),    Projection_VF_inv(size_base,nb_subcell))
+    ALLOCATE( Projection_VF_d(nb_subcell,size_base),  Projection_VF_inv_d(size_base,nb_subcell))
+    ALLOCATE( Projection_VF_dd(nb_subcell,size_base), Projection_VF_inv_dd(size_base,nb_subcell))
     ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 

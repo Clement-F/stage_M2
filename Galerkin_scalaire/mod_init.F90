@@ -63,6 +63,9 @@ CONTAINS
             sig_quad(ii,jj) = DG_base(x_quad(jj),ii, LOC=LRef,ni=0)
           END DO
         END DO
+
+        print *, "matrice points quad "
+        CALL print_mat(sig_quad, size_base, size_quad_nodes)
         
 
 
@@ -168,6 +171,7 @@ CONTAINS
         read(numfile_param,  *) monolithique
         read(numfile_param,  *) max_rule
         read(numfile_param,  *) coeff_smooth
+        read(numfile_param,  *) smooth_extrema
         read(numfile_param,  *) nb_subcell
         read(numfile_param,  *) subcell_repartition
 
