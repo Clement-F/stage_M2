@@ -850,31 +850,15 @@ CONTAINS
         REAL(prec) :: YY
         REAL(prec), DIMENSION(size_base, size_base) :: inv_temp
 
-        Projection_VF_d = 0._prec
+        Projection_VF_d = 0._prec; Projection_VF_dd =0._prec
         DO j =1,nb_subcell
             DO i=1,size_base
 
-                DO kk =size_quad_nodes,1,-1
-                    YY = x_quad(kk)
-                    Projection_VF_d(j,i) = Projection_VF(j,i) + dDG_base(YY,i,LOC=LSub, ni=j)*w_quad(kk)/2._prec
-                END DO
-
-                Projection_VF_dd(j,i) = 0.5_prec * (dDG_base(1._prec,i, LOC=LSub,ni=j) - dDG_base(-1._prec,i, LOC=LSub,ni=j))
+                Projection_VF_d(j,i) = ( DG_base(1._prec,i, LOC=LSub,ni=j) -  DG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j)*2._prec)
+                Projection_VF_dd(j,i)= (dDG_base(1._prec,i, LOC=LSub,ni=j) - dDG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j)*2._prec)
             END DO
         END DO
  
-
-        IF(nb_subcell == size_base) THEN
-            CALL inv_mat(Projection_VF_d,Projection_VF_inv_d,0)
-            CALL inv_mat(Projection_VF_dd,Projection_VF_inv_dd,0)
-        ELSE 
-            CALL inv_mat(MATMUL(Transpose(Projection_VF_d),Projection_VF_d),inv_temp,0)
-            Projection_VF_inv_d = MATMUL(inv_temp,Transpose(Projection_VF_d))
-
-            CALL inv_mat(MATMUL(Transpose(Projection_VF_dd),Projection_VF_dd),inv_temp,0)
-            Projection_VF_inv_dd = MATMUL(inv_temp,Transpose(Projection_VF_dd))
-        END IF
-
     END SUBROUTINE Projection_VFd_init
     
     SUBROUTINE sub_cells_init
@@ -883,6 +867,7 @@ CONTAINS
         REAL(prec), DIMENSION(nb_subcell+1) :: temp
         REAL(prec), DIMENSION(nb_subcell,2) :: phi_val
 
+        print *, "subcells init"
         ! Répartition des subpoints 
         IF(TRIM(subcell_repartition)=="Unif") THEN
             DO i =1,nb_subcell+1 
@@ -919,6 +904,7 @@ CONTAINS
         END DO
 
 
+        subcells_(:,:)%extrema = .FALSE.
         DO i=1,nb_cell
             DO j=1, nb_subcell
                 subcells_(i,j)%index_m = i; subcells_(i,j)%index_s = j;  

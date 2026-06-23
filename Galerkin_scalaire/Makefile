@@ -4,8 +4,7 @@ LD	= gfortran
 # FFLAGS  = -g -C -O3 -march=native 
 # LDFLAGS = -g -C -O3 -march=native 
 
-
-FFLAGS  = -g -C -fbacktrace -Wtarget-lifetime -Wcompare-reals -Wrealloc-lhs-all \
+FFLAGS  =  -fcheck=all -g -C -fbacktrace -Wtarget-lifetime -Wcompare-reals -Wrealloc-lhs-all \
 			-Wrealloc-lhs -Wintrinsic-shadow -Wunderflow -Wintrinsics-std \
 			-Wimplicit-procedure -Wconversion -Wconversion-extra -Wline-truncation \
 			-Wcharacter-truncation -Wc-binding-type -Waliasing -ffpe-trap=zero,overflow,underflow

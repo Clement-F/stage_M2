@@ -98,7 +98,6 @@ CONTAINS
 
   END FUNCTION minmax_loc
 
-
   FUNCTION gamma_calc(u,v)
     IMPLICIT NONE
     REAL(prec), INTENT(IN) :: u,v
@@ -120,14 +119,11 @@ CONTAINS
       gamma_calc = max(abs(flux_d(u)), abs(flux_d(v)))
 
       IF(.NOT. convex_flux) THEN
-        u_step = (max(u,v)-min(u,v))/20._prec
+        u_step = (max(u,v)-min(u,v))/10._prec
 
-        DO i=1,20
+        DO i=1,10
           gamma_temp = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
-
-          IF(gamma_calc .LT. gamma_temp ) THEN
-             gamma_calc = gamma_temp
-          END IF
+          gamma_calc = MAX(gamma_calc, gamma_temp)
 
         END DO
       END IF
@@ -145,14 +141,7 @@ CONTAINS
       REAL(prec) :: gamma_mp, param
       REAL(prec) :: alpha,beta, u_Riemann
       INTEGER, DIMENSION(2) :: voi_L, voi_R
-
-      LOGICAL    :: alpha_smooth 
-      REAL(prec) :: vL,vR, alpha_L, alpha_R
-
-      ! IF(smooth_extrema) THEN
-      ! END IF
-
-
+      
       IF(max_rule == 0) THEN 
         theta = 1._prec
 
@@ -160,7 +149,7 @@ CONTAINS
           
         ug = sol_step(mc(1))%val_subcells(mc(2))
         ud = sol_step(pv(1))%val_subcells(pv(2))
-        f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
+        gamma_mp = gamma_calc(ug,ud)
    
         u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
@@ -171,21 +160,24 @@ CONTAINS
       
         ug = sol_step(mc(1))%val_subcells(mc(2))
         ud = sol_step(pv(1))%val_subcells(pv(2))
-        f_FV = Flux_FV(ug,ud);   gamma_mp = gamma_calc(ug,ud)
+        gamma_mp = gamma_calc(ug,ud)
         u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
         IF(DF .LT. -eps0) THEN
-
           beta = minmax_loc(mc,"max")
           alpha= minmax_loc(pv,"min")
 
         ELSE IF(DF .GT. eps0) THEN
-          
           beta = minmax_loc(pv,"max")
           alpha= minmax_loc(mc,"min")
 
         ELSE 
-          
+
+          beta = minmax_loc(mc,"max")
+          beta = max(beta,minmax_loc(pv,"max"))
+          alpha= minmax_loc(pv,"min")
+          alpha= min(alpha,minmax_loc(mc,"min"))
+
           theta = 0._prec
         END IF
         
@@ -193,15 +185,14 @@ CONTAINS
     
       END IF
 
-      param = min(beta - u_Riemann, u_Riemann- alpha); IF((param .LT. 10._prec*eps0) .or.(DF .LT. 10*eps0)) param = 0._prec
-      IF(abs(DF) .LT. eps0) THEN 
-        theta = 1._prec
-      ELSE 
-        theta = min(1._prec, abs(gamma_mp/DF) * param)
+      param = min(beta - u_Riemann, u_Riemann- alpha); IF(param .LT. eps0) param = 0._prec
+
+      ! IF(theta .LT. eps0) theta = 0._prec
+
+      IF(abs(DF) .LT. eps0) THEN; theta = 1._prec
+      ELSE;                       theta = max(min(1._prec, abs(gamma_mp/DF) * param),0._prec)
       END IF
 
-      ! theta = max(theta, eps0)
-      
       voi_L = subcells_(mc(1),mc(2))%L;
       voi_R = subcells_(pv(1),pv(2))%R; 
 
@@ -209,21 +200,75 @@ CONTAINS
         print *,"================" ,mc,"---------", pv ,"============================"
         print *,"voi_L : ", voi_L, "voi_R : ", voi_R
         write(*, fmt="( 'stencil = (', e12.6, 2x,e12.6, 2x ,e12.6, 2x,e12.6 ,')')") sol_step(voi_L(1))%val_subcells(voi_L(2)), ug, ud , sol_step(voi_R(1))%val_subcells(voi_R(2)) 
+        write(*, fmt="( 'sol interface : ', e12.6,1x, e12.6 )") ug,ud
         write(*, fmt="( 'sol Riemann : ', e12.6 )") u_Riemann
         write(*, fmt="( 'alpha,beta = ',e12.6,2x, e12.6 )") alpha, beta
         write(*, fmt="( 'theta = ', f10.6, ' gamma = ', f10.6)") theta, gamma_mp
         write(* ,fmt="( 'param = ', e12.6, ' DF = ', e12.6)") param, DF
       END IF
 
-      IF(coeff_smooth == 2) THEN
-        subcells_(mc(1),mc(2))%theta_cm = subcells_(mc(1),mc(2))%theta_cm + theta/2._prec
-        subcells_(pv(1),pv(2))%theta_cm = subcells_(pv(1),pv(2))%theta_cm + theta/2._prec
-      ELSE IF(coeff_smooth==1) THEN
-        subcells_(mc(1),mc(2))%theta_cm = min(subcells_(mc(1),mc(2))%theta_cm, theta)
-        subcells_(pv(1),pv(2))%theta_cm = min(subcells_(pv(1),pv(2))%theta_cm, theta)
-      END IF
+      ! IF(coeff_smooth == 2) THEN
+      !   subcells_(mc(1),mc(2))%theta_cm = subcells_(mc(1),mc(2))%theta_cm + theta/2._prec
+      !   subcells_(pv(1),pv(2))%theta_cm = subcells_(pv(1),pv(2))%theta_cm + theta/2._prec
+      ! ELSE IF(coeff_smooth==1) THEN
+      !   subcells_(mc(1),mc(2))%theta_cm = min(subcells_(mc(1),mc(2))%theta_cm, theta)
+      !   subcells_(pv(1),pv(2))%theta_cm = min(subcells_(pv(1),pv(2))%theta_cm, theta)
+      ! END IF
 
 
   END FUNCTION
+
+  SUBROUTINE extrema_detect 
+    IMPLICIT NONE
+
+    REAL(prec), DIMENSION(nb_cell,nb_subcell) :: du,ddu, vL, vR
+    INTEGER, DIMENSION(2) :: voi_L, voi_R
+    REAL(prec) :: v_min,v_max
+    INTEGER :: ni, jj
+    LOGICAL :: x_L, x_R
+
+    vL = 0._prec; vR = 0._prec
+
+    ! print *, "-------------------",n_time,"-----------------------------"
+
+    DO ni = 1,nb_cell
+      ! print *,"------------------"
+      DO jj =1,nb_subcell
+        du( ni,jj) = DOT_PRODUCT( sol_step(ni)%base_poly, Projection_VF_d (jj,:))/cell_size(ni)
+        ddu(ni,jj) = DOT_PRODUCT( sol_step(ni)%base_poly, Projection_VF_dd(jj,:))/cell_size(ni)
+
+        vL(ni,jj) = du(ni,jj) - cell_size(ni)/2._prec * ddu(ni,jj)
+        vR(ni,jj) = du(ni,jj) + cell_size(ni)/2._prec * ddu(ni,jj)
+
+
+        ! write(*,fmt ="(e12.6,1x, e12.6,1x, e12.6)") sol_step(ni)%val_subcells(jj), du(ni,jj), ddu(ni,jj)
+      END DO
+    END DO
+
+
+    subcells_(:,:)%extrema = .False.
+
+    DO ni = 1,nb_cell
+      DO jj =1,nb_subcell
+        voi_L = Voisin_Face(ni,jj,'L'); voi_R = Voisin_Face(ni,jj,'R')
+        v_min = min(du(ni,jj), du(voi_L(1),voi_L(2))) - eps0
+        v_max = max(du(ni,jj), du(voi_L(1),voi_L(2))) + eps0
+
+        IF(((vL(ni,jj) .LT. v_min) .or. (vL(ni,jj) .GT. v_max)) ) THEN  ! check Left
+          v_min = min(du(ni,jj), du(voi_R(1),voi_R(2))) - eps0
+          v_max = max(du(ni,jj), du(voi_R(1),voi_R(2))) + eps0
+          ! print *,"Left"
+          ! print *, vR(ni,jj), v_min, v_max
+          IF(((vR(ni,jj) .LT. v_min) .or. (vR(ni,jj) .GT. v_max)) ) THEN ;
+            subcells_(ni,jj)%extrema = .True.
+            ! print *,"Right"
+          END IF
+        END IF
+        
+      END DO
+    END DO
+
+
+  END SUBROUTINE extrema_detect
 
 END MODULE mod_Monolith

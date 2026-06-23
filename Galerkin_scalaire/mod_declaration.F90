@@ -13,7 +13,7 @@ MODULE mod_declaration
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER, DIMENSION(2) :: L, LL, R, RR
-    REAL(prec) :: theta_cm
+    LOGICAL :: extrema
   END TYPE subcells
 
   TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa
@@ -86,15 +86,15 @@ MODULE mod_declaration
     ALLOCATE( coeff_DG(size_base, size_base) ) 
 
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
-    ALLOCATE( RK_alpha(order_t,order_t), RK_beta(order_t), RK_time(order_t) )
+    ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
     ALLOCATE( L_step(size_base))
     ALLOCATE( Time_stemp(print_rule+1))
     
     ALLOCATE( pts_DG(size_base)) 
     ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
     ALLOCATE( Projection_VF(nb_subcell,size_base),    Projection_VF_inv(size_base,nb_subcell))
-    ALLOCATE( Projection_VF_d(nb_subcell,size_base),  Projection_VF_inv_d(size_base,nb_subcell))
-    ALLOCATE( Projection_VF_dd(nb_subcell,size_base), Projection_VF_inv_dd(size_base,nb_subcell))
+    ALLOCATE( Projection_VF_d(nb_subcell,size_base))
+    ALLOCATE( Projection_VF_dd(nb_subcell,size_base))
     ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 

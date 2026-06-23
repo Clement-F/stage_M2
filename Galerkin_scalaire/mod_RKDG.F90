@@ -17,6 +17,8 @@ CONTAINS
     REAL(prec) :: theta_loc, DF
     INTEGER, DIMENSION(2) :: voi_L, voi_R
 
+    LOGICAL :: extrema
+
     DO ni = 1,nb_cell+1
       IF (ni ==1) THEN 
 
@@ -60,6 +62,9 @@ CONTAINS
     END DO
     
     IF(subcell_use) THEN
+
+    IF(smooth_extrema) CALL extrema_detect
+
     DO ni = 1,nb_cell
       fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
       fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
@@ -70,18 +75,23 @@ CONTAINS
         flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
                                   & - C_m(jj)*(fh_L-g(ni  )) &
                                   & - C_p(jj)*(fh_R-g(ni+1))
+                    
         IF(monolithique) THEN
+
 
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
-          f_FV = Flux_FV(ug,ud);      
+          extrema = (subcells_(voi_L(1),voi_L(2))%extrema) .OR. (subcells_(voi_R(1),voi_R(2))%extrema)
 
-          DF = flux_h(ni)%val_subcells(jj) - f_FV          
+          IF(.not. extrema) THEN
+          f_FV = Flux_FV(ug,ud);      
+          DF = flux_h(ni)%val_subcells(jj) - f_FV; IF(abs(DF) .LT. eps0) DF = 0._prec   
+
           theta_loc = theta(voi_L,voi_R, DF)
 
-          
-
           flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
+          END IF
+
         END IF                  
       END DO
 
@@ -199,17 +209,13 @@ CONTAINS
 
           L = (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
 
-          if( abs(L) .LT. 10*eps0) L = 0._prec
-
-
           sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
                                     & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-                                    & - RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj))) &
-                                    & * L                                   
+                                    & - L*RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
+                                                                      
         END DO
       END DO
 
-      
       IF(max_check .ne. 0) THEN
         ! print *,"--------------------------"
         DO ni=1,nb_cell
@@ -217,21 +223,22 @@ CONTAINS
             IF(max_check == 1) THEN
 
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) > max_loc(ni,jj)*(1+10._prec**(-8))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
-                IF(sol_step(ni)%val_subcells(jj) < min_loc(ni,jj)*(1-10._prec**(-8))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_loc(ni,jj))   
+                IF(sol_step(ni)%val_subcells(jj) .LT. min_loc(ni,jj)-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_loc(ni,jj))     
               END IF
 
             ELSE IF(max_check == 2) THEN
               
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) > max_glob*(1+10._prec**(-8))+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,i2,'), max : ',e12.6,' ,val : ',e12.6 )") ni,jj,max_glob,sol_step(ni)%val_subcells(jj)  
-                IF(sol_step(ni)%val_subcells(jj) < min_glob*(1-10._prec**(-8))-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,i2,'), min : ',e12.6,' ,val : ',e12.6 )") ni,jj,min_glob,sol_step(ni)%val_subcells(jj)  
+                IF(sol_step(ni)%val_subcells(jj) .GT. max_glob+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_glob,sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_glob)    
+                IF(sol_step(ni)%val_subcells(jj) .LT. min_glob-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_glob,sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_glob)      
               END IF
               
             END IF
           END DO
         END DO
       END IF
+
 
 
       DO ni = 1,nb_cell
@@ -253,6 +260,11 @@ CONTAINS
 
     END DO
 
+    ! IF(smooth_extrema) THEN
+    !   DO ni =1,nb_cell
+        
+    !   END DO
+    ! END IF
     
     DO ni=1,nb_cell
       sol(ni)%base_poly  = sol_step(ni)%base_poly
@@ -350,7 +362,7 @@ CONTAINS
           DO j=1,nb_subcell
             xi = Ref_to_loc(i,x_submiddle(j))
             out1 = sol(i)%val_subcells(j)
-            write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, 0._prec
+            write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1, 0._prec, subcells_(i,j)%extrema
           END DO
 
         ELSE

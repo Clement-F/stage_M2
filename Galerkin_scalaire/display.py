@@ -49,7 +49,7 @@ for k in range(0,sm):
     plt.show()         
 
 
-if(True):
+if(False):
     with open('buckley.dat') as f:
         lines = f.readlines()
         
@@ -61,7 +61,7 @@ if(True):
         
     plt.plot(X_B,U_B, 'r')
     
-    plt.plot(X,U_t[k],'b')
+    plt.plot(X,U_t[k],'b-')
     #plt.plot(X,U_t2[k],'go')
     plt.ylim(-1.2,1.2)
     plt.show()     

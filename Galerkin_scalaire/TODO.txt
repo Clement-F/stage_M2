@@ -18,12 +18,6 @@
 ¤) !NON BUG! Convergence d'un ordre de moins pour la sous-cellule 
              Erreur calculé aux points milieu et non aux points de quad   
 
-¤) theta < 0. dans le shcéma monolithique max local
-(bug semble avoir disparu possibilité qu'il soit juste plus difficile à répliquer)
-
-¤) erreur mémoire 1 test/20 à la 1er itération. (source inconnue) -> return NAN 
--(bug semble porter sur le cas Buckley, à vérifier)
--elle semble être la cause du problème de max
 
 ¤) max local -> pas de max local
 
