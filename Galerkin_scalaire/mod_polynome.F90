@@ -35,7 +35,7 @@ CONTAINS
             Q_init = unit(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
             Q_init = eps0
-            if(x<eps0) Q_init =1._prec
+            if(x<0._prec) Q_init =1._prec
         ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
             Q_init = creneau(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
@@ -56,7 +56,7 @@ CONTAINS
         REAL(prec), DIMENSION(size_base), INTENT(IN) :: base_poly
         REAL(prec)  :: eval_poly
         INTEGER :: ii
-        eval_poly= eps0
+        eval_poly= 0._prec
 
 
         IF(.not. present(kk)) THEN
@@ -81,7 +81,7 @@ CONTAINS
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_sol 
         INTEGER :: ii
-        eval_sol= eps0
+        eval_sol= 0._prec
 
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
@@ -105,7 +105,7 @@ CONTAINS
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec) :: eval_step 
         INTEGER :: ii
-        eval_step= eps0
+        eval_step= 0._prec
         
         IF(.not. present(kk)) THEN
             DO ii = 1,size_base
@@ -146,7 +146,7 @@ CONTAINS
         REAL(prec) :: YY
         INTEGER :: kk
         
-        quadrature = eps0
+        quadrature = 0._prec
 
             IF(TRIM(LOC) == "Loc") THEN
             DO kk =size_quad_nodes,1,-1
@@ -192,7 +192,7 @@ CONTAINS
         INTEGER :: ni
         REAL(prec) :: integration
 
-        integration = eps0
+        integration = 0._prec
 
         DO ni = 1,nb_cell
             integration = integration + quadrature(fct1,opt1, fct2,opt2,LLoc,ni)
@@ -557,7 +557,7 @@ CONTAINS
         IF(TRIM(LOC) == "Ref")      XX = x
         IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
 
-        DG_base = eps0
+        DG_base = 0._prec
 
         IF(DG_meth == "Legendre") THEN
             DO ii =ordre_poly,1,-1
@@ -588,7 +588,7 @@ CONTAINS
         IF(TRIM(LOC) == "Ref")      XX = x
         IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
 
-        dDG_base = eps0
+        dDG_base =  0._prec
 
         IF(DG_meth == "Legendre") THEN
         DO ii =ordre_poly,2,-1
@@ -677,7 +677,6 @@ CONTAINS
         INTEGER, INTENT(IN) :: ni
         INTEGER, INTENT(IN), optional :: n_sub
         REAL(prec), INTENT(IN) :: XX
-        REAL(prec) :: xL,xR
         REAL(prec) :: YY
 
         IF(.not. present(n_sub)) THEN
@@ -726,7 +725,7 @@ CONTAINS
         INTEGER :: jj, kk
 
 
-        f_prod = eps0
+        f_prod =  0._prec
         IF(.not. present(fct_val)) THEN
         DO jj =size_base,1,-1
             DO kk =1,size_quad_nodes
@@ -756,7 +755,7 @@ CONTAINS
         IMPLICIT NONE
 
         INTEGER :: ii,jj,kk
-        Masse =eps0
+        Masse =  0._prec
 
         DO ii = 1,size_base
             DO jj = ii,size_base
@@ -816,8 +815,7 @@ CONTAINS
     
     SUBROUTINE Projection_VF_init
         IMPLICIT NONE
-        INTEGER ::i,j,m,kk
-        integer :: ord
+        INTEGER ::i,j,kk
         REAL(prec) :: YY
         REAL(prec), DIMENSION(size_base, size_base) :: Projection_VF_inv_temp
 
@@ -845,10 +843,7 @@ CONTAINS
 
     SUBROUTINE Projection_VFd_init
         IMPLICIT NONE
-        INTEGER ::i,j,m,kk
-        integer :: ord
-        REAL(prec) :: YY
-        REAL(prec), DIMENSION(size_base, size_base) :: inv_temp
+        INTEGER ::i,j
 
         Projection_VF_d = 0._prec; Projection_VF_dd =0._prec
         DO j =1,nb_subcell
@@ -891,8 +886,8 @@ CONTAINS
         phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
         phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))
 
-        C_m =eps0; 
-        C_p = eps0;
+        C_m = 0._prec; 
+        C_p = 0._prec;
         DO i=1,nb_subcell+1
             DO j=1,i-1
                 C_p(i) = C_p(i) + phi_val(j,2)
@@ -927,7 +922,7 @@ CONTAINS
         xls = x_subcell(n_sub)
         xrs = x_subcell(n_sub+1)
 
-        unit_sm = eps0
+        unit_sm =  0._prec
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm

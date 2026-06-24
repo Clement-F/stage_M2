@@ -4,34 +4,34 @@
 40              | noeuds du maillage 
 -1.             | xd
 1.              | xf
-0.4            | T
+.4              | T
 ---------------------------------------------------
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 1               | Max global(2), local(1), Null(0)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
-False           | Smooth extrema detection 
-4               | nb subcellules du sous maillage
+True           | Smooth extrema detection 
+8               | nb subcellules du sous maillage
 Unif            | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
-0.9             | cfl
+0.3             | cfl
 False           | Error calc    (True, False)
-1               | max-rule check    (0,1,2) (only works on subcell use)
-10             | print rule
+0               | max-rule check    (0,1,2) (only works on subcell use)
+10              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 --------------------------------------------------
-3               | ordre espace
+4               | ordre espace
 3               | ordre temps
-Legendre        | polynomes  (Legendre,Lobatto)
-Legendre        | quadrature (Legendre,Lobatto)
+Lobatto        | polynomes  (Legendre,Lobatto)
+Lobatto        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-sinus         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
-burgers         | problème (advection, burgers, Buckley)
+creneau         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
+Buckley       | problème (advection, burgers, Buckley)
 1.              | vitesse advection (si pb = advection)
-period             | condition au bord (period, Sym)
+period          | condition au bord (period, Sym)

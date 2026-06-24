@@ -50,7 +50,7 @@ CONTAINS
         n_imp = 0
         t_imp = tmax/Real(print_rule,prec)
 
-        dt = 10._prec**(-4)
+        dt = 10._prec**(-8)
 
 
         CALL Coeff_quad_init

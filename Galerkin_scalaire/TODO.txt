@@ -5,6 +5,13 @@
 1) optimiser le calcule sur sous-cellules (?)
 ¤) theta est calculé deux fois aux subcells du bords des cells
 
+
+! je n'ai pas trouvé ce qui fait bugger la règle du max 
+! dans certains cas, elle fonctionne sans problème (des fois sans l'intervention de la règle)
+! dans d'autres elle ne fonctionne pas dès le premier pas de temps
+! Il y a probablement un seul détail à régler mais je ne le trouve pas.
+! je laisse ceci de côté avant de devenir fou
+
 2) règle du max
 ¤) max local 
 ¤) max global 

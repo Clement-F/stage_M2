@@ -134,9 +134,7 @@ CONTAINS
 
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
                              &+  RK_beta(tni) *dt * L_step
-        
-        sol_step(ni)%val_nodes = eps0 
-                  
+                          
         DO ii=1,size_quad_nodes          
           sol_step(ni)%val_nodes(ii)  = eval_step(x_quad(ii),ni, ii,LOC= LRef )
         END DO
@@ -178,6 +176,7 @@ CONTAINS
     INTEGER :: ni, tni
 
     INTEGER :: ii,jj,kk
+    INTEGER, DIMENSION(2) :: pv,af
     REAL(prec), DIMENSION(nb_cell,nb_subcell) :: max_loc, min_loc
     REAL(prec) :: L
 
@@ -210,8 +209,8 @@ CONTAINS
           L = (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
 
           sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
-                                    & + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-                                    & - L*RK_beta(ii) *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
+                                    &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
+                                    &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
                                                                       
         END DO
       END DO
@@ -223,8 +222,26 @@ CONTAINS
             IF(max_check == 1) THEN
 
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_loc(ni,jj))   
-                IF(sol_step(ni)%val_subcells(jj) .LT. min_loc(ni,jj)-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_loc(ni,jj))     
+                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 +1E-6_prec)THEN
+                  print *,"---------------------------"
+                  write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_loc(ni,jj))   
+                  pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
+                  write(*,fmt="('at the time step nb',i1)") ii
+                  write(*,fmt="('stencil : (',i2,1x,i1,')',e12.6,2x,'(',i2,1x,i1,')',e12.6,'(',i2,1x,i1,')',e12.6  )") & 
+                        & pv, sol(pv(1))%val_subcells(pv(2)), ni,jj,sol(ni)%val_subcells(jj), af, sol(af(1))%val_subcells(af(2))
+                  write(*,fmt="('DF : ',e12.6)")(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+                  print *,"---------------------------"
+                ELSE IF(sol_step(ni)%val_subcells(jj) .LT. min_loc(ni,jj)-4*eps0-1E-6_prec ) THEN 
+                  print *,"---------------------------"
+                  write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_loc(ni,jj))     
+                   pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
+                  write(*,fmt="('at the time step nb',i1)") ii
+                  write(*,fmt="('stencil : (',i2,1x,i1,')',e12.6,2x,'(',i2,1x,i1,')',e12.6,'(',i2,1x,i1,')',e12.6  )") & 
+                        & pv, sol(pv(1))%val_subcells(pv(2)), ni,jj,sol(ni)%val_subcells(jj), af, sol(af(1))%val_subcells(af(2))
+                  write(*,fmt="('DF : ',e12.6)")(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
+                
+                  print *,"---------------------------"
+                END IF
               END IF
 
             ELSE IF(max_check == 2) THEN
@@ -289,7 +306,7 @@ CONTAINS
     IF(TRIM(flux_name) == "advection") THEN
       max_dflux = abs(vit_adv)
     ELSE 
-      max_dflux =eps0
+      max_dflux = 0._prec
       if(subcell_use) THEN
         DO i=1,nb_cell
           DO j=1,nb_subcell
@@ -324,10 +341,10 @@ CONTAINS
     dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
     END IF 
 
-    dt = min(dt, 1.05_prec * dt_old)
+    ! dt = min(dt, 1.05_prec * dt_old)
 
 
-    IF(dt .LT. 10._prec**(-20)) THEN
+    IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.tmax)) THEN
       write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
       CALL Emergency_stop
     END IF

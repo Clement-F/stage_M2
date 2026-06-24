@@ -184,11 +184,11 @@ MODULE mod_declaration
        RK_alpha(3,2)=2._prec/3._prec
        RK_beta(3)=2._prec/3._prec
     CASE DEFAULT
-       RK_time=0._prec; RK_alpha = 0._prec; RK_beta = 0._prec
-      !  DO nrk2=1,nrk
-      !     RK_time(nrk2)=1._prec
-      !     RK_beta(nrk2)=1._prec/REAL(nrk+1-nrk2,prec)
-      !  END DO
+       RK_alpha=0._prec; RK_beta =0._prec
+       DO nrk2=1,nrk
+          RK_alpha(nrk2,1)=1._prec
+          RK_beta(nrk2)=1._prec/REAL(nrk+1-nrk2,prec)
+       END DO
     END SELECT
 
 
