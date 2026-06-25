@@ -1,51 +1,282 @@
 =====================
 for elements P2 and RK SSP of order 3
-for nx =     5 we have error :
-err_L1 :  0.768510154214E-01
-err_L2 :  0.505955526450E-01
-err_Li :  0.882476783156E-01
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    10 we have error :
-err_L1 :  0.109176560280E-01
-err_L2 :  0.739482173867E-02
-err_Li :  0.995229591932E-02
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    20 we have error :
-err_L1 :  0.144971697553E-02
-err_L2 :  0.977040218166E-03
-err_Li :  0.125539129069E-02
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    50 we have error :
-err_L1 :  0.762315533637E-04
-err_L2 :  0.517775939584E-04
-err_Li :  0.670619435197E-04
+for nx =   100 we have error :
+err_L1 :  0.238073094994E-03
+err_L2 :  0.485255627045E-03
+err_Li :  0.533087731541E-02
 =====================
 =====================
 for elements P2 and RK SSP of order 3
 for nx =   100 we have error :
-err_L1 :  0.936852540427E-05
-err_L2 :  0.636871423928E-05
-err_Li :  0.826821793684E-05
+err_L1 :  0.125479489238E-03
+err_L2 :  0.247696640071E-03
+err_Li :  0.106445580392E-02
 =====================
 =====================
-for elements P2 and RK SSP of order 3
-for nx =   200 we have error :
-err_L1 :  0.117044951454E-05
-err_L2 :  0.796092881760E-06
-err_Li :  0.103396024780E-05
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.100296903194E-03
+err_L2 :  0.984029931336E-04
+err_Li :  0.451027883122E-03
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.675022014378E-01
+err_L2 :  0.224236710797E+00
+err_Li :  0.183975425762E+01
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.526823324214E-03
+err_L2 :  0.561781544228E-03
+err_Li :  0.359481311740E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =   100 we have error :
+err_L1 :  0.345855742621E-04
+err_L2 :  0.689579207823E-04
+err_Li :  0.690740953217E-03
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.192037385219E+00
+err_L2 :  0.306181832988E+00
+err_Li :  0.194961568549E+01
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
 =====================
 =====================
 for elements P2 and RK SSP of order 3
 for nx =    40 we have error :
-err_L1 :  0.805511539349E+00
-err_L2 :  0.704040025526E+00
-err_Li :  0.136438631749E+01
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
 =====================
 =====================
 for elements P2 and RK SSP of order 3
@@ -88,6 +319,307 @@ for nx =    40 we have error :
 err_L1 :  0.000000000000E+00
 err_L2 :  0.000000000000E+00
 err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 2
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P1 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.000000000000E+00
+err_L2 :  0.000000000000E+00
+err_Li :  0.000000000000E+00
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.306360385670E-03
+err_L2 :  0.370318955710E-03
+err_Li :  0.200049522442E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.494574224621E-03
+err_L2 :  0.578685298119E-03
+err_Li :  0.301271774585E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.177610722996E-02
+err_L2 :  0.184250154060E-02
+err_Li :  0.693082821302E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.245269895894E-02
+err_L2 :  0.246807711849E-02
+err_Li :  0.866374206351E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.133675933977E-02
+err_L2 :  0.149916136969E-02
+err_Li :  0.663432577862E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.133056970183E-02
+err_L2 :  0.149148540834E-02
+err_Li :  0.662329422663E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.133056970183E-02
+err_L2 :  0.149148540834E-02
+err_Li :  0.662329422663E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.245269895894E-02
+err_L2 :  0.246807711849E-02
+err_Li :  0.866374206351E-02
 =====================
 =====================
 for elements P3 and RK SSP of order 3
@@ -104,90 +636,6 @@ err_L2 :  0.000000000000E+00
 err_Li :  0.000000000000E+00
 =====================
 =====================
-for elements P4 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
 for elements P3 and RK SSP of order 3
 for nx =    40 we have error :
 err_L1 :  0.000000000000E+00
@@ -197,280 +645,133 @@ err_Li :  0.000000000000E+00
 =====================
 for elements P3 and RK SSP of order 3
 for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
+err_L1 :  0.999868956284E-03
+err_L2 :  0.122756799180E-02
+err_Li :  0.510756636829E-02
 =====================
 =====================
 for elements P3 and RK SSP of order 3
 for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 1
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 1
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P3 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P3 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P3 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P3 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
+err_L1 :  0.149084726925E-02
+err_L2 :  0.179986457033E-02
+err_Li :  0.665918343120E-02
 =====================
 =====================
 for elements P3 and RK SSP of order 3
 for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 1
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 1
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 1
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P1 and RK SSP of order 1
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 2
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.100000000000E+01
-err_L2 :  0.825751377280E+00
-err_Li :  0.999999999999E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.100000000000E+01
-err_L2 :  0.825751377280E+00
-err_Li :  0.999999999999E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.500000000000E+00
-err_L2 :  0.574468009924E+00
-err_Li :  0.999996813815E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
-=====================
-=====================
-for elements P2 and RK SSP of order 3
-for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
+err_L1 :  0.149084726925E-02
+err_L2 :  0.179986457033E-02
+err_Li :  0.665918343120E-02
 =====================
 =====================
 for elements P3 and RK SSP of order 3
 for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
+err_L1 :  0.876691766580E-03
+err_L2 :  0.102778585095E-02
+err_Li :  0.550623599482E-02
 =====================
 =====================
 for elements P3 and RK SSP of order 3
 for nx =    40 we have error :
-err_L1 :  0.000000000000E+00
-err_L2 :  0.000000000000E+00
-err_Li :  0.000000000000E+00
+err_L1 :  0.833426315950E-03
+err_L2 :  0.904019449868E-03
+err_Li :  0.452053422656E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.833426315950E-03
+err_L2 :  0.904019449868E-03
+err_Li :  0.452053422656E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.833426315950E-03
+err_L2 :  0.904019449868E-03
+err_Li :  0.452053422656E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.833426315950E-03
+err_L2 :  0.904019449868E-03
+err_Li :  0.452053422656E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.456343372625E-05
+err_L2 :  0.298134171690E-05
+err_Li :  0.562005770321E-05
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.586174270043E-03
+err_L2 :  0.635672010211E-03
+err_Li :  0.280190920387E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.496148571055E-03
+err_L2 :  0.637791468609E-03
+err_Li :  0.294525415839E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.314157517272E-05
+err_L2 :  0.210774238379E-05
+err_Li :  0.381291043716E-05
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.496148571055E-03
+err_L2 :  0.637791468609E-03
+err_Li :  0.294525415839E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.144628883329E-02
+err_L2 :  0.174546955051E-02
+err_Li :  0.656842783580E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.144628883329E-02
+err_L2 :  0.174546955051E-02
+err_Li :  0.656842783580E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.147169828831E-02
+err_L2 :  0.178356885345E-02
+err_Li :  0.664974219298E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.144628883329E-02
+err_L2 :  0.174546955051E-02
+err_Li :  0.656842783580E-02
+=====================
+=====================
+for elements P3 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.151893431640E-02
+err_L2 :  0.165052639724E-02
+err_Li :  0.651286528242E-02
+=====================
+=====================
+for elements P2 and RK SSP of order 3
+for nx =    40 we have error :
+err_L1 :  0.113082560980E-02
+err_L2 :  0.143000112847E-02
+err_Li :  0.419606100923E-02
 =====================

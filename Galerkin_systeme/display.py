@@ -40,17 +40,16 @@ for k in range(0,sm):
         
     err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
     #plt.plot(X,err[k],'r')
-    plt.plot(X,U_t[k],'b-x')
+    plt.plot(X,U_t[k],'b-')
     #plt.plot(X,U_t2[k],'g-')
     
     print(max(U_t[k]), min(U_t[k]), sum(U_t[k]))
-    plt.plot(X,U_ex[k],'g')
-    plt.ylim(0.8,1.2); plt.xlim(-0.75,-0.45)
-    #plt.ylim(-1.2,1.2)
+    #plt.plot(X,U_ex[k],'g')
+    plt.ylim(-1.2,2.)
     plt.show()         
 
 
-if(False):
+if(True):
     with open('buckley.dat') as f:
         lines = f.readlines()
         
@@ -64,7 +63,7 @@ if(False):
     
     plt.plot(X,U_t[k],'b-')
     #plt.plot(X,U_t2[k],'go')
-    plt.ylim(-.2,1.2)
+    plt.ylim(-1.2,1.2)
     plt.show()     
 #for k in range(1,sm):
     #err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx

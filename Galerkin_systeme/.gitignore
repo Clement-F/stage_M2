@@ -1,0 +1,7 @@
+
+*.d
+/buckley.dat/
+*.txt
+*.mod
+*.o
+*.exe

@@ -69,9 +69,37 @@ CONTAINS
     REAL(prec), INTENT(IN) :: u,v
     REAL(prec) :: Flux_FV
 
-    Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
+    Flux_FV = (flux(u) + flux(v) - gamma_calc(u,v)*(v-u))  * 0.5_prec
 
   END FUNCTION Flux_FV
+
+
+  FUNCTION minmax_cell(mc,minmax)
+    IMPLICIT NONE
+    CHARACTER(len=3) :: minmax
+    INTEGER, DIMENSION(2), INTENT(IN) :: mc
+    INTEGER, DIMENSION(2) :: voi_L, voi_R
+    REAL(prec) :: minmax_cell
+
+    voi_L = subcells_(mc(1),1)%L
+    voi_R = subcells_(mc(1),nb_subcell)%R
+
+    IF(TRIM(minmax) == "min") THEN
+    IF(max_rule == 1)   minmax_cell= minval(min(sol_step(mc   (1))%val_subcells(:), &
+                                               &sol_step(voi_L(1))%val_subcells(:), &
+                                               &sol_step(voi_R(1))%val_subcells(:)))
+    IF(max_rule == 2 .or. max_rule == 0)  minmax_cell = min_glob
+
+    ELSE IF(TRIM(minmax) == "max") THEN
+    IF(max_rule == 1)   minmax_cell= maxval(max( sol_step(mc   (1))%val_subcells(mc   (:)), &
+                                                &sol_step(voi_L(1))%val_subcells(voi_L(:)), &
+                                                &sol_step(voi_R(1))%val_subcells(voi_R(:))))
+    IF(max_rule == 2 .or. max_rule == 0)  minmax_cell = max_glob
+    END IF
+
+
+  END FUNCTION minmax_cell
+
 
   FUNCTION minmax_loc(mc,minmax)
     IMPLICIT NONE
@@ -112,8 +140,6 @@ CONTAINS
     IF(TRIM(flux_name) == "advection") THEN
       gamma_calc = abs(vit_adv)
 
-    ! ELSE IF(TRIM(flux_name) == "Buckley") THEN
-    !   gamma_calc = 2.34_prec
  
     ELSE
       gamma_calc = max(abs(flux_d(u)), abs(flux_d(v)))
@@ -131,21 +157,22 @@ CONTAINS
     END IF
   END FUNCTION gamma_calc
 
-  FUNCTION theta(mc,pv, DF)
+  FUNCTION theta(mc,pv, DF, rule)
       IMPLICIT NONE
       INTEGER, DIMENSION(2), INTENT(IN) :: mc,pv
+      INTEGER, INTENT(IN) :: rule
       REAL(prec), INTENT(IN) :: DF
       REAL(prec) :: theta
 
-      REAL(prec) :: ug,ud, f_FV
+      REAL(prec) :: ug,ud
       REAL(prec) :: gamma_mp, param
       REAL(prec) :: alpha,beta, u_Riemann
       INTEGER, DIMENSION(2) :: voi_L, voi_R
       
       IF(max_rule == 0) THEN 
         theta = 1._prec
-
-      ELSE IF(max_rule == 2) THEN
+        return
+      ELSE IF(rule == 2) THEN
           
         ug = sol_step(mc(1))%val_subcells(mc(2))
         ud = sol_step(pv(1))%val_subcells(pv(2))
@@ -156,8 +183,7 @@ CONTAINS
         beta = max_glob; alpha = min_glob
 
 
-      ELSE IF(max_rule == 1) THEN
-      
+      ELSE IF(rule == 1) THEN
         ug = sol_step(mc(1))%val_subcells(mc(2))
         ud = sol_step(pv(1))%val_subcells(pv(2))
         gamma_mp = gamma_calc(ug,ud)
@@ -179,6 +205,7 @@ CONTAINS
           alpha= min(alpha,minmax_loc(mc,"min"))
 
           theta = 0._prec
+          return
         END IF
         
       
@@ -186,8 +213,6 @@ CONTAINS
       END IF
 
       param = min(beta - u_Riemann, u_Riemann- alpha); IF(param .LT. eps0) param = 0._prec
-
-      ! IF(theta .LT. eps0) theta = 0._prec
 
       IF(abs(DF) .LT. eps0) THEN; theta = 1._prec
       ELSE;                       theta = max(min(1._prec, abs(gamma_mp/DF) * param),0._prec)
@@ -207,13 +232,14 @@ CONTAINS
         write(* ,fmt="( 'param = ', e12.6, ' DF = ', e12.6)") param, DF
       END IF
 
-      ! IF(coeff_smooth == 2) THEN
-      !   subcells_(mc(1),mc(2))%theta_cm = subcells_(mc(1),mc(2))%theta_cm + theta/2._prec
-      !   subcells_(pv(1),pv(2))%theta_cm = subcells_(pv(1),pv(2))%theta_cm + theta/2._prec
-      ! ELSE IF(coeff_smooth==1) THEN
-      !   subcells_(mc(1),mc(2))%theta_cm = min(subcells_(mc(1),mc(2))%theta_cm, theta)
-      !   subcells_(pv(1),pv(2))%theta_cm = min(subcells_(pv(1),pv(2))%theta_cm, theta)
-      ! END IF
+      return 
+      IF(coeff_smooth == 2) THEN
+        subcells_(mc(1),mc(2))%theta_cm = subcells_(mc(1),mc(2))%theta_cm + theta/2._prec
+        subcells_(pv(1),pv(2))%theta_cm = subcells_(pv(1),pv(2))%theta_cm + theta/2._prec
+      ELSE IF(coeff_smooth==1) THEN
+        subcells_(mc(1),mc(2))%theta_cm = min(subcells_(mc(1),mc(2))%theta_cm, theta)
+        subcells_(pv(1),pv(2))%theta_cm = min(subcells_(pv(1),pv(2))%theta_cm, theta)
+      END IF
 
 
   END FUNCTION
@@ -225,7 +251,6 @@ CONTAINS
     INTEGER, DIMENSION(2) :: voi_L, voi_R
     REAL(prec) :: v_min,v_max
     INTEGER :: ni, jj
-    LOGICAL :: x_L, x_R
 
     vL = 0._prec; vR = 0._prec
 
@@ -235,13 +260,13 @@ CONTAINS
       ! print *,"------------------"
       DO jj =1,nb_subcell
         du( ni,jj) = DOT_PRODUCT( sol_step(ni)%base_poly, Projection_VF_d (jj,:))/cell_size(ni)
-        ddu(ni,jj) = DOT_PRODUCT( sol_step(ni)%base_poly, Projection_VF_dd(jj,:))/cell_size(ni)
+        ddu(ni,jj) = DOT_PRODUCT( sol_step(ni)%base_poly, Projection_VF_dd(jj,:))/(cell_size(ni)**2)
 
-        vL(ni,jj) = du(ni,jj) - cell_size(ni)/2._prec * ddu(ni,jj)
-        vR(ni,jj) = du(ni,jj) + cell_size(ni)/2._prec * ddu(ni,jj)
+        vL(ni,jj) = du(ni,jj) - subcell_size(jj)*cell_size(ni)/2._prec * ddu(ni,jj)
+        vR(ni,jj) = du(ni,jj) + subcell_size(jj)*cell_size(ni)/2._prec * ddu(ni,jj)
 
 
-        ! write(*,fmt ="(e12.6,1x, e12.6,1x, e12.6)") sol_step(ni)%val_subcells(jj), du(ni,jj), ddu(ni,jj)
+        ! write(*,fmt ="(e12.6,1x, e12.6,1x, e12.6, 2x,'x =', f10.6 ) ") sol_step(ni)%val_subcells(jj), du(ni,jj), ddu(ni,jj), Ref_to_loc(ni=ni,XX=x_submiddle(jj))
       END DO
     END DO
 

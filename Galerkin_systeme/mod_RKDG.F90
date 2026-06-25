@@ -9,55 +9,53 @@ CONTAINS
   SUBROUTINE flux_numerique
     IMPLICIT NONE
     INTEGER :: ni,ii,jj
-    REAL(prec), DIMENSION(size_quad_nodes) :: flux_uh_val
+    REAL(prec), DIMENSION(size_quad_nodes, nb_var) :: flux_uh_val
 
-    REAL(prec) :: ug,ud
+    REAL(prec), DIMENSION(nb_var) :: ug,ud
     REAL(prec) :: x_s
-    REAL(prec) :: fh_L, fh_R, f_FV
+    REAL(prec), DIMENSION(nb_var) :: fh_L, fh_R, f_FV
     REAL(prec) :: theta_loc, DF
     INTEGER, DIMENSION(2) :: voi_L, voi_R
 
     LOGICAL :: extrema
 
-    extrema = .FALSE.
-
     DO ni = 1,nb_cell+1
       IF (ni ==1) THEN 
 
         IF (TRIM(bdry_cond) == "period") THEN 
-          ug = sol_step(nb_cell)  %inter(2)
-          ud = sol_step(1)        %inter(1)
+          ug = sol_step(nb_cell)  %inter(2,:)
+          ud = sol_step(1)        %inter(1,:)
         ELSE IF(TRIM(bdry_cond) == "Sym") THEN
-          ug = sol_step(1)        %inter(1)
-          ud = sol_step(1)        %inter(1)
+          ug = sol_step(1)        %inter(1,:)
+          ud = sol_step(1)        %inter(1,:)
         ELSE 
           print *, "boundary condition non reconnue"
         END IF
 
       ELSE IF (ni ==nb_cell +1) THEN
         IF (TRIM(bdry_cond) == "period") THEN 
-          ug = sol_step(nb_cell)  %inter(2)
-          ud = sol_step(1)        %inter(1)
+          ug = sol_step(nb_cell)  %inter(2,:)
+          ud = sol_step(1)        %inter(1,:)
         ELSE IF(TRIM(bdry_cond) == "Sym") THEN
-          ug = sol_step(nb_cell)  %inter(2)
-          ud = sol_step(nb_cell)  %inter(2)
+          ug = sol_step(nb_cell)  %inter(2,:)
+          ud = sol_step(nb_cell)  %inter(2,:)
         ELSE 
           print *, "boundary condition non reconnue"
         END IF
 
       ELSE 
-        ug = sol_step(ni-1)%inter(2)
-        ud = sol_step(ni)  %inter(1)
+        ug = sol_step(ni-1)%inter(2,:)
+        ud = sol_step(ni)  %inter(1,:)
       END IF
 
-      g(ni) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+      g(ni,:) = (flux(ug) + flux(ud) - gamma_calc(ud,ug)*(ud-ug))  * 0.5_prec
 
 
     END DO
 
     DO ni = 1,nb_cell
       DO ii=1,size_quad_nodes
-        flux_uh_val(ii) = flux(sol_step(ni)%val_nodes(ii))
+        flux_uh_val(ii,:) = flux(sol_step(ni)%val_nodes(ii,:))
       END DO
 
       CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,LOC= LLoc,ni =ni,fct_val=flux_uh_val)
@@ -84,15 +82,15 @@ CONTAINS
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
           extrema = (subcells_(voi_L(1),voi_L(2))%extrema) .OR. (subcells_(voi_R(1),voi_R(2))%extrema)
-          extrema = extrema .AND.( order_x .GT. 2 )
-          f_FV = Flux_FV(ug,ud)      
 
-          DF = flux_h(ni)%val_subcells(jj) - f_FV; IF(abs(DF) .LT. eps0) DF = 0._prec 
+          IF(.not. extrema) THEN
+          f_FV = Flux_FV(ug,ud);      
+          DF = flux_h(ni)%val_subcells(jj) - f_FV; IF(abs(DF) .LT. eps0) DF = 0._prec   
 
-          theta_loc = theta(voi_L,voi_R, DF, rule=2)
-          IF(.NOT. extrema) theta_loc = min(theta_loc, theta(voi_L,voi_R,DF, rule=1))
+          theta_loc = theta(voi_L,voi_R, DF)
 
           flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
+          END IF
 
         END IF                  
       END DO
@@ -224,7 +222,7 @@ CONTAINS
             IF(max_check == 1) THEN
 
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 )THEN
+                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 +1E-6_prec)THEN
                   print *,"---------------------------"
                   write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_loc(ni,jj))   
                   pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
@@ -233,7 +231,7 @@ CONTAINS
                         & pv, sol(pv(1))%val_subcells(pv(2)), ni,jj,sol(ni)%val_subcells(jj), af, sol(af(1))%val_subcells(af(2))
                   write(*,fmt="('DF : ',e12.6)")(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
                   print *,"---------------------------"
-                ELSE IF(sol_step(ni)%val_subcells(jj) .LT. min_loc(ni,jj)-4*eps0 ) THEN 
+                ELSE IF(sol_step(ni)%val_subcells(jj) .LT. min_loc(ni,jj)-4*eps0-1E-6_prec ) THEN 
                   print *,"---------------------------"
                   write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_loc(ni,jj))     
                    pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
@@ -301,54 +299,47 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: i,j
     INTEGER, DIMENSION(2) :: next_subcell
-    REAL(prec) :: gamma_temp_bf, gamma_temp, dt_loc
+    REAL(prec) :: max_u,min_u,  gamma_temp
 
-    max_dflux = 0._prec; gamma_temp_bf = 0._prec
-    dt_loc = 1._prec
-    if(subcell_use) THEN
-      DO i=1,nb_cell
-        DO j=1,nb_subcell
-          
-          next_subcell = subcells_(i,j)%L
-          gamma_temp = gamma_calc(sol(i)%val_subcells(j), sol(next_subcell(1))%val_subcells(next_subcell(2)))
-          
-          IF(TRIM(flux_name) == "advection") THEN
-            max_dflux = abs(vit_adv)
-          ELSE IF(TRIM(flux_name) == "Buckley") THEN
-            max_dflux = 2.34_prec
-          ELSE 
+
+
+    IF(TRIM(flux_name) == "advection") THEN
+      max_dflux = abs(vit_adv)
+    ELSE 
+      max_dflux = 0._prec
+      if(subcell_use) THEN
+        DO i=1,nb_cell
+          DO j=1,nb_subcell
+            next_subcell = subcells_(i,j)%L
+            gamma_temp = gamma_calc(sol(i)%val_subcells(j), sol(next_subcell(1))%val_subcells(next_subcell(2)))
+            
             max_dflux = max(max_dflux, gamma_temp)
-          END IF
-
-          dt_loc = min(dt_loc,CFL*(subcell_size(j)*cell_size(i)) /(gamma_temp + gamma_temp_bf));
-          gamma_temp_bf = gamma_temp
-
-        END DO
-      END DO
-    ELSE
-
-      IF(TRIM(flux_name) == "advection") THEN
-        max_dflux = abs(vit_adv)
-      ELSE IF(TRIM(flux_name) == "Buckley") THEN
-        max_dflux = 2.34_prec
-      ELSE 
-        DO i=1,nb_cell     
-          DO j=1,size_quad_nodes-1
-
-            gamma_temp = gamma_calc(sol(i)%val_nodes(j), sol(i)%val_subcells(j+1))
-
-            max_dflux = max(max_dflux, gamma_temp)
-
           END DO
         END DO
+      ELSE
+        DO i=1,nb_cell        
+          DO j=1,nb_subcell
+            IF(max_u .LT. sol(i)%val_subcells(j) ) THEN
+              max_u = sol(i)%val_subcells(j)
+            END IF
+
+            IF(min_u .GT. sol(i)%val_subcells(j) ) THEN
+              min_u = sol(i)%val_subcells(j)
+            END IF
+          END DO
+        END DO
+
+        max_dflux = gamma_calc(min_u,max_u) 
       END IF
+
+
     END IF
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    ! IF(order_x .GT. order_t) THEN
-    ! dt = min(   dt **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
-    ! END IF 
+    IF(order_x .GT. order_t) THEN
+    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+    END IF 
 
     ! dt = min(dt, 1.05_prec * dt_old)
 

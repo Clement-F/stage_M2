@@ -4,23 +4,22 @@ MODULE mod_declaration
   IMPLICIT NONE
 
   TYPE var_type
-    REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG
-    REAL(prec),DIMENSION(:),POINTER :: val_nodes   ! valeurs aux points de quadratures
-    REAL(prec),DIMENSION(:),POINTER :: val_subcells   ! valeurs aux points de quadratures
-    REAL(prec),DIMENSION(:),POINTER :: inter
+    REAL(prec),DIMENSION(:,:),POINTER :: base_poly   ! decomposition dans la base DG
+    REAL(prec),DIMENSION(:,:),POINTER :: val_nodes   ! valeurs aux points de quadratures
+    REAL(prec),DIMENSION(:,:),POINTER :: val_subcells   ! valeurs aux points de quadratures
+    REAL(prec),DIMENSION(:,:),POINTER :: inter
   END TYPE var_type
 
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER, DIMENSION(2) :: L, LL, R, RR
-    REAL(prec) :: theta_cm
     LOGICAL :: extrema
   END TYPE subcells
 
   TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa
   TYPE(subcells), DIMENSION(:,:), POINTER :: subcells_
 
-  REAL(prec), DIMENSION(:),   POINTER :: g
+  REAL(prec), DIMENSION(:,:),   POINTER :: g
 
   REAL(prec), DIMENSION(:),   POINTER :: x_cell, x_middle, cell_size
   REAL(prec), DIMENSION(:),   POINTER :: x_subcell, x_submiddle, subcell_size
@@ -46,6 +45,7 @@ MODULE mod_declaration
   INTEGER   :: max_rule, coeff_smooth, max_check
 
 
+  INTEGER :: nb_var
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 
   INTEGER :: size_base, size_quad_nodes
   INTEGER :: n_imp, n_time, frame_rule, print_rule
@@ -75,7 +75,7 @@ MODULE mod_declaration
     INTEGER :: i
 
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
-    ALLOCATE( g(nb_cell +1))
+    ALLOCATE( g(nb_cell +1, nb_var))
 
     ALLOCATE (subcells_(nb_cell, nb_subcell))
 
@@ -100,11 +100,11 @@ MODULE mod_declaration
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 
     DO i =1,nb_cell
-      ALLOCATE(sol(i)%base_poly(size_base));      ALLOCATE(sol(i)%val_nodes(size_quad_nodes));      ALLOCATE(sol(i)%val_subcells(nb_subcell))
-      ALLOCATE(sol_exa(i)%base_poly(size_base));  ALLOCATE(sol_exa(i)%val_nodes(size_quad_nodes));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell)) 
-      ALLOCATE(sol_step(i)%base_poly(size_base)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell))
-      ALLOCATE(flux_h(i)%base_poly(size_base));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1))
-      ALLOCATE(sol(i)%inter(2));                  ALLOCATE(sol_exa(i)%inter(2));                    ALLOCATE(sol_step(i)%inter(2))
+      ALLOCATE(sol(i)%base_poly(size_base,nb_var));      ALLOCATE(sol(i)%val_nodes(size_quad_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var))
+      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_exa(i)%val_nodes(size_quad_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var)) 
+      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var))
+      ALLOCATE(flux_h(i)%base_poly(size_base,nb_var));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes,nb_var));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1,nb_var))
+      ALLOCATE(sol(i)%inter(2,nb_var));                  ALLOCATE(sol_exa(i)%inter(2,nb_var));                    ALLOCATE(sol_step(i)%inter(2,nb_var))
     END DO
     
   END SUBROUTINE ALLOCATE_all

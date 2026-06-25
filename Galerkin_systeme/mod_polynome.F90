@@ -23,10 +23,10 @@ CONTAINS
         if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
     END FUNCTION creneau
 
-    FUNCTION Q_init(x,ni)
+    FUNCTION Q_init(x,ni,nvar)
         IMPLICIT NONE
         REAL(prec), INTENT(IN) :: x
-        INTEGER,    INTENT(IN) :: ni
+        INTEGER,    INTENT(IN) :: ni,nvar
         REAL(prec) :: Q_init
 
         IF     (TRIM(sol_ini_name)=="sinus") THEN
@@ -73,9 +73,9 @@ CONTAINS
 
     END FUNCTION eval_poly
 
-    FUNCTION eval_sol(YY,ni, kk, LOC)
+    FUNCTION eval_sol(YY, nvar ,ni, kk, LOC)
         IMPLICIT NONE
-        INTEGER, INTENT(in) :: ni
+        INTEGER, INTENT(in) :: ni,nvar
         INTEGER, INTENT(in), optional :: kk
         CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
@@ -86,20 +86,20 @@ CONTAINS
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
             DO ii = 1,size_base
-                eval_sol = eval_sol + sol(ni)%base_poly(ii) * DG_base(YY,ii,LOC,ni)
+                eval_sol = eval_sol + sol(ni)%base_poly(ii,nvar) * DG_base(YY,ii,LOC,ni)
             END DO
         ELSE 
             counter2 = counter2 +1
             DO ii = 1,size_base
-                eval_sol = eval_sol + sol(ni)%base_poly(ii) * sig_quad(ii,kk)
+                eval_sol = eval_sol + sol(ni)%base_poly(ii,nvar) * sig_quad(ii,kk)
             END DO
         END IF
 
     END FUNCTION eval_sol
     
-    FUNCTION eval_step(YY,ni,kk, LOC)
+    FUNCTION eval_step(YY,nvar,ni,kk, LOC)
         IMPLICIT NONE
-        INTEGER, INTENT(in) :: ni
+        INTEGER, INTENT(in) :: ni,nvar
         INTEGER, INTENT(in), optional :: kk
         CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
@@ -109,11 +109,11 @@ CONTAINS
         
         IF(.not. present(kk)) THEN
             DO ii = 1,size_base
-                eval_step = eval_step + sol_step(ni)%base_poly(ii) * DG_base(YY,ii, LOC,ni)
+                eval_step = eval_step + sol_step(ni)%base_poly(ii,nvar) * DG_base(YY,ii, LOC,ni)
             END DO
         ELSE 
             DO ii = 1,size_base
-                eval_step  = eval_step + sol_step(ni)%base_poly(ii) * sig_quad(ii,kk)
+                eval_step  = eval_step + sol_step(ni)%base_poly(ii,nvar) * sig_quad(ii,kk)
             END DO
         END IF
 
@@ -703,19 +703,19 @@ CONTAINS
 
     END FUNCTION Loc_to_Ref
 
-    SUBROUTINE Projection_Pk(fct, fct_h ,LOC ,ni ,fct_val)
+    SUBROUTINE Projection_Pk(fct, fct_h ,LOC ,ni, nvar ,fct_val)
         IMPLICIT NONE
         
         INTERFACE
-        FUNCTION fct(YY,ni)
+        FUNCTION fct(YY,ni,nvar)
             USE precis
             REAL(prec),INTENT(IN) :: YY
-            INTEGER,   INTENT(IN) :: ni
+            INTEGER,   INTENT(IN) :: ni,nvar
             REAL(prec) :: fct
         END FUNCTION fct
         END INTERFACE
 
-        INTEGER, INTENT(IN) :: ni
+        INTEGER, INTENT(IN) :: ni,nvar
         REAL(prec), DIMENSION(size_base), INTENT(OUT) :: fct_h
         CHARACTER (len=8),  INTENT(IN) :: LOC
         REAL(prec), DIMENSION(size_quad_nodes), INTENT(IN), optional :: fct_val
@@ -733,7 +733,7 @@ CONTAINS
                 IF(TRIM(LOC) == "Loc") YY = Ref_to_loc(ni,x_quad(kk))
                 IF(TRIM(LOC) == "Ref") YY = x_quad(kk)
 
-                f_prod(jj) = f_prod(jj) + fct(YY,ni)*sig_quad(jj,kk)*w_quad(kk)
+                f_prod(jj) = f_prod(jj) + fct(YY,ni,nvar)*sig_quad(jj,kk)*w_quad(kk)
             END DO
         END DO
 
@@ -848,8 +848,9 @@ CONTAINS
         Projection_VF_d = 0._prec; Projection_VF_dd =0._prec
         DO j =1,nb_subcell
             DO i=1,size_base
-                Projection_VF_d(j,i) = 2._prec*( DG_base(1._prec,i, LOC=LSub,ni=j) -  DG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j))
-                Projection_VF_dd(j,i)= 4._prec*(dDG_base(1._prec,i, LOC=LSub,ni=j) - dDG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j))
+
+                Projection_VF_d(j,i) = ( DG_base(1._prec,i, LOC=LSub,ni=j) -  DG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j)*2._prec)
+                Projection_VF_dd(j,i)= (dDG_base(1._prec,i, LOC=LSub,ni=j) - dDG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j)*2._prec)
             END DO
         END DO
  
