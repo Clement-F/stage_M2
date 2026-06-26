@@ -47,7 +47,7 @@ MODULE mod_declaration
 
   INTEGER :: nb_var
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 
-  INTEGER :: size_base, size_quad_nodes
+  INTEGER :: size_base, nb_nodes
   INTEGER :: n_imp, n_time, frame_rule, print_rule
   INTEGER :: counter1, counter2
   REAL(prec) :: time, tmax,t_ini,dt, dt_old, t_imp
@@ -82,14 +82,14 @@ MODULE mod_declaration
     ALLOCATE( x_cell(nb_cell+1),        x_middle(nb_cell),        cell_size(nb_cell)) 
     ALLOCATE( x_subcell(nb_subcell+1),  x_submiddle(nb_subcell),  subcell_size(nb_subcell))
 
-    ALLOCATE( x_quad(size_quad_nodes), w_quad(size_quad_nodes) ) 
-    ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,size_quad_nodes))
+    ALLOCATE( x_quad(nb_nodes), w_quad(nb_nodes) ) 
+    ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,nb_nodes))
     ALLOCATE( coeff_DG(size_base, size_base) ) 
 
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
     ALLOCATE( L_step(size_base))
-    ALLOCATE( Time_stemp(print_rule+1))
+    ALLOCATE( Time_stemp(print_rule+2))
     
     ALLOCATE( pts_DG(size_base)) 
     ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
@@ -100,10 +100,10 @@ MODULE mod_declaration
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 
     DO i =1,nb_cell
-      ALLOCATE(sol(i)%base_poly(size_base,nb_var));      ALLOCATE(sol(i)%val_nodes(size_quad_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var))
-      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_exa(i)%val_nodes(size_quad_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var)) 
-      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var))
-      ALLOCATE(flux_h(i)%base_poly(size_base,nb_var));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes,nb_var));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1,nb_var))
+      ALLOCATE(sol(i)%base_poly(size_base,nb_var));      ALLOCATE(sol(i)%val_nodes(nb_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var))
+      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_exa(i)%val_nodes(nb_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var)) 
+      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var)); ALLOCATE(sol_step(i)%val_nodes(nb_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var))
+      ALLOCATE(flux_h(i)%base_poly(size_base,nb_var));   ALLOCATE(flux_h(i)%val_nodes(nb_nodes,nb_var));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1,nb_var))
       ALLOCATE(sol(i)%inter(2,nb_var));                  ALLOCATE(sol_exa(i)%inter(2,nb_var));                    ALLOCATE(sol_step(i)%inter(2,nb_var))
     END DO
     

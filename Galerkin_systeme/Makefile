@@ -38,7 +38,7 @@ clean:
 	$(FC) $(FFLAGS) $(MODPATH) -c $*.F90
 
 mod_declaration.o : precis.o   
-mod_polynome.o : mod_declaration.o
+mod_polynome.o : mod_declaration.o mod_divers.o
 mod_divers.o : mod_declaration.o 
 mod_flux.o : mod_polynome.o
 mod_Monolith.o : mod_flux.o

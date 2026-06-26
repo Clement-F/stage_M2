@@ -1,11 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+p = lambda U:  0.4*(U[2] - 0.5*(U[1]*U[1])/U[0])
+
 with open('file_data.txt') as f:
     lines = f.readlines()
-order = int(lines[0][10:16])
-nx = int(lines[2][5:11])
-sm = int(lines[3][5:11])
+nb_var =int(lines[0][10:16]) 
+order = int(lines[1][10:16])
+nx = int(lines[3][5:11])
+sm = int(lines[4][5:11])
 
 T=[]
 #for k in range(4,4+sm):
@@ -15,64 +19,36 @@ T=[]
 #   solDG   SolSub   file_sol    
 
 with open('solSub.txt') as f:
-    lines1 = f.readlines()
-    
-#with open('SolDG.txt') as f:
-#    lines2 = f.readlines()
-    
+    lines1 = f.readlines()   
 
-U_t = np.zeros((sm,nx));    U_t2 = np.zeros((sm,nx)); 
+U_t = np.zeros((sm,nx,nb_var)); P_ = np.zeros((sm,nx))
 X   = np.zeros(nx)
 dec = 0
 
-U_ex = np.zeros((sm,nx))
-err = np.zeros((sm,nx))
-err_L2 = np.zeros(sm)
 
 for k in range(0,sm):
-    for i in range(0,(nx)):
+    for i in range(0,(nx)): 
         X[i] = lines1[k*(nx+1) + i][0:10]
-        U_t[k][i]   = lines1[k*(nx+1) +i][11:23]
-        #U_t2[k][i]   = lines2[k*(nx+1) +i][11:23]
-        U_ex[k][i]  = lines1[k*(nx+1) +i][27:43]        
-        err[k][i] = abs(U_t[k][i] - U_ex[k][i]) 
-                   
+        U_t[k][i][0]   = lines1[k*(nx+1) +i][11:27]
+        if(nb_var >1) : 
+            U_t[k][i][1]   = lines1[k*(nx+1) +i][28:43]
+        if(nb_var >2) :
+            U_t[k][i][2]   = lines1[k*(nx+1) +i][44:60]
         
-    err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
-    #plt.plot(X,err[k],'r')
-    plt.plot(X,U_t[k],'b-')
-    #plt.plot(X,U_t2[k],'g-')
+        P_[k,i] = p(U_t[k,i,:])
+                  
+        
+    plt.plot(X,U_t[k,:,0],'b-')
+    if(nb_var>1):
+        #plt.plot(X,U_t[k,:,1],'r-')
+        plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r')
+    if(nb_var>2):
+        plt.plot(X,U_t[k,:,2],'g')
     
-    print(max(U_t[k]), min(U_t[k]), sum(U_t[k]))
-    #plt.plot(X,U_ex[k],'g')
-    plt.ylim(-1.2,2.)
+    plt.plot(X,P_[k,:],'k')
+    
+    plt.ylim(-0.2,1.2)
     plt.show()         
 
 
-if(True):
-    with open('buckley.dat') as f:
-        lines = f.readlines()
-        
-    X_B   = np.zeros(30000)
-    U_B   = np.zeros(30000)
-    for i in range(0,30000):
-        X_B[i] = lines[i][0:16]
-        U_B[i] = lines[i][17:32]
-        
-    plt.plot(X_B,U_B, 'r')
-    
-    plt.plot(X,U_t[k],'b-')
-    #plt.plot(X,U_t2[k],'go')
-    plt.ylim(-1.2,1.2)
-    plt.show()     
-#for k in range(1,sm):
-    #err_L2[k] = np.sqrt(sum(err[k][:]**2)) * 1/nx
-    #plt.plot(X,err[1],'r')
-#plt.plot(X,U_ex[0],'g')
-#plt.plot(X,U_t[0],'k')
-#plt.plot(X,U_t[-1],'b')
-#plt.plot(X,U_t[2],'r')
-#plt.xlim(0.0,0.1)
-#print(sum(U_t[0]), sum(U_t[-1]))
-#print(max(err_L2))
     

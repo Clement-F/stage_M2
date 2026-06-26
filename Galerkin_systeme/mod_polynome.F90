@@ -1,6 +1,7 @@
 
 MODULE mod_polynome
     USE mod_declaration
+    USE mod_Divers
     IMPLICIT NONE
     
 CONTAINS
@@ -23,6 +24,24 @@ CONTAINS
         if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
     END FUNCTION creneau
 
+    FUNCTION sod_tube(x,ni,nvar)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN):: x
+        INTEGER, INTENT(IN) :: ni,nvar
+        REAL(prec) :: sod_tube 
+
+        sod_tube = eps0
+        IF(x .LT. 0._prec) THEN
+            IF(nvar==1) sod_tube = 1._prec
+            IF(nvar==3) sod_tube = 1._prec
+        ELSE
+            
+            IF(nvar==1) sod_tube = 0.125_prec
+            IF(nvar==3) sod_tube = 0.1_prec
+        END IF
+
+    END FUNCTION sod_tube
+
     FUNCTION Q_init(x,ni,nvar)
         IMPLICIT NONE
         REAL(prec), INTENT(IN) :: x
@@ -42,6 +61,8 @@ CONTAINS
             Q_init = eps0
             if(0.3_prec<x .and. x<0.7_prec) Q_init = -1._prec
             if(x>0.7_prec) Q_init = 0.5_prec
+        ELSE IF(TRIM(sol_ini_name)=="Sod") THEN
+            Q_init = sod_tube(x,ni,nvar)
         END IF
     END FUNCTION Q_init
 
@@ -149,18 +170,18 @@ CONTAINS
         quadrature = 0._prec
 
             IF(TRIM(LOC) == "Loc") THEN
-            DO kk =size_quad_nodes,1,-1
+            DO kk =nb_nodes,1,-1
                 YY = Ref_to_loc(ni,x_quad(kk))
                 quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*cell_size(ni)/2._prec
             END DO
 
         ELSEIF(TRIM(LOC) == "Ref") THEN
-            DO kk =size_quad_nodes,1,-1
+            DO kk =nb_nodes,1,-1
                 quadrature = quadrature + fct1(x_quad(kk),opt1)*fct2(x_quad(kk),opt2)*w_quad(kk)
             END DO
 
         ELSEIF(TRIM(LOC) == "SubRef") THEN
-            DO kk =size_quad_nodes,1,-1
+            DO kk =nb_nodes,1,-1
                 YY = Ref_to_Refsub(x_quad(kk),n_sub)
                 quadrature = quadrature + fct1(YY,opt1)*fct2(YY,opt2)*w_quad(kk)*(subcell_size(n_sub)/2._prec)
             END DO
@@ -268,9 +289,9 @@ CONTAINS
         IMPLICIT NONE
 
         IF(TRIM(quad_meth) == "Lobatto") THEN
-            CALL quad_1D_lobatto(size_quad_nodes,x_quad,w_quad)
+            CALL quad_1D_lobatto(nb_nodes,x_quad,w_quad)
         ELSE IF(TRIM(quad_meth) == "Legendre") THEN
-            CALL quad_1D_legendre(size_quad_nodes,x_quad,w_quad)
+            CALL quad_1D_legendre(nb_nodes,x_quad,w_quad)
         END IF
 
     END SUBROUTINE Coeff_quad_init
@@ -613,42 +634,42 @@ CONTAINS
 
 
     ! FUNCTION deriv_DG_base(x,ordre_poly, nb_deriv, LOC,ni)
-    !     IMPLICIT NONE
-    !     INTEGER,            INTENT(IN) :: ordre_poly
-    !     CHARACTER (len=8),  INTENT(IN) :: LOC
-    !     INTEGER,            INTENT(IN) :: nb_deriv
-    !     INTEGER,            INTENT(IN) :: ni
-    !     REAL(Prec),         INTENT(IN) :: x
+        !     IMPLICIT NONE
+        !     INTEGER,            INTENT(IN) :: ordre_poly
+        !     CHARACTER (len=8),  INTENT(IN) :: LOC
+        !     INTEGER,            INTENT(IN) :: nb_deriv
+        !     INTEGER,            INTENT(IN) :: ni
+        !     REAL(Prec),         INTENT(IN) :: x
 
-    !     REAL(prec) :: XX
-    !     REAL(prec) :: deriv_DG_base
-    !     REAL(prec) :: temp
-    !     INTEGER :: ii,jj
+        !     REAL(prec) :: XX
+        !     REAL(prec) :: deriv_DG_base
+        !     REAL(prec) :: temp
+        !     INTEGER :: ii,jj
 
-    !     IF(TRIM(LOC) == "Loc")      XX = Loc_to_Ref(ni,x)
-    !     IF(TRIM(LOC) == "Ref")      XX = x
-    !     IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
+        !     IF(TRIM(LOC) == "Loc")      XX = Loc_to_Ref(ni,x)
+        !     IF(TRIM(LOC) == "Ref")      XX = x
+        !     IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
 
-    !     deriv_DG_base = eps0
+        !     deriv_DG_base = eps0
 
-    !     IF(DG_meth == "Legendre") THEN
-    !     DO ii =ordre_poly,(nb_deriv+1),-1
-    !         deriv_DG_base = deriv_DG_base + factoriel(ii,nb_deriv)*coeff_DG(ordre_poly,ii) * XX**(ii-nb_deriv)
-    !     END DO
-    !     ELSE IF(DG_meth == "Lobatto") THEN
-    !     DO ii =1,size_base
-    !         temp =1._prec
+        !     IF(DG_meth == "Legendre") THEN
+        !     DO ii =ordre_poly,(nb_deriv+1),-1
+        !         deriv_DG_base = deriv_DG_base + factoriel(ii,nb_deriv)*coeff_DG(ordre_poly,ii) * XX**(ii-nb_deriv)
+        !     END DO
+        !     ELSE IF(DG_meth == "Lobatto") THEN
+        !     DO ii =1,size_base
+        !         temp =1._prec
 
-    !         DO jj =1,size_base
-    !             IF((jj .NE. ii) .and. (jj .ne.ordre_poly)) THEN 
-    !             temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))
-    !             END IF
-    !         END DO
+        !         DO jj =1,size_base
+        !             IF((jj .NE. ii) .and. (jj .ne.ordre_poly)) THEN 
+        !             temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))
+        !             END IF
+        !         END DO
 
-    !         IF(ii .NE. ordre_poly)  dDG_base = dDG_base + temp/(pts_DG(ordre_poly)-pts_DG(ii))
-    !     END DO
-    !     END IF
-        
+        !         IF(ii .NE. ordre_poly)  dDG_base = dDG_base + temp/(pts_DG(ordre_poly)-pts_DG(ii))
+        !     END DO
+        !     END IF
+            
 
     ! END FUNCTION deriv_DG_base
 
@@ -718,7 +739,7 @@ CONTAINS
         INTEGER, INTENT(IN) :: ni,nvar
         REAL(prec), DIMENSION(size_base), INTENT(OUT) :: fct_h
         CHARACTER (len=8),  INTENT(IN) :: LOC
-        REAL(prec), DIMENSION(size_quad_nodes), INTENT(IN), optional :: fct_val
+        REAL(prec), DIMENSION(nb_nodes), INTENT(IN), optional :: fct_val
 
         REAL(prec), DIMENSION(size_base) :: f_prod
         REAL(prec) :: YY
@@ -728,7 +749,7 @@ CONTAINS
         f_prod =  0._prec
         IF(.not. present(fct_val)) THEN
         DO jj =size_base,1,-1
-            DO kk =1,size_quad_nodes
+            DO kk =1,nb_nodes
 
                 IF(TRIM(LOC) == "Loc") YY = Ref_to_loc(ni,x_quad(kk))
                 IF(TRIM(LOC) == "Ref") YY = x_quad(kk)
@@ -739,14 +760,12 @@ CONTAINS
 
         ELSEIF(  present(fct_val)) THEN
         DO jj =size_base,1,-1
-            DO kk =1,size_quad_nodes
-
+            DO kk =1,nb_nodes
                 f_prod(jj) = f_prod(jj) + fct_val(kk)*sig_quad(jj,kk)*w_quad(kk)
-
             END DO
         END DO
-
         END IF
+
         fct_h = MATMUL(Masse_inv,f_prod)
 
     END SUBROUTINE Projection_Pk
@@ -760,7 +779,7 @@ CONTAINS
         DO ii = 1,size_base
             DO jj = ii,size_base
                 
-                DO kk =size_quad_nodes,1,-1
+                DO kk =nb_nodes,1,-1
                     Masse(ii,jj) = Masse(ii,jj) + sig_quad(ii,kk)*sig_quad(jj,kk)*w_quad(kk)
                 END DO
 
@@ -822,7 +841,7 @@ CONTAINS
         Projection_VF = 0._prec
         DO j =1,nb_subcell
             DO i=1,size_base
-                DO kk =size_quad_nodes,1,-1
+                DO kk =nb_nodes,1,-1
                     YY = x_quad(kk)
                     Projection_VF(j,i) = Projection_VF(j,i) + DG_base(YY,i,LOC=LSub, ni=j)*w_quad(kk)/2._prec
                 END DO
@@ -926,51 +945,6 @@ CONTAINS
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm
-
-    FUNCTION Voisin_Face(ni,ns,LR)
-        IMPLICIT NONE
-        INTEGER, INTENT(IN) :: ni,ns
-        CHARACTER(len =1) :: LR
-        INTEGER, DIMENSION(2):: Voisin_Face
-
-        ! print *,ni,ns,LR
-
-        IF(LR == "L") THEN
-        IF(ni == 1 .AND. ns == 1) THEN 
-            IF(TRIM(bdry_cond) == "period") THEN
-            Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
-            Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
-            END IF
-
-        ELSE IF(ns ==1 ) THEN
-            Voisin_Face(1) = ni-1 ; Voisin_Face(2) = nb_subcell
-        ELSE 
-            Voisin_Face(1) = ni ; Voisin_Face(2) = ns-1
-        END IF
-
-        ELSE IF(LR == "R") THEN
-        IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
-            IF(TRIM(bdry_cond) == "period") THEN
-            Voisin_Face(1) = 1; Voisin_Face(2) = 1
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
-            Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
-            END IF
-            
-        ELSE IF(ns == nb_subcell+1 ) THEN
-            Voisin_Face(1) = ni+1 ; Voisin_Face(2) = 1
-        ELSE 
-            Voisin_Face(1) = ni ; Voisin_Face(2) = ns
-        END IF
-
-        ELSE 
-        print *,"direction non reconnue"
-        STOP
-        END IF
-
-        ! print *,Voisin_Face
-
-    END FUNCTION Voisin_Face
 
     SUBROUTINE print_submesh
         IMPLICIT NONE

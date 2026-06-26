@@ -47,7 +47,6 @@ CONTAINS
         dicho = c
     END FUNCTION dicho
 
-
     FUNCTION minmod(x,y,z)
 
         implicit none
@@ -59,28 +58,28 @@ CONTAINS
     END FUNCTION
 
     ! FUNCTION Moindre_carre(A,b,n1,n2, A_inv) result(X)
-    !     IMPLICIT NONE
-    !     INTEGER,  INTENT(IN)  :: n1,n2
-    !     REAL(prec), DIMENSION(n1,n2), INTENT(IN) :: A
-    !     REAL(prec), DIMENSION(n2,n1), INTENT(IN),  optional :: A_inv
-    !     REAL(prec), DIMENSION(n2),    INTENT(IN)  :: b
+        !     IMPLICIT NONE
+        !     INTEGER,  INTENT(IN)  :: n1,n2
+        !     REAL(prec), DIMENSION(n1,n2), INTENT(IN) :: A
+        !     REAL(prec), DIMENSION(n2,n1), INTENT(IN),  optional :: A_inv
+        !     REAL(prec), DIMENSION(n2),    INTENT(IN)  :: b
 
-    !     REAL(prec), DIMENSION(n1,n2) :: mat_inv
-    !     REAL(prec), DIMENSION(n1) :: X
+        !     REAL(prec), DIMENSION(n1,n2) :: mat_inv
+        !     REAL(prec), DIMENSION(n1) :: X
 
 
-    !     IF(n1 == n2) THEN 
-    !         IF(.not.present(A_inv)) THEN; CALL inv_mat(A,mat_inv,0);    X = MATMUL(mat_inv,b)
-    !         ELSE IF(present(A_inv)) THEN; X = MATMUL(A_inv,b)
-    !         END IF
-    !     ELSE
-    !         IF(.not.present(A_inv)) THEN; 
-    !             CALL inv_mat(MATMUL(Transpose(A),A),mat_inv,0);
-    !             X = MATMUL(mat_inv,MATMUL(Transpose(A),b) )
-    !         ELSE IF(present(A_inv)) THEN; X = MATMUL(A_inv,MATMUL(Transpose(A),b))
-    !         END IF
+        !     IF(n1 == n2) THEN 
+        !         IF(.not.present(A_inv)) THEN; CALL inv_mat(A,mat_inv,0);    X = MATMUL(mat_inv,b)
+        !         ELSE IF(present(A_inv)) THEN; X = MATMUL(A_inv,b)
+        !         END IF
+        !     ELSE
+        !         IF(.not.present(A_inv)) THEN; 
+        !             CALL inv_mat(MATMUL(Transpose(A),A),mat_inv,0);
+        !             X = MATMUL(mat_inv,MATMUL(Transpose(A),b) )
+        !         ELSE IF(present(A_inv)) THEN; X = MATMUL(A_inv,MATMUL(Transpose(A),b))
+        !         END IF
 
-    !     END IF
+        !     END IF
 
     ! END FUNCTION Moindre_carre
     
@@ -136,4 +135,132 @@ CONTAINS
 
     END FUNCTION factoriel
 
+
+    FUNCTION Voisin_Face(ni,ns,LR)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni,ns
+        CHARACTER(len =1) :: LR
+        INTEGER, DIMENSION(2):: Voisin_Face
+
+        ! print *,ni,ns,LR
+
+        IF(LR == "L") THEN
+        IF(ni == 1 .AND. ns == 1) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
+            END IF
+
+        ELSE IF(ns ==1 ) THEN
+            Voisin_Face(1) = ni-1 ; Voisin_Face(2) = nb_subcell
+        ELSE 
+            Voisin_Face(1) = ni ; Voisin_Face(2) = ns-1
+        END IF
+
+        ELSE IF(LR == "R") THEN
+        IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_Face(1) = 1; Voisin_Face(2) = 1
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
+            END IF
+            
+        ELSE IF(ns == nb_subcell+1 ) THEN
+            Voisin_Face(1) = ni+1 ; Voisin_Face(2) = 1
+        ELSE 
+            Voisin_Face(1) = ni ; Voisin_Face(2) = ns
+        END IF
+
+        ELSE 
+        print *,"direction non reconnue"
+        STOP
+        END IF
+
+        ! print *,Voisin_Face
+
+    END FUNCTION Voisin_Face
+
+    FUNCTION Voisin_cell(ni,LR)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni
+        CHARACTER(len =1) :: LR
+        INTEGER :: Voisin_cell
+
+        IF(LR == "L") THEN
+        IF(ni == 1 ) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_cell = nb_cell; 
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_cell = 1
+            END IF
+        ELSE 
+            Voisin_cell = ni-1
+        END IF
+
+        ELSE IF(LR == "R") THEN
+        IF(ni == nb_cell) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_cell= 1
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_cell = nb_cell
+            END IF
+        ELSE 
+            Voisin_cell = ni+1 
+        END IF
+
+        ELSE 
+        print *,"direction non reconnue"
+        STOP
+        END IF
+
+        ! print *,Voisin_Face
+
+    END FUNCTION Voisin_cell
+
+
+    FUNCTION Voisin_quad(ni,nq,LR)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni,nq
+        CHARACTER(len =1) :: LR
+        INTEGER, DIMENSION(2):: Voisin_quad
+
+
+        IF(LR == "L") THEN
+        IF(ni == 1 .AND. nq == 1) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_quad(1) = nb_cell; Voisin_quad(2) = nb_nodes
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_quad(1) = 1 ; Voisin_quad(2) = 1
+            END IF
+
+        ELSE IF(nq ==1 ) THEN
+            Voisin_quad(1) = ni-1 ; Voisin_quad(2) = nb_nodes
+        ELSE 
+            Voisin_quad(1) = ni ; Voisin_quad(2) = nq-1
+        END IF
+
+        ELSE IF(LR == "R") THEN
+        IF(ni == nb_cell .AND. nq == nb_nodes) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_quad(1) = 1; Voisin_quad(2) = 1
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_quad(1) = nb_cell ; Voisin_quad(2) = nb_nodes
+            END IF
+            
+        ELSE IF(nq == nb_nodes ) THEN
+            Voisin_quad(1) = ni+1 ; Voisin_quad(2) = 1
+        ELSE 
+            Voisin_quad(1) = ni ; Voisin_quad(2) = nq
+        END IF
+
+        ELSE 
+        print *,"direction non reconnue"
+        STOP
+        END IF
+
+        ! print *,Voisin_quad
+
+    END FUNCTION Voisin_quad
+    
 END MODULE mod_Divers

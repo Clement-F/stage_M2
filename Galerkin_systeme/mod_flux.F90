@@ -19,17 +19,28 @@ CONTAINS
       flux(2) = u(1)*u(2)
     CASE("Shallow")
       flux(1) = u(2)
-      flux(2) = u(1)*u(2)
+      flux(2) = u(1)*u(2) + (u(1)**2)/2._prec
     CASE("Euler")
       flux(1) = u(2)
-      flux(2) = u(1)*u(2) ! + p
-      flux(3) = u(2)*u(3)/u(1) ! + p*u(2)/u(1) 
+      flux(2) = u(2)**2/u(1)  + pression(u)
+      flux(3) = (u(2)/u(1))*(u(3)+ pression(u)) 
     CASE DEFAULT
       WRITE(*,*) "flux non reconnu ",flux_name
       flux = 0._prec
       STOP
     END SELECT
   END FUNCTION flux
+
+  FUNCTION pression(u) result(p)
+    IMPLICIT NONE
+    REAL(prec), DIMENSION(nb_var), INTENT(in) :: u
+    REAL(prec) :: p
+    REAL(prec) :: gamma = 1.4_prec
+
+    p = (gamma-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
+
+  END FUNCTION pression
+
 
   ! FUNCTION flux_d(u)
     !   IMPLICIT NONE
@@ -92,10 +103,6 @@ CONTAINS
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u,v
     REAL(prec) :: gamma_calc
-    REAL(prec) :: gamma_temp
-
-    REAL(prec) :: u_step
-    INTEGER :: i 
     
     gamma_calc = 0._prec
     
@@ -106,7 +113,10 @@ CONTAINS
     ELSE IF(TRIM(flux_name) == "Shallow") THEN
         gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))
     ELSE IF(TRIM(flux_name) == "Euler") THEN
-        gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))
+        gamma_calc = max(abs(u(2)/u(1) ) + sqrt(1.4_prec* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(1.4_prec* pression(v)/v(1)))
+    ELSE 
+      print *,"flux non reconnue "
+      Stop
     END IF
   END FUNCTION gamma_calc
 
