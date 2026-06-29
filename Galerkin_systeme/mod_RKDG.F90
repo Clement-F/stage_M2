@@ -12,6 +12,9 @@ CONTAINS
     REAL(prec), DIMENSION(nb_nodes, nb_var) :: flux_uh_val
     REAL(prec), DIMENSION(nb_var) :: ug,ud,u_temp
 
+    REAL(prec) :: x_s
+    REAL(prec) :: fh_L, fh_R
+
     DO ni = 1,nb_cell+1
       IF (ni ==1) THEN 
 
@@ -41,7 +44,7 @@ CONTAINS
         ud = sol_step(ni)  %inter(1,:)
       END IF
 
-      g(ni,:) = (flux(ug) + flux(ud) - gamma_calc(ud,ug)*(ud-ug))  * 0.5_prec
+      g(ni,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
 
 
     END DO
@@ -53,47 +56,28 @@ CONTAINS
       END DO
 
       DO ii = 1,nb_var
-        CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly(:,ii),LOC= LLoc,ni =ni, nvar =ii, fct_val= flux_uh_val(:,ii))
+        CALL Projection_Pk(flux_uh,flux_h(ni)%flux_DG(:,ii),LOC= LLoc,ni =ni, nvar =ii, fct_val= flux_uh_val(:,ii))
       END DO
     END DO
     
-    ! IF(subcell_use) THEN
+    IF(subcell_use) THEN
+      
+    DO ni = 1,nb_cell; DO ii = 1,nb_var
+      fh_L = eval_poly(-1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
+      fh_R = eval_poly( 1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
 
-    ! IF(smooth_extrema) CALL extrema_detect
+      DO jj =1,nb_subcell+1
+        x_s = x_subcell(jj)
 
-    ! DO ni = 1,nb_cell
-    !   fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
-    !   fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
-
-    !   DO jj =1,nb_subcell+1
-    !     x_s = x_subcell(jj)
-
-    !     flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
-    !                               & - C_m(jj)*(fh_L-g(ni  )) &
-    !                               & - C_p(jj)*(fh_R-g(ni+1))
-                    
-    !     IF(monolithique) THEN
-
-
-    !       voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
-    !       voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
-    !       extrema = (subcells_(voi_L(1),voi_L(2))%extrema) .OR. (subcells_(voi_R(1),voi_R(2))%extrema)
-
-    !       IF(.not. extrema) THEN
-    !       f_FV = Flux_FV(ug,ud);      
-    !       DF = flux_h(ni)%val_subcells(jj) - f_FV; IF(abs(DF) .LT. eps0) DF = 0._prec   
-
-    !       theta_loc = theta(voi_L,voi_R, DF)
-
-    !       flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
-    !       END IF
-
-    !     END IF                  
-    !   END DO
+        flux_h(ni)%flux_subcells(jj,ii) = eval_poly(x_s,ni=ni, base_poly=flux_h(ni)%flux_DG(:,ii),LOC= LRef) &
+                                  & - C_m(jj)*(fh_L-g(ni  ,ii)) &
+                                  & - C_p(jj)*(fh_R-g(ni+1,ii))
+                               
+      END DO
 
       
-    ! END DO
-    ! END IF
+    END DO; END DO
+    END IF
 
   END SUBROUTINE flux_numerique
 
@@ -121,7 +105,7 @@ CONTAINS
 
       DO ni =1,nb_cell;     DO jj=1,nb_var
 
-        V_B = MATMUL(Rigid,flux_h(ni)%base_poly(:,jj))
+        V_B = MATMUL(Rigid,flux_h(ni)%flux_DG(:,jj))
         S_B = -(g(ni+1,jj)*sig_2 - g(ni,jj)*sig_1)
         BB  = (V_B + S_B)
         ! write(*,fmt='(  3( 2(f10.6) ) )')V_B,S_B,BB
@@ -168,134 +152,75 @@ CONTAINS
 
   END SUBROUTINE Time_step
 
-  ! SUBROUTINE Time_step_subcell
-  !   IMPLICIT NONE
-  !   INTEGER :: ni, tni
+  SUBROUTINE Time_step_subcell
+    IMPLICIT NONE
+    INTEGER :: ni
 
-  !   INTEGER :: ii,jj,kk
-  !   INTEGER, DIMENSION(2) :: pv,af
-  !   REAL(prec), DIMENSION(nb_cell,nb_subcell) :: max_loc, min_loc
-  !   REAL(prec) :: L
+    INTEGER :: ii,jj,kk
+    REAL(prec) :: L
 
-  !   ! print *,"---------------------"
+    ! print *,"---------------------"
 
-  !   DO ni=1,nb_cell
-  !     sol_step(ni)%base_poly  = sol(ni)%base_poly
-  !     sol_step(ni)%val_nodes  = sol(ni)%val_nodes
-  !     sol_step(ni)%val_subcells=sol(ni)%val_subcells
-  !     sol_step(ni)%inter      = sol(ni)%inter
-  !   END DO
+    DO ni=1,nb_cell
+      sol_step(ni)%base_poly  = sol(ni)%base_poly
+      sol_step(ni)%val_nodes  = sol(ni)%val_nodes
+      sol_step(ni)%val_subcells=sol(ni)%val_subcells
+      sol_step(ni)%inter      = sol(ni)%inter
+    END DO
 
-  !   DO ii=1,order_t
-  !     CALL flux_numerique
+    DO ii=1,order_t
+      CALL flux_numerique
       
-  !     IF(max_check == 1) THEN
-  !       DO ni=1,nb_cell
-  !         DO jj=1,nb_subcell
-  !           max_loc(ni,jj) = minmax_loc((/ni,jj/),"max")
-  !           min_loc(ni,jj) = minmax_loc((/ni,jj/),"min")
-  !         END DO 
-  !       END DO
-  !     END IF
+      DO ni = 1,nb_cell;  DO kk=1,nb_var 
 
-  !     DO ni = 1,nb_cell
-  !       DO jj =1,nb_subcell
+        DO jj =1,nb_subcell
           
-  !         ! print *,flux_h(ni)%val_subcells(jj+1), flux_h(ni)%val_subcells(jj)
+          L = (flux_h(ni)%flux_subcells(jj+1,kk)- flux_h(ni)%flux_subcells(jj,kk))
 
-  !         L = (flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-
-  !         sol_step(ni)%val_subcells(jj)= RK_alpha(ii,1) * sol(ni)%val_subcells(jj) &
-  !                                   &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj) &
-  !                                   &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
+          sol_step(ni)%val_subcells(jj,kk)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,kk) &
+                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,kk) &
+                                        &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
                                                                       
-  !       END DO
-  !     END DO
+        END DO; END DO
+      END DO
 
-  !     IF(max_check .ne. 0) THEN
-  !       ! print *,"--------------------------"
-  !       DO ni=1,nb_cell
-  !         DO jj=1,nb_subcell
-  !           IF(max_check == 1) THEN
+      DO ni = 1,nb_cell; DO kk=1,nb_var 
 
-  !             IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-  !               IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 +1E-6_prec)THEN
-  !                 print *,"---------------------------"
-  !                 write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_loc(ni,jj))   
-  !                 pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
-  !                 write(*,fmt="('at the time step nb',i1)") ii
-  !                 write(*,fmt="('stencil : (',i2,1x,i1,')',e12.6,2x,'(',i2,1x,i1,')',e12.6,'(',i2,1x,i1,')',e12.6  )") & 
-  !                       & pv, sol(pv(1))%val_subcells(pv(2)), ni,jj,sol(ni)%val_subcells(jj), af, sol(af(1))%val_subcells(af(2))
-  !                 write(*,fmt="('DF : ',e12.6)")(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-  !                 print *,"---------------------------"
-  !               ELSE IF(sol_step(ni)%val_subcells(jj) .LT. min_loc(ni,jj)-4*eps0-1E-6_prec ) THEN 
-  !                 print *,"---------------------------"
-  !                 write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_loc(ni,jj))     
-  !                  pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
-  !                 write(*,fmt="('at the time step nb',i1)") ii
-  !                 write(*,fmt="('stencil : (',i2,1x,i1,')',e12.6,2x,'(',i2,1x,i1,')',e12.6,'(',i2,1x,i1,')',e12.6  )") & 
-  !                       & pv, sol(pv(1))%val_subcells(pv(2)), ni,jj,sol(ni)%val_subcells(jj), af, sol(af(1))%val_subcells(af(2))
-  !                 write(*,fmt="('DF : ',e12.6)")(flux_h(ni)%val_subcells(jj+1)- flux_h(ni)%val_subcells(jj))
-                
-  !                 print *,"---------------------------"
-  !               END IF
-  !             END IF
+        DO jj=1,size_base
+          sol_step(ni)%base_poly(jj,kk) = DOT_PRODUCT(Projection_VF_inv(jj,:), sol_step(ni)%val_subcells(:,kk))
+        END DO
 
-  !           ELSE IF(max_check == 2) THEN
-              
-  !             IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-  !               IF(sol_step(ni)%val_subcells(jj) .GT. max_glob+4*eps0 ) write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_glob,sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_glob)    
-  !               IF(sol_step(ni)%val_subcells(jj) .LT. min_glob-4*eps0 ) write(*,fmt="('problem min rule at :(',i2,1x,i2,'), min : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,min_glob,sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - min_glob)      
-  !             END IF
-              
-  !           END IF
-  !         END DO
-  !       END DO
-  !     END IF
+        DO jj=1,nb_nodes
+          sol_step(ni)%val_nodes(jj,kk)  = eval_step(x_quad(jj),nvar=kk,ni=ni, kk=jj, LOC= LRef)
+        END DO
+        IF(TRIM(quad_meth)=="Lobatto") THEN
+          sol_step(ni)%inter(1,kk)      = sol_step(ni)%val_nodes(1,kk)
+          sol_step(ni)%inter(2,kk)      = sol_step(ni)%val_nodes(nb_nodes,kk)
+        ELSE 
+          sol_step(ni)%inter(1,kk)      = eval_step(x_cell(ni),   nvar=kk,ni=ni,LOC= LLoc)
+          sol_step(ni)%inter(2,kk)      = eval_step(x_cell(ni+1), nvar=kk,ni=ni,LOC= LLoc)
+        END IF
 
+      END DO; END DO
 
+    END DO
 
-  !     DO ni = 1,nb_cell
-  !       DO jj=1,size_base
-  !         sol_step(ni)%base_poly(jj) = DOT_PRODUCT(Projection_VF_inv(jj,:), sol_step(ni)%val_subcells)
-  !       END DO
-
-  !       DO jj=1,nb_nodes
-  !         sol_step(ni)%val_nodes(jj)  = eval_step(x_quad(jj),ni, jj, LOC= LRef)
-  !       END DO
-  !       IF(TRIM(quad_meth)=="Lobatto") THEN
-  !         sol_step(ni)%inter(1)      = sol_step(ni)%val_nodes(1)
-  !         sol_step(ni)%inter(2)      = sol_step(ni)%val_nodes(nb_nodes)
-  !       ELSE 
-  !         sol_step(ni)%inter(1)      = eval_step(x_cell(ni),ni,  LOC= LLoc)
-  !         sol_step(ni)%inter(2)      = eval_step(x_cell(ni+1),ni,LOC= LLoc)
-  !       END IF
-  !     END DO
-
-  !   END DO
-
-  !   ! IF(smooth_extrema) THEN
-  !   !   DO ni =1,nb_cell
-        
-  !   !   END DO
-  !   ! END IF
-    
-  !   DO ni=1,nb_cell
-  !     sol(ni)%base_poly  = sol_step(ni)%base_poly
-  !     sol(ni)%val_nodes  = sol_step(ni)%val_nodes
-  !     sol(ni)%val_subcells=sol_step(ni)%val_subcells
-  !     sol(ni)%inter      = sol_step(ni)%inter
-  !   END DO
+    DO ni=1,nb_cell
+      sol(ni)%base_poly    = sol_step(ni)%base_poly
+      sol(ni)%val_nodes    = sol_step(ni)%val_nodes
+      sol(ni)%val_subcells = sol_step(ni)%val_subcells
+      sol(ni)%inter        = sol_step(ni)%inter
+    END DO
 
 
 
 
-  ! END SUBROUTINE Time_step_subcell
+  END SUBROUTINE Time_step_subcell
 
   SUBROUTINE dt_calc
     IMPLICIT NONE
     INTEGER :: i,j
-    INTEGER, DIMENSION(2) :: nxt_quad
+    INTEGER, DIMENSION(2) :: nxt_
     REAL(prec) :: gamma_temp
     REAL(prec), DIMENSION(nb_var) :: u_,v_
 
@@ -303,14 +228,28 @@ CONTAINS
       max_dflux = abs(vit_adv)
     ELSE 
       max_dflux = 0._prec
-      DO i=1,nb_cell;    DO j=1,nb_nodes
-        nxt_quad = Voisin_quad(i,j,'R')
 
-        u_=sol(i)%val_nodes(j,:); v_ = sol(nxt_quad(1))%val_nodes(nxt_quad(2),:)
+      IF(subcell_use .and.(.not. error_calc)) THEN
+
+      DO i=1,nb_cell;    DO j=1,nb_subcell
+        nxt_ = Voisin_Face(i,j,'R')
+
+        u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
         gamma_temp = gamma_calc(u_, v_)
         
         max_dflux = max(max_dflux, gamma_temp)
       END DO;END DO
+
+      ELSE 
+        DO i=1,nb_cell;    DO j=1,nb_nodes
+          nxt_ = Voisin_quad(i,j,'R')
+
+          u_=sol(i)%val_nodes(j,:); v_ = sol(nxt_(1))%val_nodes(nxt_(2),:)
+          gamma_temp = gamma_calc(u_, v_)
+                    
+          max_dflux = max(max_dflux, gamma_temp)
+        END DO;END DO
+      END IF
     END IF
     
     dt_old = dt
@@ -335,7 +274,7 @@ CONTAINS
     INTEGER :: i,j,k
     REAL(prec), DIMENSION(nb_var) :: out, out_ex
     REAL(prec) :: xi
-    REAL(prec) :: err1 , err2, errLi
+    REAL(prec) :: err1 , err2, errLi, pression_
     LOGICAL, optional :: switch
     LOGICAL :: force
     Character(len=63) :: save_format
@@ -344,7 +283,7 @@ CONTAINS
     ELSE; force = .FALSE.
     END IF
 
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec; pression_ = 0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
     END IF
@@ -352,15 +291,23 @@ CONTAINS
     IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0) .OR. force )  THEN
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
-        ! IF(subcell_use .and.(.not. error_calc)) THEN
+        IF(subcell_use .and.(.not. error_calc)) THEN
 
-        !   DO j=1,nb_subcell
-        !     xi = Ref_to_loc(i,x_submiddle(j))
-        !     out1 = sol(i)%val_subcells(j)
-        !     write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1, 0._prec, subcells_(i,j)%extrema
-        !   END DO
+          save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
 
-        ! ELSE
+          DO j=1,nb_subcell; 
+            xi = Ref_to_loc(i,x_submiddle(j))
+            out = sol(i)%val_subcells(j,:)
+            write(unit=numfile_sol,  fmt=save_format,  advance="no") xi,out
+
+            IF(TRIM(flux_name)== "Euler" ) THEN; pression_ = max(pression(sol(i)%val_subcells(j,:)), pression_)
+            write(unit=numfile_sol, fmt= '(f10.6)') pression(sol(i)%val_subcells(j,:))
+            ELSE; write(unit=numfile_sol, fmt= '(1x)')
+            END IF
+
+          END DO; 
+
+        ELSE
           
           DO j=1,size_base
             xi = Ref_to_loc(i,x_quad(j))
@@ -377,19 +324,21 @@ CONTAINS
             END DO
 
             save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
+            write(unit=numfile_sol,  fmt=save_format ) xi,out
 
-            write(unit=numfile_sol,  fmt=save_format) xi,out
 
             errLi = max(errLi , maxval(abs(out-out_ex)))
             err1 = err1 + SUM(abs(out-out_ex))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + SUM(((out-out_ex)*w_quad(j))**2)  *cell_size(i)/2
+
+            IF(TRIM(flux_name)== "Euler" ) pression_ = max(pression(sol(i)%val_nodes(j,:)), pression_)
           END DO
 
-        ! END IF
+        END IF
       END DO
 
       err2 = sqrt(err2)
-      
+      IF(TRIM(flux_name)== "Euler" ) write(*,fmt='("pression = ", f10.6)') pression_
       write(*, fmt ='("err L1 = ", e20.12)')  err1
       write(*, fmt ='("err L2 = ", e20.12)')  err2
       write(*, fmt ='("err Li = ", e20.12)')  errLi
@@ -399,7 +348,7 @@ CONTAINS
       n_imp = n_imp +1
       Time_stemp(n_imp) = time
       
-      write(unit=numfile_sol, fmt='("------------------------")' ) 
+      write(unit=numfile_sol, fmt='("----------",f10.6,"--------------")' ) time
     END IF
   END SUBROUTINE writout
   
@@ -459,12 +408,5 @@ CONTAINS
 
     print *, "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
-
-  SUBROUTINE Projection_conv
-    IMPLICIT NONE
-
-
-
-  END SUBROUTINE Projection_conv
   
 END MODULE

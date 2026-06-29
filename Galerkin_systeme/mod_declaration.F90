@@ -10,13 +10,22 @@ MODULE mod_declaration
     REAL(prec),DIMENSION(:,:),POINTER :: inter
   END TYPE var_type
 
+  TYPE flux_
+    REAL(prec) :: theta
+    REAL(prec), DIMENSION(:,:), POINTER :: flux_VF
+    REAL(prec), DIMENSION(:,:), POINTER :: flux_DG
+    REAL(prec), DIMENSION(:,:), POINTER :: flux_subcells
+    REAL(prec), DIMENSION(:,:), POINTER :: flux_tilde
+  END TYPE flux_
+
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER, DIMENSION(2) :: L, LL, R, RR
     LOGICAL :: extrema
   END TYPE subcells
 
-  TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, flux_h, sol_exa
+  TYPE(var_type), DIMENSION(:), POINTER :: sol, sol_step, sol_exa
+  TYPE(flux_), DIMENSION(:), POINTER :: flux_h
   TYPE(subcells), DIMENSION(:,:), POINTER :: subcells_
 
   REAL(prec), DIMENSION(:,:),   POINTER :: g
@@ -74,7 +83,7 @@ MODULE mod_declaration
 
     INTEGER :: i
 
-    ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell), sol_exa(nb_cell))
+    ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell+1), sol_exa(nb_cell))
     ALLOCATE( g(nb_cell +1, nb_var))
 
     ALLOCATE (subcells_(nb_cell, nb_subcell))
@@ -100,13 +109,16 @@ MODULE mod_declaration
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 
     DO i =1,nb_cell
-      ALLOCATE(sol(i)%base_poly(size_base,nb_var));      ALLOCATE(sol(i)%val_nodes(nb_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var))
-      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_exa(i)%val_nodes(nb_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var)) 
-      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var)); ALLOCATE(sol_step(i)%val_nodes(nb_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var))
-      ALLOCATE(flux_h(i)%base_poly(size_base,nb_var));   ALLOCATE(flux_h(i)%val_nodes(nb_nodes,nb_var));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1,nb_var))
-      ALLOCATE(sol(i)%inter(2,nb_var));                  ALLOCATE(sol_exa(i)%inter(2,nb_var));                    ALLOCATE(sol_step(i)%inter(2,nb_var))
+      ALLOCATE(sol(i)%base_poly(size_base,nb_var));       ALLOCATE(sol(i)%val_nodes(nb_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var))
+      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));   ALLOCATE(sol_exa(i)%val_nodes(nb_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var)) 
+      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_step(i)%val_nodes(nb_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var))
+      ALLOCATE(sol(i)%inter(2,nb_var));                   ALLOCATE(sol_exa(i)%inter(2,nb_var));             ALLOCATE(sol_step(i)%inter(2,nb_var))
+
+      ALLOCATE(flux_h(i)%flux_DG(size_base,nb_var))      
+      ALLOCATE(flux_h(i)%flux_tilde(nb_subcell+1,nb_var));ALLOCATE(flux_h(i)%flux_VF(nb_subcell+1,nb_var)); ALLOCATE(flux_h(i)%flux_subcells(nb_subcell+1,nb_var));  
     END DO
     
+
   END SUBROUTINE ALLOCATE_all
 
   SUBROUTINE DEALLOCATE_all
@@ -115,11 +127,11 @@ MODULE mod_declaration
     INTEGER :: i
     
     DO i =1,nb_cell
-      DEALLOCATE(sol(i)%base_poly);      DEALLOCATE(sol(i)%val_nodes);      DEALLOCATE(sol(i)%val_subcells)
-      DEALLOCATE(sol_exa(i)%base_poly);  DEALLOCATE(sol_exa(i)%val_nodes);  DEALLOCATE(sol_exa(i)%val_subcells) 
-      DEALLOCATE(sol_step(i)%base_poly); DEALLOCATE(sol_step(i)%val_nodes); DEALLOCATE(sol_step(i)%val_subcells)
-      DEALLOCATE(flux_h(i)%base_poly);   DEALLOCATE(flux_h(i)%val_nodes);   DEALLOCATE(flux_h(i)%val_subcells)
-      DEALLOCATE(sol(i)%inter);          DEALLOCATE(sol_exa(i)%inter);      DEALLOCATE(sol_step(i)%inter)
+      DEALLOCATE(sol(i)%base_poly);       DEALLOCATE(sol(i)%val_nodes);       DEALLOCATE(sol(i)%val_subcells)
+      DEALLOCATE(sol_exa(i)%base_poly);   DEALLOCATE(sol_exa(i)%val_nodes);   DEALLOCATE(sol_exa(i)%val_subcells) 
+      DEALLOCATE(sol_step(i)%base_poly);  DEALLOCATE(sol_step(i)%val_nodes);  DEALLOCATE(sol_step(i)%val_subcells)
+      DEALLOCATE(flux_h(i)%flux_VF);      DEALLOCATE(flux_h(i)%flux_DG);      DEALLOCATE(flux_h(i)%flux_tilde)
+      DEALLOCATE(sol(i)%inter);           DEALLOCATE(sol_exa(i)%inter);       DEALLOCATE(sol_step(i)%inter)
     END DO
     
     DEALLOCATE( sol, sol_step, flux_h, sol_exa, g)

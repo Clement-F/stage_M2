@@ -99,21 +99,22 @@ CONTAINS
         DO ni=1,nb_cell
             
             IF(subcell_use) THEN
-                ! DO j =1,nb_subcell 
-                ! DO kk =1,nb_nodes
-                !     YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
-                !     sol(ni)%val_subcells(j) = sol(ni)%val_subcells(j) + Q_init(YY,ni)*w_quad(kk)/2._prec
-                ! END DO
-                ! END DO
+                DO ii=1,nb_var
+
+                DO j =1,nb_subcell; DO kk =1,nb_nodes
+                    YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
+                    sol(ni)%val_subcells(j,ii) = sol(ni)%val_subcells(j,ii) + Q_init(YY,ni=ni,nvar=ii)*w_quad(kk)/2._prec
+                END DO; END DO
             
-                ! DO j=1,size_base
-                !     sol(ni)%base_poly(j) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells)
-                ! END DO
+                DO j=1,size_base
+                    sol(ni)%base_poly(j,ii) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
+                END DO
+
+                END DO
 
             ELSE 
                 DO ii=1,nb_var
                     CALL Projection_Pk(Q_init,sol(ni)%base_poly(:,ii), LOC=LLoc, ni= ni, nvar = ii)
-                    
                 END DO
             END IF
 

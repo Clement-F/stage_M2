@@ -95,7 +95,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u,v
     REAL(prec), DIMENSION(nb_var) :: Flux_FV
 
-    Flux_FV = (flux(u) + flux(v) - gamma_calc(u,v)*(v-u))  * 0.5_prec
+    Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
 
   END FUNCTION Flux_FV
 
@@ -107,7 +107,7 @@ CONTAINS
     gamma_calc = 0._prec
     
     IF(TRIM(flux_name) == "advection") THEN
-        gamma_calc = abs(vit_adv)
+        gamma_calc = abs(abs(vit_adv))
     ELSE IF(TRIM(flux_name) == "burgers") THEN
         gamma_calc = max(abs(u(1)), abs(v(1)))
     ELSE IF(TRIM(flux_name) == "Shallow") THEN
@@ -118,6 +118,10 @@ CONTAINS
       print *,"flux non reconnue "
       Stop
     END IF
+
   END FUNCTION gamma_calc
+
+  
+
 
 END MODULE mod_flux

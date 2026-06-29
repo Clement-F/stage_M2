@@ -28,7 +28,9 @@ PROGRAM MAIN
     DO WHILE (time .LT. tmax)     
         CALL dt_calc
 
-        CALL Time_step
+        IF(subcell_use) THEN; CALL Time_step_subcell
+        ELSE;                 CALL Time_step
+        END IF
 
         time = time +dt
         n_time = n_time +1
