@@ -10,10 +10,12 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: ni,ii,jj
     REAL(prec), DIMENSION(nb_nodes, nb_var) :: flux_uh_val
-    REAL(prec), DIMENSION(nb_var) :: ug,ud,u_temp
+    REAL(prec), DIMENSION(nb_var) :: ug,ud,u_temp, DF
 
     REAL(prec) :: x_s
     REAL(prec) :: fh_L, fh_R
+    REAL(prec) :: theta_
+    INTEGER, DIMENSION(2) :: voi_L,voi_R
 
     DO ni = 1,nb_cell+1
       IF (ni ==1) THEN 
@@ -72,11 +74,27 @@ CONTAINS
         flux_h(ni)%flux_subcells(jj,ii) = eval_poly(x_s,ni=ni, base_poly=flux_h(ni)%flux_DG(:,ii),LOC= LRef) &
                                   & - C_m(jj)*(fh_L-g(ni  ,ii)) &
                                   & - C_p(jj)*(fh_R-g(ni+1,ii))
-                               
+                              
       END DO
 
       
     END DO; END DO
+
+    
+    IF(monolithique) THEN 
+    DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+          voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
+          voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+
+          flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+          DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
+
+          theta_ = theta(voi_L,voi_R, DF)
+          
+          flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_*DF
+    END DO; END DO
+    END IF
+
     END IF
 
   END SUBROUTINE flux_numerique
@@ -203,6 +221,8 @@ CONTAINS
 
       END DO; END DO
 
+      CALL Error_check
+
     END DO
 
     DO ni=1,nb_cell
@@ -255,6 +275,10 @@ CONTAINS
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
+    IF(order_x .GT. order_t) THEN
+    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+    END IF 
+
     IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.tmax)) THEN
       write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
       CALL Emergency_stop
@@ -272,9 +296,9 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER :: i,j,k
-    REAL(prec), DIMENSION(nb_var) :: out, out_ex
+    REAL(prec), DIMENSION(nb_var) :: out, out_ex,u_
     REAL(prec) :: xi
-    REAL(prec) :: err1 , err2, errLi, pression_
+    REAL(prec) :: err1 , err2, errLi, pression_,p_max,p_min
     LOGICAL, optional :: switch
     LOGICAL :: force
     Character(len=63) :: save_format
@@ -283,7 +307,7 @@ CONTAINS
     ELSE; force = .FALSE.
     END IF
 
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec; pression_ = 0._prec
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec; p_max = 0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
     END IF
@@ -300,8 +324,10 @@ CONTAINS
             out = sol(i)%val_subcells(j,:)
             write(unit=numfile_sol,  fmt=save_format,  advance="no") xi,out
 
-            IF(TRIM(flux_name)== "Euler" ) THEN; pression_ = max(pression(sol(i)%val_subcells(j,:)), pression_)
-            write(unit=numfile_sol, fmt= '(f10.6)') pression(sol(i)%val_subcells(j,:))
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            u_ = sol(i)%val_subcells(j,:); pression_ = pression(u_)
+            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(f10.6)') pression_
             ELSE; write(unit=numfile_sol, fmt= '(1x)')
             END IF
 
@@ -331,14 +357,20 @@ CONTAINS
             err1 = err1 + SUM(abs(out-out_ex))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + SUM(((out-out_ex)*w_quad(j))**2)  *cell_size(i)/2
 
-            IF(TRIM(flux_name)== "Euler" ) pression_ = max(pression(sol(i)%val_nodes(j,:)), pression_)
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            u_ = sol(i)%val_nodes(j,:); pression_ = pression(u_)
+            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(f10.6)') pression_
+            ELSE; write(unit=numfile_sol, fmt= '(1x)')
+            END IF
+
           END DO
 
         END IF
       END DO
 
       err2 = sqrt(err2)
-      IF(TRIM(flux_name)== "Euler" ) write(*,fmt='("pression = ", f10.6)') pression_
+      IF(TRIM(flux_name)== "Euler" ) write(*,fmt='("pression in [", f10.6,",",f10.6,"]")') p_min,p_max
       write(*, fmt ='("err L1 = ", e20.12)')  err1
       write(*, fmt ='("err L2 = ", e20.12)')  err2
       write(*, fmt ='("err Li = ", e20.12)')  errLi
@@ -408,5 +440,60 @@ CONTAINS
 
     print *, "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
+
+
+  SUBROUTINE Error_check
+    IMPLICIT NONE
+    INTEGER ::i,j,k
+    REAL(prec) :: min_,max_
+    
+    ! print *,"error check"
+    ! minmax rule
+    DO i=1,nb_cell;       DO k=1,nb_var
+
+
+      min_ = minmax_loc((/i,0/),'min',k)
+      max_ = minmax_loc((/i,0/),'max',k)
+
+      IF(maxval(sol_step(i)%val_subcells(:,k)) .GT. max_) THEN
+        write(*,fmt='("erreur (max), var=",i1," en cellule ",i4," : max ",e12.6," , val",e12.6)') k,i,max_,maxval(sol_step(i)%val_subcells(:,k))
+      END IF 
+
+      IF(minval(sol_step(i)%val_subcells(:,k)) .LT. min_) THEN
+        write(*,fmt='("erreur (min), var=",i1," en cellule ",i4," : max ",e12.6," , val",e12.6)') k,i,min_,maxval(sol_step(i)%val_subcells(:,k))
+      END IF 
+
+      DO j=1,nb_subcell
+        ! minmax rule on subcell 
+        min_ = minmax_loc((/i,j/),'min',k)
+        max_ = minmax_loc((/i,j/),'max',k)
+
+        IF(sol_step(i)%val_subcells(j,k) .GT. max_) THEN
+          write(*,fmt='("erreur (max), var=",i1," en cellule ",i4," sous-cellule ",i4," : max ",e12.6," , val",e12.6)') k,i,j,max_,sol_step(i)%val_subcells(j,k)
+        END IF 
+
+        IF(sol_step(i)%val_subcells(j,k) .LT. min_) THEN
+          write(*,fmt='("erreur (min), var=",i1," en cellule ",i4," sous-cellule ",i4," : min ",e12.6," , val",e12.6)') k,i,j,min_,sol_step(i)%val_subcells(j,k)
+        END IF 
+
+      IF(trim(flux_name)=="Euler") THEN 
+        IF(minval(sol_step(i)%val_subcells(:,1)) .LT. 0._prec) THEN
+          write(*,fmt='("erreur (densité), en cellule ",i4," :  val",e12.6)') i,sol_step(i)%val_subcells(j,1)
+        END IF 
+
+        IF(pression(sol_step(i)%val_subcells(j,:)) .LT. 0._prec) THEN
+          write(*,fmt='("erreur (pression), en cellule ",i4," :  val",e12.6)') i,pression(sol_step(i)%val_subcells(j,:))
+        END IF 
+
+      END IF
+
+
+
+      END DO
+
+    END DO;  END DO
+
+  END SUBROUTINE Error_check
+
   
 END MODULE

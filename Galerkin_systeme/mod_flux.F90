@@ -35,9 +35,8 @@ CONTAINS
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(in) :: u
     REAL(prec) :: p
-    REAL(prec) :: gamma = 1.4_prec
 
-    p = (gamma-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
+    p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
 
   END FUNCTION pression
 
@@ -113,7 +112,8 @@ CONTAINS
     ELSE IF(TRIM(flux_name) == "Shallow") THEN
         gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))
     ELSE IF(TRIM(flux_name) == "Euler") THEN
-        gamma_calc = max(abs(u(2)/u(1) ) + sqrt(1.4_prec* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(1.4_prec* pression(v)/v(1)))
+        gamma_calc = max(abs(u(2)/u(1) ) + sqrt(gamma_iso* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(gamma_iso* pression(v)/v(1)))
+        ! print *, pression(u),u(1)
     ELSE 
       print *,"flux non reconnue "
       Stop
@@ -123,5 +123,7 @@ CONTAINS
 
   
 
+
+  
 
 END MODULE mod_flux

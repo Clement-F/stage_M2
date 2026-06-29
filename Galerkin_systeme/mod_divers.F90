@@ -218,7 +218,6 @@ CONTAINS
 
     END FUNCTION Voisin_cell
 
-
     FUNCTION Voisin_quad(ni,nq,LR)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni,nq

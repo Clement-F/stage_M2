@@ -63,7 +63,7 @@ MODULE mod_declaration
   REAL(prec) :: xL,xR,CFL,max_dflux,dx, sub_dx
   REAL(prec), parameter :: pi = acos(-1._prec)
   REAL(prec), parameter :: eps0=0.1_prec**(2*prec-3)
-  REAL(prec) :: vit_adv 
+  REAL(prec) :: vit_adv, gamma_iso 
   REAL(prec) :: err_L1, err_L2, err_Li
 
   CHARACTER(Len=8) :: LRef = "Ref", LLoc = "Loc", LSub = "SubRef" 

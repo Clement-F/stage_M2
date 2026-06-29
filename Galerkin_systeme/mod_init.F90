@@ -38,7 +38,10 @@ CONTAINS
         ELSE IF((flux_name) == "Shallow") THEN
             nb_var=2
         ELSE IF((flux_name) == "Euler") THEN
-            nb_var=3
+            nb_var=3;
+            gamma_iso = 1.4_prec
+            IF((sol_ini_name) == "Sod") gamma_iso = 1.4_prec
+            IF((sol_ini_name) == "isentropique") gamma_iso = 3._prec
         ELSE
             print *," flux non reconnue "
             STOP

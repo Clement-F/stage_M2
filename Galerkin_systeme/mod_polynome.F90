@@ -42,6 +42,22 @@ CONTAINS
 
     END FUNCTION sod_tube
 
+
+    FUNCTION smooth_isentropique(x,ni,nvar)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN):: x
+        INTEGER, INTENT(IN) :: ni,nvar
+        REAL(prec) :: smooth_isentropique 
+
+        smooth_isentropique = eps0
+
+        if(nvar ==1) smooth_isentropique = 1._prec  +  0.9999999_prec* sin(pi*x)
+        if(nvar ==3) smooth_isentropique = ((1._prec  +  0.9999999_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
+
+        if(abs(smooth_isentropique) .LT. eps0) smooth_isentropique = eps0
+
+    END FUNCTION smooth_isentropique
+
     FUNCTION Q_init(x,ni,nvar)
         IMPLICIT NONE
         REAL(prec), INTENT(IN) :: x
@@ -63,6 +79,10 @@ CONTAINS
             if(x>0.7_prec) Q_init = 0.5_prec
         ELSE IF(TRIM(sol_ini_name)=="Sod") THEN
             Q_init = sod_tube(x,ni,nvar)
+
+        ELSE IF(TRIM(sol_ini_name)=="isentropique") THEN
+            Q_init = smooth_isentropique(x,ni,nvar)
+
         END IF
     END FUNCTION Q_init
 

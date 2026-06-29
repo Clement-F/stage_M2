@@ -4,118 +4,127 @@ MODULE mod_Monolith
 
 CONTAINS
 
-  ! FUNCTION minmax_loc(mc,minmax)
-  !   IMPLICIT NONE
-  !   CHARACTER(len=3) :: minmax
-  !   INTEGER, DIMENSION(2), INTENT(IN) :: mc
-  !   INTEGER, DIMENSION(2) :: voi_L, voi_R
-  !   REAL(prec) :: minmax_loc
+  FUNCTION minmax_loc(mc,minmax,nvar)
+    IMPLICIT NONE
+    CHARACTER(len=3) :: minmax
+    INTEGER, DIMENSION(2), INTENT(IN) :: mc
+    INTEGER, INTENT(IN) :: nvar
 
-  !   voi_L = subcells_(mc(1),mc(2))%L
-  !   voi_R = subcells_(mc(1),mc(2))%R
-  !   IF(TRIM(minmax) == "min") THEN
-  !   IF(max_rule == 1)   minmax_loc= min( sol_step(mc   (1))%val_subcells(mc   (2)), &
-  !                                       &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-  !                                       &sol_step(voi_R(1))%val_subcells(voi_R(2)))
-  !   IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = min_glob
+    INTEGER, DIMENSION(2) :: voi_L, voi_R
+    REAL(prec) :: sol_mc
+    REAL(prec) :: minmax_loc
 
-  !   ELSE IF(TRIM(minmax) == "max") THEN
-  !   IF(max_rule == 1)   minmax_loc= max( sol_step(mc   (1))%val_subcells(mc   (2)), &
-  !                                       &sol_step(voi_L(1))%val_subcells(voi_L(2)), &
-  !                                       &sol_step(voi_R(1))%val_subcells(voi_R(2)))
-  !   IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = max_glob
-  !   END IF
+    ! print *, mc
+
+    IF(mc(2) .ne. 0) THEN 
+    sol_mc = sol_step(mc   (1))%val_subcells(mc   (2),nvar)
+    voi_L = subcells_(mc(1),mc(2))%L
+    voi_R = subcells_(mc(1),mc(2))%R
+    ELSE 
+    IF(TRIM(minmax) == "min") sol_mc = minval(sol_step(mc   (1))%val_subcells(:,nvar))
+    IF(TRIM(minmax) == "max") sol_mc = maxval(sol_step(mc   (1))%val_subcells(:,nvar))
+    voi_L = subcells_(mc(1),1)%L
+    voi_R = subcells_(mc(1),nb_subcell)%R
+    END IF 
+    IF(TRIM(minmax) == "min") THEN
+    IF(max_rule == 1)   minmax_loc= min( sol_mc, &
+                                        &sol_step(voi_L(1))%val_subcells(voi_L(2),nvar), &
+                                        &sol_step(voi_R(1))%val_subcells(voi_R(2),nvar))
+
+    IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = min_glob
+
+    ELSE IF(TRIM(minmax) == "max") THEN
+    IF(max_rule == 1)   minmax_loc= max( sol_mc, &
+                                        &sol_step(voi_L(1))%val_subcells(voi_L(2),nvar), &
+                                        &sol_step(voi_R(1))%val_subcells(voi_R(2),nvar))
+
+    IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = max_glob
+    END IF
 
 
-  ! END FUNCTION minmax_loc
+  END FUNCTION minmax_loc
 
 
-  ! FUNCTION theta(mc,pv, DF)
-  !     IMPLICIT NONE
-  !     INTEGER, DIMENSION(2), INTENT(IN) :: mc,pv
-  !     REAL(prec), INTENT(IN) :: DF
-  !     REAL(prec) :: theta
+  
 
-  !     REAL(prec) :: ug,ud, f_FV
-  !     REAL(prec) :: gamma_mp, param
-  !     REAL(prec) :: alpha,beta, u_Riemann
-  !     INTEGER, DIMENSION(2) :: voi_L, voi_R
+  FUNCTION theta(mc,pv, DF)
+      IMPLICIT NONE
+      INTEGER, DIMENSION(2), INTENT(IN) :: mc,pv
+      REAL(prec), DIMENSION(nb_var) :: DF
+      REAL(prec), DIMENSION(nb_var) :: theta_
+      REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
+      REAL(prec) :: gamma_mp, param
+      REAL(prec) :: alpha,beta
+
+      REAL(prec) :: A,B,M
+      INTEGER :: ii
+
+      REAL(prec) :: theta
       
-  !     IF(max_rule == 0) THEN 
-  !       theta = 1._prec
+      theta = 1._prec
+      IF(max_rule == 0) THEN 
+        theta = 1._prec
 
-  !     ELSE IF(max_rule == 2) THEN
+      ELSE IF(max_rule == 2) THEN
           
-  !       ug = sol_step(mc(1))%val_subcells(mc(2))
-  !       ud = sol_step(pv(1))%val_subcells(pv(2))
-  !       gamma_mp = gamma_calc(ug,ud)
+        ug = sol_step(mc(1))%val_subcells(mc(2),:)
+        ud = sol_step(pv(1))%val_subcells(pv(2),:)
+        gamma_mp = gamma_calc(ug,ud)
    
-  !       u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
+        u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
+        beta = max_glob; alpha = min_glob
 
-  !       beta = max_glob; alpha = min_glob
 
-
-  !     ELSE IF(max_rule == 1) THEN
+      ELSE IF(max_rule == 1) THEN
       
-  !       ug = sol_step(mc(1))%val_subcells(mc(2))
-  !       ud = sol_step(pv(1))%val_subcells(pv(2))
-  !       gamma_mp = gamma_calc(ug,ud)
-  !       u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
+        IF(minval(abs(DF)) < eps0) THEN; theta = 0._prec; return; END IF
 
-  !       IF(DF .LT. -eps0) THEN
-  !         beta = minmax_loc(mc,"max")
-  !         alpha= minmax_loc(pv,"min")
+        ug = sol_step(mc(1))%val_subcells(mc(2),:)
+        ud = sol_step(pv(1))%val_subcells(pv(2),:)
+        gamma_mp = gamma_calc(ug,ud)
+        u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
-  !       ELSE IF(DF .GT. eps0) THEN
-  !         beta = minmax_loc(pv,"max")
-  !         alpha= minmax_loc(mc,"min")
+        IF(TRIM(flux_name)=="Euler") THEN 
+          ! positivité de rho
+          theta_(1) = min(1._prec, abs(gamma_mp/DF(1))*u_Riemann(1))
 
-  !       ELSE 
+          ! positivité de E//P
+          A = 1/(gamma_mp**2) *(0.5_prec*abs(DF(2))**2 - theta_(1)*DF(1)*DF(3))
+          B = 1/(gamma_mp)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - theta_(1)*u_Riemann(3)*DF(1))
+          M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
+          theta_(2) = min(1._prec, M/(abs(B)+ max(eps0,A)))
 
-  !         beta = minmax_loc(mc,"max")
-  !         beta = max(beta,minmax_loc(pv,"max"))
-  !         alpha= minmax_loc(pv,"min")
-  !         alpha= min(alpha,minmax_loc(mc,"min"))
+          ! positivité des deux 
+          theta = theta_(1)* theta_(2)          
+        END IF
 
-  !         theta = 0._prec
-  !       END IF
+        DO ii=1,nb_var
         
-      
-    
-  !     END IF
+          IF((abs(DF(ii))) < eps0) THEN; theta = 0._prec; return; END IF
+          IF(DF(ii) .LT. -eps0) THEN
+            beta = minmax_loc(mc,"max",nvar=ii)
+            alpha= minmax_loc(pv,"min",nvar=ii)
 
-  !     param = min(beta - u_Riemann, u_Riemann- alpha); IF(param .LT. eps0) param = 0._prec
-
-  !     ! IF(theta .LT. eps0) theta = 0._prec
-
-  !     IF(abs(DF) .LT. eps0) THEN; theta = 1._prec
-  !     ELSE;                       theta = max(min(1._prec, abs(gamma_mp/DF) * param),0._prec)
-  !     END IF
-
-  !     voi_L = subcells_(mc(1),mc(2))%L;
-  !     voi_R = subcells_(pv(1),pv(2))%R; 
-
-  !     IF(((theta .GT. 1._prec) .or. (theta .LT.  0._prec)) .or. (param .LT. 0._prec))THEN
-  !       print *,"================" ,mc,"---------", pv ,"============================"
-  !       print *,"voi_L : ", voi_L, "voi_R : ", voi_R
-  !       write(*, fmt="( 'stencil = (', e12.6, 2x,e12.6, 2x ,e12.6, 2x,e12.6 ,')')") sol_step(voi_L(1))%val_subcells(voi_L(2)), ug, ud , sol_step(voi_R(1))%val_subcells(voi_R(2)) 
-  !       write(*, fmt="( 'sol interface : ', e12.6,1x, e12.6 )") ug,ud
-  !       write(*, fmt="( 'sol Riemann : ', e12.6 )") u_Riemann
-  !       write(*, fmt="( 'alpha,beta = ',e12.6,2x, e12.6 )") alpha, beta
-  !       write(*, fmt="( 'theta = ', f10.6, ' gamma = ', f10.6)") theta, gamma_mp
-  !       write(* ,fmt="( 'param = ', e12.6, ' DF = ', e12.6)") param, DF
-  !     END IF
-
-  !     ! IF(coeff_smooth == 2) THEN
-  !     !   subcells_(mc(1),mc(2))%theta_cm = subcells_(mc(1),mc(2))%theta_cm + theta/2._prec
-  !     !   subcells_(pv(1),pv(2))%theta_cm = subcells_(pv(1),pv(2))%theta_cm + theta/2._prec
-  !     ! ELSE IF(coeff_smooth==1) THEN
-  !     !   subcells_(mc(1),mc(2))%theta_cm = min(subcells_(mc(1),mc(2))%theta_cm, theta)
-  !     !   subcells_(pv(1),pv(2))%theta_cm = min(subcells_(pv(1),pv(2))%theta_cm, theta)
-  !     ! END IF
+          ELSE IF(DF(ii) .GT. eps0) THEN
+            beta = minmax_loc(pv,"max",nvar=ii)
+            alpha= minmax_loc(mc,"min",nvar=ii)
+          END IF
 
 
-  ! END FUNCTION
+          param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha); IF(param .LT. eps0) param = 0._prec
+
+          theta_(ii) = max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec)   
+          ! print *,theta_ 
+          
+          theta = min(theta,theta_(ii))
+        END DO
+
+
+      END IF
+
+
+
+  END FUNCTION
 
   ! SUBROUTINE extrema_detect 
   !   IMPLICIT NONE
