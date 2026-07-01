@@ -7,7 +7,6 @@
 
 
 2) règle du max
-¤) max local (maybe)
 ¤) relaxation extrema smooth
 
 

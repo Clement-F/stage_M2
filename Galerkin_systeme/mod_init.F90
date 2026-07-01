@@ -35,6 +35,8 @@ CONTAINS
             nb_var=2
         ELSE IF((flux_name) == "burgers") THEN
             nb_var=2
+        ELSE IF((flux_name) == "burgers_SCL") THEN
+            nb_var=1
         ELSE IF((flux_name) == "Shallow") THEN
             nb_var=2
         ELSE IF((flux_name) == "Euler") THEN
@@ -103,7 +105,6 @@ CONTAINS
             
             IF(subcell_use) THEN
                 DO ii=1,nb_var
-
                 DO j =1,nb_subcell; DO kk =1,nb_nodes
                     YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
                     sol(ni)%val_subcells(j,ii) = sol(ni)%val_subcells(j,ii) + Q_init(YY,ni=ni,nvar=ii)*w_quad(kk)/2._prec

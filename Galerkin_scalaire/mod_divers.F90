@@ -136,4 +136,42 @@ CONTAINS
 
     END FUNCTION factoriel
 
+    FUNCTION Voisin_cell(ni,LR)
+        IMPLICIT NONE
+        INTEGER, INTENT(IN) :: ni
+        CHARACTER(len =1) :: LR
+        INTEGER :: Voisin_cell
+
+        IF(LR == "L") THEN
+        IF(ni == 1 ) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_cell = nb_cell; 
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_cell = 1
+            END IF
+        ELSE 
+            Voisin_cell = ni-1
+        END IF
+
+        ELSE IF(LR == "R") THEN
+        IF(ni == nb_cell) THEN 
+            IF(TRIM(bdry_cond) == "period") THEN
+            Voisin_cell= 1
+            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            Voisin_cell = nb_cell
+            END IF
+        ELSE 
+            Voisin_cell = ni+1 
+        END IF
+
+        ELSE 
+        print *,"direction non reconnue"
+        STOP
+        END IF
+
+        ! print *,Voisin_Face
+
+    END FUNCTION Voisin_cell
+
+
 END MODULE mod_Divers

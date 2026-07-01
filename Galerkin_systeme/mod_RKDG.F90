@@ -82,6 +82,9 @@ CONTAINS
 
     
     IF(monolithique) THEN 
+
+    IF(smooth_extrema) CALL extrema_detect
+
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
@@ -94,7 +97,6 @@ CONTAINS
           flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_*DF
     END DO; END DO
     END IF
-
     END IF
 
   END SUBROUTINE flux_numerique
@@ -350,7 +352,7 @@ CONTAINS
             END DO
 
             save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
-            write(unit=numfile_sol,  fmt=save_format ) xi,out
+            write(unit=numfile_sol,  fmt=save_format,  advance="no") xi,out
 
 
             errLi = max(errLi , maxval(abs(out-out_ex)))

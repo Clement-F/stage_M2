@@ -11,7 +11,7 @@ CONTAINS
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: sinus 
-        sinus = sin(2._prec*pi*x)
+        sinus = sin(2._prec * pi*x)
     END FUNCTION sinus
     
     FUNCTION creneau(x,ni)
@@ -591,66 +591,30 @@ CONTAINS
         dDG_base =  0._prec
 
         IF(DG_meth == "Legendre") THEN
+
         DO ii =ordre_poly,2,-1
-            dDG_base = dDG_base + REAL(ii-1,prec)*coeff_DG(ordre_poly,ii) * XX**(ii-2)
+            dDG_base = dDG_base + REAL(ii-1,prec)*coeff_DG(ordre_poly,ii) * (XX**(ii-2))
         END DO
+
         ELSE IF(DG_meth == "Lobatto") THEN
         DO ii =1,size_base
-            temp =1._prec
+            IF(ii .ne. ordre_poly) THEN
+            temp =1._prec/(pts_DG(ordre_poly)-pts_DG(ii))
 
-            DO jj =1,size_base
-                IF((jj .NE. ii) .and. (jj .ne.ordre_poly)) THEN 
-                temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))
-                END IF
+            DO jj = 1,size_base 
+            IF((jj .NE. ii) .AND.(jj .NE. ordre_poly)) THEN 
+                temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))                
+            END IF
             END DO
 
-            IF(ii .NE. ordre_poly)  dDG_base = dDG_base + temp/(pts_DG(ordre_poly)-pts_DG(ii))
+            dDG_base = dDG_base + temp
+
+            END IF
         END DO
         END IF
         
 
     END FUNCTION dDG_base
-
-
-    ! FUNCTION deriv_DG_base(x,ordre_poly, nb_deriv, LOC,ni)
-    !     IMPLICIT NONE
-    !     INTEGER,            INTENT(IN) :: ordre_poly
-    !     CHARACTER (len=8),  INTENT(IN) :: LOC
-    !     INTEGER,            INTENT(IN) :: nb_deriv
-    !     INTEGER,            INTENT(IN) :: ni
-    !     REAL(Prec),         INTENT(IN) :: x
-
-    !     REAL(prec) :: XX
-    !     REAL(prec) :: deriv_DG_base
-    !     REAL(prec) :: temp
-    !     INTEGER :: ii,jj
-
-    !     IF(TRIM(LOC) == "Loc")      XX = Loc_to_Ref(ni,x)
-    !     IF(TRIM(LOC) == "Ref")      XX = x
-    !     IF(TRIM(LOC) == "SubRef")   XX = Refsub_to_Ref(x,ni)
-
-    !     deriv_DG_base = eps0
-
-    !     IF(DG_meth == "Legendre") THEN
-    !     DO ii =ordre_poly,(nb_deriv+1),-1
-    !         deriv_DG_base = deriv_DG_base + factoriel(ii,nb_deriv)*coeff_DG(ordre_poly,ii) * XX**(ii-nb_deriv)
-    !     END DO
-    !     ELSE IF(DG_meth == "Lobatto") THEN
-    !     DO ii =1,size_base
-    !         temp =1._prec
-
-    !         DO jj =1,size_base
-    !             IF((jj .NE. ii) .and. (jj .ne.ordre_poly)) THEN 
-    !             temp = temp * (XX-pts_DG(jj))/(pts_DG(ordre_poly)-pts_DG(jj))
-    !             END IF
-    !         END DO
-
-    !         IF(ii .NE. ordre_poly)  dDG_base = dDG_base + temp/(pts_DG(ordre_poly)-pts_DG(ii))
-    !     END DO
-    !     END IF
-        
-
-    ! END FUNCTION deriv_DG_base
 
     FUNCTION Ref_to_Refsub(XX,n_sub)  result(ZZ)
         IMPLICIT NONE
@@ -804,7 +768,6 @@ CONTAINS
                 REAL(prec) :: T_dDG_base
                 T_dDG_base  = dDG_base(x,ordre_poly,LRef,0)
             END FUNCTION T_dDG_base
-        ! CALL inv_mat(Rigid,Rigid_inv,1)
 
 
     END SUBROUTINE Matrice_Rigid_init
@@ -844,14 +807,15 @@ CONTAINS
     SUBROUTINE Projection_VFd_init
         IMPLICIT NONE
         INTEGER ::i,j
+        REAL(prec) :: a,b
+
 
         Projection_VF_d = 0._prec; Projection_VF_dd =0._prec
-        DO j =1,nb_subcell
-            DO i=1,size_base
-                Projection_VF_d(j,i) = 2._prec*( DG_base(1._prec,i, LOC=LSub,ni=j) -  DG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j))
-                Projection_VF_dd(j,i)= 4._prec*(dDG_base(1._prec,i, LOC=LSub,ni=j) - dDG_base(-1._prec,i, LOC=LSub,ni=j))/(subcell_size(j))
-            END DO
-        END DO
+        DO j =1,nb_subcell;            DO i=1,size_base
+            a = Refsub_to_Ref(-1._prec,n_sub = j);  b = Refsub_to_Ref(1._prec,n_sub = j);
+            Projection_VF_d (j,i)= 2._prec*( DG_base(b,i, LOC=LREF,ni=0) -  DG_base(a,i, LOC=LREF,ni=0))/(subcell_size(j))
+            Projection_VF_dd(j,i)= 4._prec*(dDG_base(b,i, LOC=LREF,ni=0) - dDG_base(a,i, LOC=LREF,ni=0))/(subcell_size(j))
+        END DO;        END DO
  
     END SUBROUTINE Projection_VFd_init
     

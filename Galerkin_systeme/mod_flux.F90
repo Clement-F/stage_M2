@@ -17,6 +17,8 @@ CONTAINS
     CASE("burgers")
       flux(1) = 0.5_prec * u(1)**2 
       flux(2) = u(1)*u(2)
+    CASE("burgers_SCL")
+      flux(1) = 0.5_prec * u(1)**2 
     CASE("Shallow")
       flux(1) = u(2)
       flux(2) = u(1)*u(2) + (u(1)**2)/2._prec
@@ -39,38 +41,6 @@ CONTAINS
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
 
   END FUNCTION pression
-
-
-  ! FUNCTION flux_d(u)
-    !   IMPLICIT NONE
-    !   REAL(prec), INTENT(in) :: u
-    !   REAL(prec) :: flux_d
-
-    !   SELECT CASE (TRIM(flux_name))
-    !   CASE("advection")
-    !     flux_d = vit_adv
-    !   CASE("burgers")
-    !     flux_d = u  
-    !   CASE("Buckley")
-    !     ! print *,abs(u),eps0, (abs(u) .GT. eps0)
-    !     IF((abs(u) .GT. eps0) .and. (abs(u-1._prec) .GT. eps0) )THEN
-    !       ! print *,"hey"
-    !       flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u))) &
-    !             &/(4._prec*u**2 + (1._prec-u)**2)**2
-    !     ELSE 
-    !       flux_d = eps0
-    !     END IF
-
-    !     ! print *,flux_d
-
-    !   CASE DEFAULT
-    !     WRITE(*,*) "flux_d non reconnu ",flux_name
-    !     flux_d = 0._prec
-    !     STOP
-    !   END SELECT
-
-
-  ! END FUNCTION flux_d
 
   FUNCTION flux_uh(x,ni, nvar)
     IMPLICIT NONE
@@ -108,6 +78,8 @@ CONTAINS
     IF(TRIM(flux_name) == "advection") THEN
         gamma_calc = abs(abs(vit_adv))
     ELSE IF(TRIM(flux_name) == "burgers") THEN
+        gamma_calc = max(abs(u(1)), abs(v(1)))
+    ELSE IF(TRIM(flux_name) == "burgers_SCL") THEN
         gamma_calc = max(abs(u(1)), abs(v(1)))
     ELSE IF(TRIM(flux_name) == "Shallow") THEN
         gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))

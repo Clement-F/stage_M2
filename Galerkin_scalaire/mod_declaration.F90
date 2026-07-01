@@ -4,7 +4,8 @@ MODULE mod_declaration
   IMPLICIT NONE
 
   TYPE var_type
-    REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG
+    REAL(prec),DIMENSION(:),POINTER :: base_poly   ! decomposition dans la base DG de la solution
+    REAL(prec),DIMENSION(:),POINTER :: deriv       ! decomposition dans la base DG de sa dérivée
     REAL(prec),DIMENSION(:),POINTER :: val_nodes   ! valeurs aux points de quadratures
     REAL(prec),DIMENSION(:),POINTER :: val_subcells   ! valeurs aux points de quadratures
     REAL(prec),DIMENSION(:),POINTER :: inter
@@ -32,13 +33,13 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:,:), POINTER :: RK_alpha
   REAL(prec), DIMENSION(:),   POINTER :: RK_time,RK_beta
-  REAL(prec), DIMENSION(:),   POINTER :: L_step
   REAL(prec), DIMENSION(:),   POINTER :: Time_stemp
 
+  REAL(prec), DIMENSION(:),   POINTER :: Mean
   REAL(prec), DIMENSION(:),   POINTER :: C_m, C_p
   REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF, Projection_VF_inv
   REAL(prec), DIMENSION(:,:), POINTER :: Projection_VF_d,Projection_VF_dd, Projection_VF_inv_d, Projection_VF_inv_dd
-  REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid, Rigid_inv
+  REAL(prec), DIMENSION(:,:), POINTER :: Masse, Masse_inv, Rigid
 
   REAL(prec) :: min_glob, max_glob
 
@@ -88,7 +89,6 @@ MODULE mod_declaration
 
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
-    ALLOCATE( L_step(size_base))
     ALLOCATE( Time_stemp(print_rule+1))
     
     ALLOCATE( pts_DG(size_base)) 
@@ -97,7 +97,7 @@ MODULE mod_declaration
     ALLOCATE( Projection_VF_d(nb_subcell,size_base))
     ALLOCATE( Projection_VF_dd(nb_subcell,size_base))
     ALLOCATE( Masse(size_base,size_base), Masse_inv(size_base,size_base) ) 
-    ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
+    ALLOCATE( Rigid(size_base,size_base)) 
 
     DO i =1,nb_cell
       ALLOCATE(sol(i)%base_poly(size_base));      ALLOCATE(sol(i)%val_nodes(size_quad_nodes));      ALLOCATE(sol(i)%val_subcells(nb_subcell))
@@ -105,6 +105,8 @@ MODULE mod_declaration
       ALLOCATE(sol_step(i)%base_poly(size_base)); ALLOCATE(sol_step(i)%val_nodes(size_quad_nodes)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell))
       ALLOCATE(flux_h(i)%base_poly(size_base));   ALLOCATE(flux_h(i)%val_nodes(size_quad_nodes));   ALLOCATE(flux_h(i)%val_subcells(nb_subcell+1))
       ALLOCATE(sol(i)%inter(2));                  ALLOCATE(sol_exa(i)%inter(2));                    ALLOCATE(sol_step(i)%inter(2))
+
+      ALLOCATE(sol_step(i)%deriv(size_base))
     END DO
     
   END SUBROUTINE ALLOCATE_all
@@ -135,14 +137,13 @@ MODULE mod_declaration
 
     DEALLOCATE( coeff_Taylor, coeff_legendre )
     DEALLOCATE( RK_alpha, RK_beta, RK_time )
-    DEALLOCATE( L_step)
     DEALLOCATE( Time_stemp)
     
     DEALLOCATE( pts_DG) 
     DEALLOCATE( C_m, C_p)
     DEALLOCATE( Projection_VF,  Projection_VF_inv)
     DEALLOCATE( Masse, Masse_inv ) 
-    DEALLOCATE( Rigid, Rigid_inv ) 
+    DEALLOCATE( Rigid) 
     
   END SUBROUTINE DEALLOCATE_all
   

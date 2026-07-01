@@ -1,6 +1,5 @@
 MODULE mod_RKDG 
    use mod_Monolith
-   use mod_Divers
   IMPLICIT NONE
 
 CONTAINS
@@ -14,7 +13,7 @@ CONTAINS
     REAL(prec) :: ug,ud
     REAL(prec) :: x_s
     REAL(prec) :: fh_L, fh_R, f_FV
-    REAL(prec) :: theta_loc, DF
+    REAL(prec) :: DF
     INTEGER, DIMENSION(2) :: voi_L, voi_R
 
     LOGICAL :: extrema
@@ -62,43 +61,39 @@ CONTAINS
 
       CALL Projection_Pk(flux_uh,flux_h(ni)%base_poly,LOC= LLoc,ni =ni,fct_val=flux_uh_val)
     END DO
-    
     IF(subcell_use) THEN
-
-    IF(smooth_extrema) CALL extrema_detect
-
+      
     DO ni = 1,nb_cell
-      fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
-      fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly, LOC= LRef)
+      fh_L = eval_poly(-1._prec,ni,flux_h(ni)%base_poly(:), LOC= LRef)
+      fh_R = eval_poly( 1._prec,ni,flux_h(ni)%base_poly(:), LOC= LRef)
 
       DO jj =1,nb_subcell+1
         x_s = x_subcell(jj)
 
-        flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni, flux_h(ni)%base_poly,LOC= LRef) &
+        flux_h(ni)%val_subcells(jj) = eval_poly(x_s,ni=ni, base_poly=flux_h(ni)%base_poly(:),LOC= LRef) &
                                   & - C_m(jj)*(fh_L-g(ni  )) &
                                   & - C_p(jj)*(fh_R-g(ni+1))
-                    
-        IF(monolithique) THEN
-
-
-          voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
-          voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
-          extrema = (subcells_(voi_L(1),voi_L(2))%extrema) .OR. (subcells_(voi_R(1),voi_R(2))%extrema)
-          extrema = extrema .AND.( order_x .GT. 2 )
-          f_FV = Flux_FV(ug,ud)      
-
-          DF = flux_h(ni)%val_subcells(jj) - f_FV; IF(abs(DF) .LT. eps0) DF = 0._prec 
-
-          theta_loc = theta(voi_L,voi_R, DF, rule=2)
-          IF(.NOT. extrema) theta_loc = min(theta_loc, theta(voi_L,voi_R,DF, rule=1))
-
-          flux_h(ni)%val_subcells(jj) = f_FV + theta_loc * DF 
-
-        END IF                  
+                              
       END DO
 
       
     END DO
+
+    
+    IF(monolithique) THEN 
+
+    IF(smooth_extrema) CALL extrema_detect
+
+    DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+          voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
+          voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
+
+          f_FV = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+          DF = ( flux_h(ni)%val_subcells(jj)- f_FV)
+          
+          flux_h(ni)%val_subcells(jj) = f_FV + theta(voi_L,voi_R, DF)*DF
+    END DO; END DO
+    END IF
     END IF
 
   END SUBROUTINE flux_numerique
@@ -110,7 +105,7 @@ CONTAINS
 
     INTEGER :: ii,jj
     REAL(prec) :: ti
-    REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB
+    REAL(prec), DIMENSION(size_base) :: BB, L_step
 
 
     DO ni=1,nb_cell
@@ -127,11 +122,7 @@ CONTAINS
       ! print *,"========================="
 
       DO ni =1,nb_cell
-
-        V_B = MATMUL(Rigid,flux_h(ni)%base_poly)
-        S_B = -(g(ni+1)*sig_2 - g(ni)*sig_1)
-        BB  = (V_B + S_B)
-        
+        BB  = (MATMUL(Rigid,flux_h(ni)%base_poly) -(g(ni+1)*sig_2 - g(ni)*sig_1))        
         L_step = MATMUL(Masse_inv, BB  )*(2._prec/(cell_size(ni))) 
 
         sol_step(ni)%base_poly = RK_alpha(tni,1) * sol(ni)%base_poly + RK_alpha(tni,2) * sol_step(ni)%base_poly &
@@ -224,7 +215,7 @@ CONTAINS
             IF(max_check == 1) THEN
 
               IF( (.not.((ni == 1) .and. (jj == 1))) .and. (.not.((ni == nb_cell) .and. (jj == nb_subcell) ))) THEN
-                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0 )THEN
+                IF(sol_step(ni)%val_subcells(jj) .GT. max_loc(ni,jj)+4*eps0  )THEN
                   print *,"---------------------------"
                   write(*,fmt="('problem max rule at :(',i2,1x,i2,'), max : ',e12.6,' ,val : ',e12.6,' diff : ',e12.6 )") ni,jj,max_loc(ni,jj),sol_step(ni)%val_subcells(jj), (sol_step(ni)%val_subcells(jj) - max_loc(ni,jj))   
                   pv = subcells_(ni,jj)%L; af = subcells_(ni,jj)%R
@@ -346,11 +337,11 @@ CONTAINS
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    ! IF(order_x .GT. order_t) THEN
-    ! dt = min(   dt **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
-    ! END IF 
+    IF(order_x .GT. order_t) THEN
+    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+    END IF 
 
-    ! dt = min(dt, 1.05_prec * dt_old)
+    ! dt = min(dt, 1.05_prec *dt_old)
 
 
     IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.tmax)) THEN
@@ -424,7 +415,7 @@ CONTAINS
       n_imp = n_imp +1
       Time_stemp(n_imp) = time
       
-      write(unit=numfile_sol, fmt='("------------------------")' ) 
+      write(unit=numfile_sol, fmt='("---------",f10.6,"---------------")' ) time
     END IF
   END SUBROUTINE writout
   
