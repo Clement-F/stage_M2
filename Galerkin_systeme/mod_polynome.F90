@@ -920,7 +920,7 @@ CONTAINS
 
         ! création de la matrice de Passage subcell <-> poly
         CALL Projection_VF_init
-        IF(smooth_extrema) CALL Projection_VFd_init
+        IF(smooth_extrema .GT. 0) CALL Projection_VFd_init
 
         phi_val(:,1) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_1))
         phi_val(:,2) = subcell_size*MATMUL(Projection_VF,MATMUL(Masse_inv,sig_2))

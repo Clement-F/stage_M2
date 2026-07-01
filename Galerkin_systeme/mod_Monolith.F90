@@ -113,50 +113,85 @@ CONTAINS
 
   SUBROUTINE extrema_detect 
     IMPLICIT NONE
+    INTEGER :: ni, n_sub, n_var 
+    INTEGER , DIMENSION(2) :: nL,nR
+    REAL(prec) :: du_L,du_R, du,ddu, vL,vR
 
-    REAL(prec), DIMENSION(nb_cell, nb_subcell, nb_var) :: du,ddu, vL, vR
-    INTEGER, DIMENSION(2) :: voi_L, voi_R
-    REAL(prec) :: v_min,v_max
-    INTEGER :: ni, jj, ii
-    LOGICAL :: x_L, x_R
+    LOGICAL :: face_L, face_R
+    
+    subcells_(:,:)%extrema = .FALSE. 
 
-    vL = 0._prec; vR = 0._prec
+    IF(smooth_extrema == 1) THEN 
+      DO ni=1,nb_cell;  DO n_var=1,nb_var
+        sol_step(ni)%deriv(:,n_var)= MATMUL(Masse_inv, MATMUL(sol_step(ni)%base_poly(:,n_var), Rigid))
+      END DO;           END DO
 
-    ! print *, "-------------------",n_time,"-----------------------------"
+      DO ni=1,nb_cell; DO n_var=1,nb_var
+        face_L = .FALSE.; face_R = .FALSE.
+        nL = Voisin_cell(ni,1         , 'L')
+        nR = Voisin_cell(ni,nb_subcell, 'R')
 
-    DO ni = 1,nb_cell; DO jj =1,nb_subcell; DO ii= 1,nb_var
-        du( ni,jj,ii) = DOT_PRODUCT( sol_step(ni)%base_poly(:,ii), Projection_VF_d (jj,:))/cell_size(ni)
-        ddu(ni,jj,ii) = DOT_PRODUCT( sol_step(ni)%base_poly(:,ii), Projection_VF_dd(jj,:))/cell_size(ni)
+        du   = 1._prec/(cell_size(ni))      * (sol_step(ni   )%inter(2,n_var)-sol_step(ni   )%inter(1,n_var))
+        du_L = 1._prec/(cell_size(nL(1)))   * (sol_step(nL(1))%inter(2,n_var)-sol_step(nL(1))%inter(1,n_var))
+        du_R = 1._prec/(cell_size(nR(1)))   * (sol_step(nR(1))%inter(2,n_var)-sol_step(nR(1))%inter(1,n_var))
 
-        vL(ni,jj,ii) = du(ni,jj,ii) - cell_size(ni)/2._prec * ddu(ni,jj,ii)
-        vR(ni,jj,ii) = du(ni,jj,ii) + cell_size(ni)/2._prec * ddu(ni,jj,ii)
+        ddu  = 2._prec/(cell_size(ni))**2  *&
+        &(eval_poly(1._prec,ni,sol_step(ni)%deriv(:,n_var), LOC=LRef)  - eval_poly(-1._prec,ni,sol_step(ni)%deriv(:,n_var), LOC=LRef))
 
+        vL = du - 0.5_prec*cell_size(ni)*ddu
+        vR = du + 0.5_prec*cell_size(ni)*ddu
 
-        ! write(*,fmt ="(e12.6,1x, e12.6,1x, e12.6)") sol_step(ni)%val_subcells(jj), du(ni,jj), ddu(ni,jj)
-    END DO;  END DO; END DO
+        IF((MIN(du,du_L)-eps0 .LT. vL) .AND. (MAX(du,du_L)+eps0 .GT. vL )) face_L = .TRUE.
+        IF((MIN(du,du_R)-eps0 .LT. vR) .AND. (MAX(du,du_R)+eps0 .GT. vR )) face_R = .TRUE.
 
+        ! print *,"----------------------------------------------------------"
+        ! write(*,fmt='("cell : ",i3,", [",f10.6,",",f10.6,"], ")') ni, x_cell(ni), x_cell(ni+1)
+        ! write(*,fmt='("ddu  : ",e12.6)') ddu
+        ! write(*,fmt='("Left  : (du=",e12.6,", du_L=",e12.6,", vL =",e12.6,", check :",l1,")" )') du, du_L,vL, face_L
+        ! write(*,fmt='("Right : (du=",e12.6,", du_R=",e12.6,", vR =",e12.6,", check :",l1,")" )') du, du_R,vR, face_R
 
-    subcells_(:,:)%extrema = .False.
-
-    DO ni = 1,nb_cell; DO jj =1,nb_subcell; DO ii= 1,nb_var
-      voi_L = Voisin_Face(ni,jj,'L'); voi_R = Voisin_Face(ni,jj,'R')
-
-      v_min = min(du(ni,jj,ii), du(voi_L(1),voi_L(2),ii)) - eps0
-      v_max = max(du(ni,jj,ii), du(voi_L(1),voi_L(2),ii)) + eps0
-
-      IF(((vL(ni,jj,ii) .LT. v_min) .or. (vL(ni,jj,ii) .GT. v_max)) ) THEN  ! check Left
-        v_min = min(du(ni,jj,ii), du(voi_R(1),voi_R(2),ii)) - eps0
-        v_max = max(du(ni,jj,ii), du(voi_R(1),voi_R(2),ii)) + eps0
-        IF(((vR(ni,jj,ii) .LT. v_min) .or. (vR(ni,jj,ii) .GT. v_max)) ) THEN ;
-          subcells_(ni,jj)%extrema = .True.
+        IF( face_L .AND. face_R) THEN
+          subcells_(ni,:)%extrema = .TRUE.
         END IF
-      END IF
+      END DO; END DO
+    ELSE 
+      DO ni=1,nb_cell;  DO n_var=1,nb_var
+        sol_step(ni)%deriv(:,n_var)= MATMUL(Masse_inv, MATMUL(sol_step(ni)%base_poly(:,n_var), Rigid))
+      END DO;           END DO
 
-      IF(subcells_(ni,jj)%extrema) EXIT
-      
-    END DO;   END DO;   END DO
+      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; DO n_var = 1,nb_var
+        face_L = .FALSE.; face_R = .FALSE.
+        nL = Voisin_cell(ni,n_sub, 'L') 
+        nR = Voisin_cell(ni,n_sub, 'R') 
 
+        du     = DOT_PRODUCT(sol_step(ni   )%deriv(:,n_var), Projection_VF(n_sub,:))/( cell_size(ni)*0.5_prec)
+        du_L   = DOT_PRODUCT(sol_step(nL(1))%deriv(:,n_var), Projection_VF(nL(2),:))/( cell_size(ni)*0.5_prec)
+        du_R   = DOT_PRODUCT(sol_step(nR(1))%deriv(:,n_var), Projection_VF(nR(2),:))/( cell_size(ni)*0.5_prec)
+
+        ddu  = 2._prec/(cell_size(ni)**2 * subcell_size(n_sub))  *&
+        &(eval_poly(1._prec,n_sub,sol_step(ni)%deriv(:,n_var), LOC=LSub)  - eval_poly(-1._prec,n_sub,sol_step(ni)%deriv(:,n_var), LOC=LRef))
+
+        vL = du - 0.5_prec*cell_size(ni)*subcell_size(n_sub)*ddu
+        vR = du + 0.5_prec*cell_size(ni)*subcell_size(n_sub)*ddu
+
+        IF((MIN(du,du_L)-eps0 .LT. vL) .AND. (MAX(du,du_L)+eps0 .GT. vL )) face_L = .TRUE.
+        IF((MIN(du,du_R)-eps0 .LT. vR) .AND. (MAX(du,du_R)+eps0 .GT. vR )) face_R = .TRUE.
+
+        ! print *,"----------------------------------------------------------"
+        ! write(*,fmt='("cell : (",i3,",",i3,"), [",f10.6,",",f10.6,"], ")') ni,n_sub, Ref_to_loc(ni,x_subcell(n_sub)), Ref_to_loc(ni,x_subcell(n_sub+1))
+        ! write(*,fmt='("ddu  : ",e12.6)') ddu
+        ! write(*,fmt='("Left  : (du=",e12.6,", du_L=",e12.6,", vL =",e12.6,", check :",l1,")" )') du, du_L,vL, face_L
+        ! write(*,fmt='("Right : (du=",e12.6,", du_R=",e12.6,", vR =",e12.6,", check :",l1,")" )') du, du_R,vR, face_R
+
+        IF( face_L .AND. face_R) THEN
+          subcells_(ni,:)%extrema = .TRUE.
+        END IF
+
+      END DO;           END DO;                  END DO
+
+    END IF
 
   END SUBROUTINE extrema_detect
+
 
 END MODULE mod_Monolith

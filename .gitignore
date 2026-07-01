@@ -1,4 +1,6 @@
 ZTest/Makefile
 ZTest/test.exe
 ZTest/test1.F90
-ZTest/test.o
+ZTest/*
+Galerkin_scalaire/convergence_err.txt
+Galerkin_scalaire/file_data.txt

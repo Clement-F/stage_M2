@@ -5,6 +5,7 @@ MODULE mod_declaration
 
   TYPE var_type
     REAL(prec),DIMENSION(:,:),POINTER :: base_poly   ! decomposition dans la base DG
+    REAL(prec),DIMENSION(:,:),POINTER :: deriv       ! decomposition dans la base DG
     REAL(prec),DIMENSION(:,:),POINTER :: val_nodes   ! valeurs aux points de quadratures
     REAL(prec),DIMENSION(:,:),POINTER :: val_subcells   ! valeurs aux points de quadratures
     REAL(prec),DIMENSION(:,:),POINTER :: inter
@@ -50,8 +51,8 @@ MODULE mod_declaration
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, smooth_extrema
-  INTEGER   :: max_rule, coeff_smooth, max_check
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc
+  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema
 
 
   INTEGER :: nb_var
@@ -116,6 +117,8 @@ MODULE mod_declaration
 
       ALLOCATE(flux_h(i)%flux_DG(size_base,nb_var))      
       ALLOCATE(flux_h(i)%flux_tilde(nb_subcell+1,nb_var));ALLOCATE(flux_h(i)%flux_VF(nb_subcell+1,nb_var)); ALLOCATE(flux_h(i)%flux_subcells(nb_subcell+1,nb_var));  
+    
+      ALLOCATE(sol_step(i)%deriv(size_base, nb_var))
     END DO
     
 

@@ -8,17 +8,11 @@
 
 2) règle du max
 ¤) relaxation extrema smooth
-
+¤) enlever le calcule de la dérivée pour les extrema
 
 ===================================
         BUG à corriger
 ===================================
-
-¤) !NON BUG! Convergence d'un ordre de moins pour la sous-cellule 
-             Erreur calculé aux points milieu et non aux points de quad   
-
-
-¤) max local -> pas de max local (maybe)
 
 
 ===================================

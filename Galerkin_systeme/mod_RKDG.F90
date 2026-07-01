@@ -83,7 +83,7 @@ CONTAINS
     
     IF(monolithique) THEN 
 
-    IF(smooth_extrema) CALL extrema_detect
+    IF(smooth_extrema .GT. 0) CALL extrema_detect
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
@@ -326,12 +326,13 @@ CONTAINS
             out = sol(i)%val_subcells(j,:)
             write(unit=numfile_sol,  fmt=save_format,  advance="no") xi,out
 
-            IF(TRIM(flux_name)== "Euler" ) THEN
-            u_ = sol(i)%val_subcells(j,:); pression_ = pression(u_)
-            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
-            write(unit=numfile_sol, fmt= '(f10.6)') pression_
-            ELSE; write(unit=numfile_sol, fmt= '(1x)')
-            END IF
+            ! IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_subcells(j,:); pression_ = pression(u_)
+            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            ! write(unit=numfile_sol, fmt= '(f10.6)') pression_
+            ! ELSE; 
+              write(unit=numfile_sol, fmt= '(1x)')
+            ! END IF
 
           END DO; 
 
@@ -359,12 +360,13 @@ CONTAINS
             err1 = err1 + SUM(abs(out-out_ex))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + SUM(((out-out_ex)*w_quad(j))**2)  *cell_size(i)/2
 
-            IF(TRIM(flux_name)== "Euler" ) THEN
-            u_ = sol(i)%val_nodes(j,:); pression_ = pression(u_)
-            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
-            write(unit=numfile_sol, fmt= '(f10.6)') pression_
-            ELSE; write(unit=numfile_sol, fmt= '(1x)')
-            END IF
+            ! IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_nodes(j,:); pression_ = pression(u_)
+            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            ! write(unit=numfile_sol, fmt= '(f10.6)') pression_
+            ! ELSE;
+               write(unit=numfile_sol, fmt= '(1x)')
+            ! END IF
 
           END DO
 

@@ -50,7 +50,7 @@ for k in range(0,sm):
     plt.show()         
 
 
-if(True):
+if(False):
     with open('buckley.dat') as f:
         lines = f.readlines()
         

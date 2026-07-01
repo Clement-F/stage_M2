@@ -43,8 +43,8 @@ MODULE mod_declaration
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, smooth_extrema
-  INTEGER   :: max_rule, coeff_smooth, max_check
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc
+  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema
 
 
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 

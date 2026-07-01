@@ -136,32 +136,36 @@ CONTAINS
 
     END FUNCTION factoriel
 
-    FUNCTION Voisin_cell(ni,LR)
+    FUNCTION Voisin_cell(ni,n_sub,LR) result(V_c)
         IMPLICIT NONE
-        INTEGER, INTENT(IN) :: ni
+        INTEGER, INTENT(IN) :: ni, n_sub
         CHARACTER(len =1) :: LR
-        INTEGER :: Voisin_cell
+        INTEGER, DIMENSION(2) :: V_c
 
         IF(LR == "L") THEN
-        IF(ni == 1 ) THEN 
+        IF(ni == 1 .AND. n_sub ==1 ) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
-            Voisin_cell = nb_cell; 
+            V_c = [nb_cell, nb_subcell]
             ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
-            Voisin_cell = 1
+            V_c = [1, 1]
             END IF
+        ELSE IF (n_sub == 1) THEN 
+            V_c = [ni-1, nb_subcell]
         ELSE 
-            Voisin_cell = ni-1
+            V_c = [ni, n_sub-1]
         END IF
 
         ELSE IF(LR == "R") THEN
-        IF(ni == nb_cell) THEN 
+        IF(ni == nb_cell .AND. n_sub == nb_subcell) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
-            Voisin_cell= 1
+            V_c = [1,1]
             ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
-            Voisin_cell = nb_cell
+            V_c = [nb_cell, nb_subcell]
             END IF
-        ELSE 
-            Voisin_cell = ni+1 
+        ELSE IF(n_sub == nb_subcell) THEN
+            V_c = [ni+1, 1]
+        ELSE  
+            V_c = [ni, n_sub+1]
         END IF
 
         ELSE 
@@ -169,7 +173,6 @@ CONTAINS
         STOP
         END IF
 
-        ! print *,Voisin_Face
 
     END FUNCTION Voisin_cell
 

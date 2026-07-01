@@ -82,7 +82,7 @@ CONTAINS
     
     IF(monolithique) THEN 
 
-    IF(smooth_extrema) CALL extrema_detect
+    IF(smooth_extrema .GT. 0) CALL extrema_detect
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
