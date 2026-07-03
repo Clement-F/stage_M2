@@ -52,29 +52,29 @@ for k in range(0,sm):
         #     print(max(abs(U_t[k,:,2]-U_2t[k,:,2])))
             
         
-        P_[k,i] = p(U_t[k,i,:])
+        #P_[k,i] = p(U_t[k,i,:])
                   
         
-    #plt.plot(X,U_t[k,:,0],'b x')
+    plt.plot(X,U_t[k,:,0],'b-')
     #plt.plot(X,U_2t[k,:,0],'b-')
     #plt.plot(X,abs(U_t[k,:,0]-U_2t[k,:,0]),'k-')
     if(nb_var>1):
         1+1
-        #plt.plot(X,U_t[k,:,1],'r x')
+        plt.plot(X,U_t[k,:,1],'r-')
         #plt.plot(X,U_2t[k,:,1],'r-')
         #plt.plot(X,abs(U_t[k,:,1]-U_2t[k,:,1]),'k-')
-        plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r x')
+        #plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-')
     if(nb_var>2):
         1+1
-        #plt.plot(X,U_t[k,:,2],'g x')
+        plt.plot(X,U_t[k,:,2],'g-')
         #plt.plot(X,U_2t[k,:,2],'g')
         #plt.plot(X,abs(U_t[k,:,2]-U_2t[k,:,2]),'k-')
     
-    plt.plot(X,P_[k,:],'k-x')
-    #m=-.2; M=2.2
+    #plt.plot(X,P_[k,:],'k-x')
+    m=-.2; M=2.2
     
-    plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
-    #plt.ylim(m,M)
+    #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
+    plt.ylim(m,M)
     plt.show()         
 
 

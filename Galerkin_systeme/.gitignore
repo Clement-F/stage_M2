@@ -2,6 +2,7 @@
 *.d
 /buckley.dat/
 *.txt
+!param.txt
 *.mod
 *.o
 *.exe

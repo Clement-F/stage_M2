@@ -48,7 +48,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, DIMENSION(2), INTENT(IN) :: mc,pv
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
-    REAL(prec), DIMENSION(nb_var) :: theta_
+    REAL(prec), DIMENSION(nb_var) :: theta_temp
     REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
     REAL(prec) :: gamma_mp, param
     REAL(prec) :: alpha,beta
@@ -73,16 +73,16 @@ CONTAINS
 
     IF(TRIM(flux_name)=="Euler") THEN 
       ! positivité de rho
-      theta_(1) = min(1._prec, abs(gamma_mp/DF(1))*u_Riemann(1))
+      theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*u_Riemann(1))
 
       ! positivité de E//P
-      A = 1/(gamma_mp**2) *(0.5_prec*abs(DF(2))**2 - theta_(1)*DF(1)*DF(3))
-      B = 1/(gamma_mp)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - theta_(1)*u_Riemann(3)*DF(1))
+      A = 1/(gamma_mp**2) *(0.5_prec*abs(DF(2))**2 - theta_temp(1)*DF(1)*DF(3))
+      B = 1/(gamma_mp)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - theta_temp(1)*u_Riemann(3)*DF(1))
       M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
-      theta_(2) = min(1._prec, M/(abs(B)+ max(eps0,A)))
+      theta_temp(2) = min(1._prec, M/(abs(B)+ max(eps0,A)))
 
       ! positivité des deux 
-      theta = theta_(1)* theta_(2)       
+      theta = theta_temp(1)* theta_temp(2)       
     END IF
 
     IF(( .not. subcells_(mc(1),mc(2))%extrema) .and. ( .not. subcells_(pv(1),pv(2))%extrema) ) THEN
@@ -103,8 +103,8 @@ CONTAINS
         END IF
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha); IF(param .LT. eps0) param = 0._prec
-        theta_(ii) = max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec)           
-        theta = min(theta,theta_(ii))
+        theta_temp(ii) = max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec)           
+        theta = min(theta,theta_temp(ii))
 
       END DO
     END IF
@@ -144,12 +144,6 @@ CONTAINS
         IF((MIN(du,du_L)-eps0 .LT. vL) .AND. (MAX(du,du_L)+eps0 .GT. vL )) face_L = .TRUE.
         IF((MIN(du,du_R)-eps0 .LT. vR) .AND. (MAX(du,du_R)+eps0 .GT. vR )) face_R = .TRUE.
 
-        ! print *,"----------------------------------------------------------"
-        ! write(*,fmt='("cell : ",i3,", [",f10.6,",",f10.6,"], ")') ni, x_cell(ni), x_cell(ni+1)
-        ! write(*,fmt='("ddu  : ",e12.6)') ddu
-        ! write(*,fmt='("Left  : (du=",e12.6,", du_L=",e12.6,", vL =",e12.6,", check :",l1,")" )') du, du_L,vL, face_L
-        ! write(*,fmt='("Right : (du=",e12.6,", du_R=",e12.6,", vR =",e12.6,", check :",l1,")" )') du, du_R,vR, face_R
-
         IF( face_L .AND. face_R) THEN
           subcells_(ni,:)%extrema = .TRUE.
         END IF
@@ -177,14 +171,8 @@ CONTAINS
         IF((MIN(du,du_L)-eps0 .LT. vL) .AND. (MAX(du,du_L)+eps0 .GT. vL )) face_L = .TRUE.
         IF((MIN(du,du_R)-eps0 .LT. vR) .AND. (MAX(du,du_R)+eps0 .GT. vR )) face_R = .TRUE.
 
-        ! print *,"----------------------------------------------------------"
-        ! write(*,fmt='("cell : (",i3,",",i3,"), [",f10.6,",",f10.6,"], ")') ni,n_sub, Ref_to_loc(ni,x_subcell(n_sub)), Ref_to_loc(ni,x_subcell(n_sub+1))
-        ! write(*,fmt='("ddu  : ",e12.6)') ddu
-        ! write(*,fmt='("Left  : (du=",e12.6,", du_L=",e12.6,", vL =",e12.6,", check :",l1,")" )') du, du_L,vL, face_L
-        ! write(*,fmt='("Right : (du=",e12.6,", du_R=",e12.6,", vR =",e12.6,", check :",l1,")" )') du, du_R,vR, face_R
-
         IF( face_L .AND. face_R) THEN
-          subcells_(ni,:)%extrema = .TRUE.
+          subcells_(ni,n_sub)%extrema = .TRUE.
         END IF
 
       END DO;           END DO;                  END DO

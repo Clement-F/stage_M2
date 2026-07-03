@@ -11,13 +11,9 @@ CONTAINS
         INTEGER :: i,j
         REAL(prec) :: YY
 
-        print *,"read"
-
         CALL READ_DATA
-        ! print *, (nomfile_sol)
-        print *,"red"
     
-        ! IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
+        IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
 
         nomfile_sol = TRIM(nomfile_sol)//".txt"
 
@@ -28,8 +24,6 @@ CONTAINS
 
         if((quad_meth)=="Lobatto") size_quad_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
         if((quad_meth)=="Legendre")size_quad_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
-
-        print *, "allocation"
 
         CALL ALLOCATE_all
         dx = REAL((xR-xL)/Real(nb_cell,prec), prec)
@@ -64,21 +58,10 @@ CONTAINS
           END DO
         END DO
 
-        print *, "matrice points quad "
-        CALL print_mat(sig_quad, size_base, size_quad_nodes)
-        
-
-
         CALL Coeff_RK_init(order_t)
         CALL Matrice_Masse_init
-
-        print *, "masse matrix "
-        CALL print_mat(Masse, size_base, size_base)
-
         CALL Matrice_Rigid_init
         
-        print *,"matrices"
-
         IF     ((sol_ini_name)=="sinus") THEN
             min_glob =-1._prec; max_glob = 1._prec;
         ELSE IF((sol_ini_name)=="unit") THEN
@@ -166,7 +149,8 @@ CONTAINS
         read(numfile_param,  *) xR;      
         read(numfile_param,  *) tmax;    
         CALL Skip_lines(numfile_param,1) 
-
+        read(numfile_param,  *) flux_num
+        CALL Skip_lines(numfile_param,1) 
         read(numfile_param,  *) subcell_use
         read(numfile_param,  *) monolithique
         read(numfile_param,  *) max_rule

@@ -34,16 +34,12 @@ CONTAINS
     CASE("burgers")
       flux_d = u  
     CASE("Buckley")
-      ! print *,abs(u),eps0, (abs(u) .GT. eps0)
       IF((abs(u) .GT. eps0) .and. (abs(u-1._prec) .GT. eps0) )THEN
-        ! print *,"hey"
         flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u))) &
               &/(4._prec*u**2 + (1._prec-u)**2)**2
       ELSE 
         flux_d = eps0
       END IF
-
-      ! print *,flux_d
 
     CASE DEFAULT
       WRITE(*,*) "flux_d non reconnu ",flux_name
@@ -69,7 +65,8 @@ CONTAINS
     REAL(prec), INTENT(IN) :: u,v
     REAL(prec) :: Flux_FV
 
-    Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
+    IF(flux_num == 0) Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
+    IF(flux_num == 1) Flux_FV = (flux(u) + flux(v) - gamma_calc(u,v)*(v-u))  * 0.5_prec
 
   END FUNCTION Flux_FV
 
@@ -93,9 +90,9 @@ CONTAINS
       gamma_calc = max(abs(flux_d(u)), abs(flux_d(v)))
 
       IF(.NOT. convex_flux) THEN
-        u_step = (max(u,v)-min(u,v))/20._prec
+        u_step = (max(u,v)-min(u,v))/10._prec
 
-        DO i=1,20
+        DO i=1,10
           gamma_temp = abs(flux_d(min(u,v)+REAL(i,prec)*u_step))
           gamma_calc = MAX(gamma_calc, gamma_temp)
 

@@ -39,9 +39,11 @@ CONTAINS
         ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
             Q_init = creneau(x,ni)
         ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
+
             Q_init = eps0
             if(0.3_prec<x .and. x<0.7_prec) Q_init = -1._prec
             if(x>0.7_prec) Q_init = 0.5_prec
+            
         END IF
     END FUNCTION Q_init
 
@@ -731,10 +733,6 @@ CONTAINS
                 Masse(jj,ii) = Masse(ii,jj)
             END DO
         END DO
-
-        print *, w_quad
-        print *, "masse"
-        CALL print_mat(masse, size_base, size_base)
         
         CALL inv_mat(Masse,Masse_inv,1)
 
@@ -896,8 +894,6 @@ CONTAINS
         CHARACTER(len =1) :: LR
         INTEGER, DIMENSION(2):: Voisin_Face
 
-        ! print *,ni,ns,LR
-
         IF(LR == "L") THEN
         IF(ni == 1 .AND. ns == 1) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
@@ -930,8 +926,6 @@ CONTAINS
         print *,"direction non reconnue"
         STOP
         END IF
-
-        ! print *,Voisin_Face
 
     END FUNCTION Voisin_Face
 

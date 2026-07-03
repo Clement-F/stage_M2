@@ -39,6 +39,7 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:,:), POINTER :: coeff_Taylor, coeff_legendre
 
+  REAL(prec), DIMENSION(:,:),   POINTER :: theta_
   REAL(prec), DIMENSION(:,:), POINTER :: RK_alpha
   REAL(prec), DIMENSION(:),   POINTER :: RK_time,RK_beta
   REAL(prec), DIMENSION(:),   POINTER :: L_step
@@ -71,9 +72,9 @@ MODULE mod_declaration
 
   CHARACTER(LEN=32):: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond, subcell_repartition
 
-  INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4
+  INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4, numfile_meshout = 5
   CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt', & 
-                        & nomfile_conv= 'convergence_err.txt' 
+                        & nomfile_conv= 'convergence_err.txt', nomfile_meshout = 'mesh_out.txt'
 
 
 
@@ -91,6 +92,7 @@ MODULE mod_declaration
 
     ALLOCATE( x_cell(nb_cell+1),        x_middle(nb_cell),        cell_size(nb_cell)) 
     ALLOCATE( x_subcell(nb_subcell+1),  x_submiddle(nb_subcell),  subcell_size(nb_subcell))
+    ALLOCATE( theta_(nb_cell,nb_subcell+1))
 
     ALLOCATE( x_quad(nb_nodes), w_quad(nb_nodes) ) 
     ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,nb_nodes))

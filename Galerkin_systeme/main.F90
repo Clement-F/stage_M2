@@ -11,8 +11,9 @@ PROGRAM MAIN
     CALL INIT_ALL
 
     CALL print_mat(Projection_VF_inv, size_base, size_base)
-    open(unit=numfile_data, file=nomfile_data,  form ='formatted', status ='old')
+    open(unit=numfile_data, file=nomfile_data,  form ='formatted', status ='unknown')
     open(unit=numfile_sol,  file=nomfile_sol,   form ='formatted', status ='unknown')
+    open(unit=numfile_meshout,  file=nomfile_meshout,   form ='formatted', status ='unknown')
    
 
     write(unit= numfile_data, fmt='("nb var  = ",i5)') nb_var
@@ -28,8 +29,8 @@ PROGRAM MAIN
     DO WHILE (time .LT. tmax)     
         CALL dt_calc
 
-        IF(subcell_use) THEN; CALL Time_step_subcell
-        ELSE;                 CALL Time_step
+        IF(subcell_use) THEN;   CALL Time_step_subcell
+        ELSE;                   CALL Time_step
         END IF
 
         time = time +dt
@@ -47,8 +48,9 @@ PROGRAM MAIN
 
     close(unit=numfile_sol)
     close(unit=numfile_data)
+    close(unit=numfile_meshout)
 
-    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')
+    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='unknown', position='append')
     write(unit=numfile_conv, fmt='("=====================")') 
     write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) size_base-1, order_t
     write(unit=numfile_conv, fmt='("for nx = ",i5," we have error :")' ) nb_cell

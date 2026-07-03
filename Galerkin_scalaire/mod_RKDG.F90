@@ -88,10 +88,13 @@ CONTAINS
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
 
-          f_FV = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
-          DF = ( flux_h(ni)%val_subcells(jj)- f_FV)
+
+          IF(flux_num == 0) f_FV = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+          IF(flux_num == 1) f_FV = (flux(ug) + flux(ud) - gamma_calc(ug,ud)*(ud-ug))  * 0.5_prec
+          DF   = (flux_h(ni)%val_subcells(jj)- f_FV)
+          theta_(ni,jj) = theta(voi_L,voi_R, DF)
           
-          flux_h(ni)%val_subcells(jj) = f_FV + theta(voi_L,voi_R, DF)*DF
+          flux_h(ni)%val_subcells(jj) = f_FV + theta_(ni,jj)*DF
     END DO; END DO
     END IF
     END IF
@@ -117,9 +120,9 @@ CONTAINS
     ! print *,"-----------------"
 
     DO tni =1,order_t
-      
+
+      ti = time + RK_time(tni)*dt
       CALL flux_numerique
-      ! print *,"========================="
 
       DO ni =1,nb_cell
         BB  = (MATMUL(Rigid,flux_h(ni)%base_poly) -(g(ni+1)*sig_2 - g(ni)*sig_1))        
@@ -141,6 +144,8 @@ CONTAINS
         END IF
 
       END DO
+
+
     END DO
 
     ! print *,"---------------------"
@@ -171,7 +176,7 @@ CONTAINS
     INTEGER :: ii,jj,kk
     INTEGER, DIMENSION(2) :: pv,af
     REAL(prec), DIMENSION(nb_cell,nb_subcell) :: max_loc, min_loc
-    REAL(prec) :: L
+    REAL(prec) :: L, ti
 
     ! print *,"---------------------"
 
@@ -183,6 +188,7 @@ CONTAINS
     END DO
 
     DO ii=1,order_t
+      ti = time + RK_time(ii)*dt
       CALL flux_numerique
       
       IF(max_check == 1) THEN
@@ -337,9 +343,9 @@ CONTAINS
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    IF(order_x .GT. order_t) THEN
-    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
-    END IF 
+    ! IF(order_x .GT. order_t) THEN
+    ! dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+    ! END IF 
 
     ! dt = min(dt, 1.05_prec *dt_old)
 
@@ -364,7 +370,6 @@ CONTAINS
     INTEGER :: i,j
     REAL(prec) :: out1, out2,xi
     REAL(prec) :: err1 , err2, errLi
-    INTEGER :: kk
 
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec
     IF(modulo(n_time,500) == 0)  THEN
@@ -372,6 +377,7 @@ CONTAINS
     END IF
 
     IF(time .GE.  REAL(n_imp,prec)*t_imp-eps0)  THEN
+      CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
         IF(subcell_use .and.(.not. error_calc)) THEN
@@ -379,7 +385,7 @@ CONTAINS
           DO j=1,nb_subcell
             xi = Ref_to_loc(i,x_submiddle(j))
             out1 = sol(i)%val_subcells(j)
-            write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1, 0._prec, subcells_(i,j)%extrema
+            write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1, 0._prec
           END DO
 
         ELSE
@@ -418,6 +424,21 @@ CONTAINS
       write(unit=numfile_sol, fmt='("---------",f10.6,"---------------")' ) time
     END IF
   END SUBROUTINE writout
+
+  SUBROUTINE Out_The_Mesh(ti)
+    IMPLICIT NONE
+    REAL(prec), INTENT(IN) :: ti
+    INTEGER :: ni,n_sub
+    REAL(prec) :: xi, out1
+
+    write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) ti
+    DO ni =1,nb_cell;    DO n_sub=1,nb_subcell
+      xi = Ref_to_loc(ni,x_subcell(n_sub))
+      out1 = theta_(ni,n_sub)
+      write(unit=numfile_meshout,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1
+    END DO; END DO
+
+  END SUBROUTINE Out_The_Mesh
   
   subroutine pied_charact(x,t,sol)
 

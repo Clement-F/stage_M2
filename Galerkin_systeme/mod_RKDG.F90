@@ -14,7 +14,6 @@ CONTAINS
 
     REAL(prec) :: x_s
     REAL(prec) :: fh_L, fh_R
-    REAL(prec) :: theta_
     INTEGER, DIMENSION(2) :: voi_L,voi_R
 
     DO ni = 1,nb_cell+1
@@ -91,10 +90,9 @@ CONTAINS
 
           flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
           DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
-
-          theta_ = theta(voi_L,voi_R, DF)
-          
-          flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_*DF
+          theta_(ni,jj) = theta(voi_L,voi_R, DF)
+                    
+          flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_(ni,jj)*DF
     END DO; END DO
     END IF
     END IF
@@ -277,9 +275,9 @@ CONTAINS
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    IF(order_x .GT. order_t) THEN
-    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
-    END IF 
+    ! IF(order_x .GT. order_t) THEN
+    ! dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+    ! END IF 
 
     IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.tmax)) THEN
       write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
@@ -315,6 +313,7 @@ CONTAINS
     END IF
 
     IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0) .OR. force )  THEN
+      CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
         IF(subcell_use .and.(.not. error_calc)) THEN
@@ -411,6 +410,22 @@ CONTAINS
   !   END FUNCTION h
 
   ! END subroutine pied_charact
+
+
+  SUBROUTINE Out_The_Mesh(ti)
+    IMPLICIT NONE
+    REAL(prec), INTENT(IN) :: ti
+    INTEGER :: ni,n_sub
+    REAL(prec) :: xi, out1
+
+    write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) ti
+    DO ni =1,nb_cell;    DO n_sub=1,nb_subcell
+      xi = Ref_to_loc(ni,x_subcell(n_sub))
+      out1 = theta_(ni,n_sub)
+      write(unit=numfile_meshout,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1
+    END DO; END DO
+
+  END SUBROUTINE Out_The_Mesh
 
   SUBROUTINE Emergency_stop
     INTEGER :: i
