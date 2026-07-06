@@ -60,17 +60,20 @@ CONTAINS
       return
     END IF
     
-    IF(abs(DF) < eps0) THEN; theta = 0._prec; return; END IF
+    IF(abs(DF) < eps0) THEN; theta = 1._prec; return; END IF
 
     ug = sol_step(mc(1))%val_subcells(mc(2))
     ud = sol_step(pv(1))%val_subcells(pv(2))
-    gamma_mp = gamma_calc(ug,ud)
+
+    IF(flux_num == 0) gamma_mp = max_dflux
+    IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
+
     u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
     IF( .not.(subcells_(mc(1),mc(2))%extrema .and. subcells_(pv(1),pv(2))%extrema) ) THEN
 
       IF(max_rule ==1) THEN
-        IF((abs(DF)) < eps0) THEN; theta = 0._prec; return; END IF
+        IF((abs(DF)) < eps0) THEN; theta = 1._prec; return; END IF
         IF(DF .LT. -eps0) THEN
           beta = minmax_loc(mc,"max")
           alpha= minmax_loc(pv,"min")
@@ -84,8 +87,9 @@ CONTAINS
       END IF
 
       param = min(beta - u_Riemann, u_Riemann- alpha); IF(param .LT. eps0) param = 0._prec
-      theta_= max(min(1._prec, abs(gamma_mp/DF) * param),0._prec)           
+      theta_= min(1._prec, abs(gamma_mp/DF) * param)          
       theta = min(theta,theta_)
+      ! print *,theta, theta_
 
     END IF
 
@@ -111,10 +115,10 @@ CONTAINS
         nL = Voisin_cell(ni,1         , 'L')
         nR = Voisin_cell(ni,nb_subcell, 'R')
 
-        IF(ni ==1 ) THEN
+        ! IF(ni ==1 ) THEN
         du   = 1._prec/(cell_size(ni))      * (sol_step(ni   )%inter(2)-sol_step(ni   )%inter(1))
         du_L = 1._prec/(cell_size(nL(1)))   * (sol_step(nL(1))%inter(2)-sol_step(nL(1))%inter(1))
-        END IF
+        ! END IF
         du_R = 1._prec/(cell_size(nR(1)))   * (sol_step(nR(1))%inter(2)-sol_step(nR(1))%inter(1))
 
         ddu  = 2._prec/(cell_size(ni))**2  *&
@@ -123,14 +127,14 @@ CONTAINS
         vL = du - 0.5_prec*cell_size(ni)*ddu
         vR = du + 0.5_prec*cell_size(ni)*ddu
 
-        IF((MIN(du,du_L)+eps0 .LT. vL) .AND. (MAX(du,du_L)-eps0 .GT. vL )) face_L = .TRUE.
-        IF((MIN(du,du_R)+eps0 .LT. vR) .AND. (MAX(du,du_R)-eps0 .GT. vR )) face_R = .TRUE.
+        IF((MIN(du,du_L)-eps0 .LT. vL) .AND. (MAX(du,du_L)+eps0 .GT. vL )) face_L = .TRUE.
+        IF((MIN(du,du_R)-eps0 .LT. vR) .AND. (MAX(du,du_R)+eps0 .GT. vR )) face_R = .TRUE.
 
         IF( face_L .AND. face_R) THEN
           subcells_(ni,:)%extrema = .TRUE.
         END IF
 
-        du_L = du; du = du_R
+        ! du_L = du; du = du_R
       END DO
     ELSE 
       DO ni=1,nb_cell

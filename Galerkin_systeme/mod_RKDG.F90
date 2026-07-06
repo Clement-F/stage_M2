@@ -81,19 +81,23 @@ CONTAINS
 
     
     IF(monolithique) THEN 
-
     IF(smooth_extrema .GT. 0) CALL extrema_detect
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
 
-          flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+          IF(flux_num == 0) flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+          IF(flux_num == 1) flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_calc(ug,ud)*(ud-ug))  * 0.5_prec
+
           DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
+          If(ISNAN(DF(1)))  DF = 0._prec
+
           theta_(ni,jj) = theta(voi_L,voi_R, DF)
                     
           flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_(ni,jj)*DF
     END DO; END DO
+
     END IF
     END IF
 
@@ -221,7 +225,7 @@ CONTAINS
 
       END DO; END DO
 
-      CALL Error_check
+      IF(max_check .GT. 0) CALL Error_check
 
     END DO
 
@@ -241,7 +245,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: i,j
     INTEGER, DIMENSION(2) :: nxt_
-    REAL(prec) :: gamma_temp
+    REAL(prec) :: gamma_temp, dt_loc, gamma_bf
     REAL(prec), DIMENSION(nb_var) :: u_,v_
 
     IF(TRIM(flux_name) == "advection") THEN
@@ -249,15 +253,20 @@ CONTAINS
     ELSE 
       max_dflux = 0._prec
 
-      IF(subcell_use .and.(.not. error_calc)) THEN
+      IF(subcell_use) THEN
+      gamma_bf = 0._prec; dt_loc = 100._prec
 
       DO i=1,nb_cell;    DO j=1,nb_subcell
         nxt_ = Voisin_Face(i,j,'R')
 
         u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
         gamma_temp = gamma_calc(u_, v_)
-        
+
+        dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
+        ! print *, dt_loc
+
         max_dflux = max(max_dflux, gamma_temp)
+        gamma_bf = gamma_temp
       END DO;END DO
 
       ELSE 
@@ -272,12 +281,18 @@ CONTAINS
       END IF
     END IF
     
-    dt_old = dt
-    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
+    ! print *,"===================="
+    ! print *, dt_loc
+    ! print *,"===================="
+    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time, dt_loc)
 
-    ! IF(order_x .GT. order_t) THEN
-    ! dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
-    ! END IF 
+    IF((order_x .GT. order_t).AND. convergence ) THEN
+    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+    END IF 
+
+
+
+
 
     IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.tmax)) THEN
       write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
@@ -316,24 +331,33 @@ CONTAINS
       CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
-        IF(subcell_use .and.(.not. error_calc)) THEN
+        IF(subcell_use ) THEN
 
           save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
 
           DO j=1,nb_subcell; 
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
-            write(unit=numfile_sol,  fmt=save_format,  advance="no") xi,out
+            IF(TRIM(flux_name) == "advection") THEN       
+              DO k=1,nb_var        
+              out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)
+              END DO
 
-            ! IF(TRIM(flux_name)== "Euler" ) THEN
-            ! u_ = sol(i)%val_subcells(j,:); pression_ = pression(u_)
-            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
-            ! write(unit=numfile_sol, fmt= '(f10.6)') pression_
-            ! ELSE; 
-              write(unit=numfile_sol, fmt= '(1x)')
-            ! END IF
+            ELSE IF(nb_var ==1) THEN
+              call pied_charact(xi,time,out_ex)
 
-          END DO; 
+            ELSE IF(sol_ini_name == "isentropique") THEN
+              call pied_charact(xi,time,out_ex)
+
+            ELSE 
+              out_ex = 0._prec
+
+            END IF
+
+            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
+            write(unit=numfile_sol,    fmt=save_format) xi,out
+            write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+          END DO 
 
         ELSE
           
@@ -342,17 +366,25 @@ CONTAINS
 
             out = sol(i)%val_nodes(j,:)
 
-            DO k=1,nb_var
-              IF(TRIM(flux_name) == "advection") THEN               
-                out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)
-              ELSE 
-                ! call pied_charact(xi,time,out_ex(k))
-                out_ex =0._prec
-              END IF
-            END DO
+            IF(TRIM(flux_name) == "advection") THEN       
+              DO k=1,nb_var        
+              out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)
+              END DO
+
+            ELSE IF(nb_var ==1) THEN
+              call pied_charact(xi,time,out_ex)
+
+            ELSE IF(sol_ini_name == "isentropique") THEN
+              call pied_charact(xi,time,out_ex)
+
+            ELSE 
+              out_ex = 0._prec
+
+            END IF
 
             save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
-            write(unit=numfile_sol,  fmt=save_format,  advance="no") xi,out
+            write(unit=numfile_sol,    fmt=save_format,  advance="no") xi,out
+            write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
 
 
             errLi = max(errLi , maxval(abs(out-out_ex)))
@@ -364,7 +396,8 @@ CONTAINS
             ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
             ! write(unit=numfile_sol, fmt= '(f10.6)') pression_
             ! ELSE;
-               write(unit=numfile_sol, fmt= '(1x)')
+               write(unit=numfile_sol,   fmt= '(1x)')
+               write(unit=numfile_solex, fmt= '(1x)')
             ! END IF
 
           END DO
@@ -383,33 +416,77 @@ CONTAINS
       n_imp = n_imp +1
       Time_stemp(n_imp) = time
       
-      write(unit=numfile_sol, fmt='("----------",f10.6,"--------------")' ) time
+      write(unit=numfile_sol  , fmt='("----------",f10.6,"--------------")' ) time
+      write(unit=numfile_solex, fmt='("----------",f10.6,"--------------")' ) time
     END IF
   END SUBROUTINE writout
   
-  ! subroutine pied_charact(x,t,sol)
+  subroutine pied_charact(x,t,sol)
 
-  !   REAL(prec), INTENT(IN) :: x,t
-  !   REAL(prec), intent(out):: sol
-  !   REAL(prec) :: xd,xf
+    REAL(prec), INTENT(IN) :: x,t
+    REAL(prec), DIMENSION(nb_var) , intent(out):: sol
+    REAL(prec) :: w_p,w_m
+    REAL(prec) :: xd,xf, x_m,x_p, c,u
 
-  !   IF(TRIM(flux_name)=="advection") THEN
-  !     xd = xL-abs(vit_adv)*t; xf = xR + abs(vit_adv)*t
-  !   ELSE
-  !     xd = xL-t; xf = xR + t
-  !   END IF
-  !   sol = Q_init(dicho(h,xd,xf),0)
 
-  !   contains
-  !   FUNCTION h(x_)
-  !       use precis
-  !       REAL(prec),INTENT(IN) :: x_
-  !       REAL(prec)  :: h
-  !       h = flux_d(Q_init(x_,0))*t + x_ -x
-  !       return 
-  !   END FUNCTION h
+    IF(TRIM(flux_name)=="advection") THEN
+      xd = xL-abs(vit_adv)*t; xf = xR + abs(vit_adv)*t
+    ELSE IF(bdry_cond =="period") THEN
+      xd = xL-max_dflux*t; xf = xR + max_dflux*t
 
-  ! END subroutine pied_charact
+    ELSE IF(bdry_cond =="Sym") THEN
+      xd = xL-eps0; xf = xR+eps0
+    END IF
+
+    IF(nb_var ==1)    sol = Q_init(dicho(h,xd,xf),0,1)
+
+    IF(sol_ini_name == "isentropique") THEN
+      x_m = dicho(Burg_Wm,xd,xf);    x_p = dicho(Burg_Wp,xd,xf)
+
+      w_m = Q_init(x_m,0,2)/Q_init(x_m,0,1) - 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_m,0,1) 
+      w_p = Q_init(x_p,0,2)/Q_init(x_p,0,1) + 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_p,0,1) 
+
+      c = (gamma_iso-1._prec)/4._prec * (w_p-w_m) 
+      u = (w_m+w_p)/2._prec
+
+      sol(1) = c/sqrt(gamma_iso); sol(2) = sol(1)*u
+      sol(3) = (sol(1)**3) /(gamma_iso-1._prec) + (sol(2)**2)/2._prec
+
+    END IF 
+
+
+    contains
+    FUNCTION h(x_)
+        use precis
+        REAL(prec),INTENT(IN) :: x_
+        REAL(prec)  :: h
+        h = flux_d(Q_init(x_,0,1))*t + x_ -x
+        return 
+    END FUNCTION h
+
+    FUNCTION Burg_Wm(x_)
+        use precis
+        REAL(prec),INTENT(IN) :: x_
+        REAL(prec)  :: Burg_Wm, W_m
+
+        W_m = Q_init(x_,0,2)/Q_init(x_,0,1) - 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_,0,1) 
+        Burg_Wm = W_m*t + x_ -x
+
+        return 
+    END FUNCTION Burg_Wm
+
+    FUNCTION Burg_Wp(x_)
+        use precis
+        REAL(prec),INTENT(IN) :: x_
+        REAL(prec)  :: Burg_Wp, W_p
+
+        W_p = Q_init(x_,0,2)/Q_init(x_,0,1) + 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_,0,1) 
+        Burg_Wp = W_p*t + x_ -x
+
+        return 
+    END FUNCTION Burg_Wp
+
+  END subroutine pied_charact
 
 
   SUBROUTINE Out_The_Mesh(ti)
@@ -437,7 +514,7 @@ CONTAINS
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 
-    close(unit=numfile_sol)
+    close(unit=numfile_sol);    close(unit=numfile_solex)
     close(unit=numfile_data)
 
     open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')

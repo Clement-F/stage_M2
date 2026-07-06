@@ -11,8 +11,9 @@ PROGRAM MAIN
     CALL INIT_ALL
 
     CALL print_mat(Projection_VF_inv, size_base, size_base)
-    open(unit=numfile_data, file=nomfile_data,  form ='formatted', status ='unknown')
-    open(unit=numfile_sol,  file=nomfile_sol,   form ='formatted', status ='unknown')
+    open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='unknown')
+    open(unit=numfile_sol,      file=nomfile_sol,       form ='formatted', status ='unknown')
+    open(unit=numfile_solex,    file=nomfile_solex,     form ='formatted', status ='unknown')
     open(unit=numfile_meshout,  file=nomfile_meshout,   form ='formatted', status ='unknown')
    
 
@@ -20,9 +21,14 @@ PROGRAM MAIN
     write(unit= numfile_data, fmt='("ordre x = ",i5)') order_x
     write(unit= numfile_data, fmt='("ordre t = ",i5)') order_t
 
-    IF(subcell_use .and. (.not. error_calc))  write(unit= numfile_data, fmt='("nx = ",i5)') nb_cell*nb_subcell
-    IF((.not. subcell_use) .or. error_calc)   write(unit= numfile_data, fmt='("nx = ",i5)') nb_cell*order_x
-        
+    IF(subcell_use) THEN
+        write(unit= numfile_data, fmt='("nb_cell = ",i5)') nb_cell
+        write(unit= numfile_data, fmt='("nb_subcell = ",i5)') nb_subcell
+    ELSE
+        write(unit= numfile_data, fmt='("nb_cell = ",i5)') nb_cell
+        write(unit= numfile_data, fmt='("blablab = 00000000 ")') 
+    END IF
+
     CALL writout
 
 
@@ -46,7 +52,7 @@ PROGRAM MAIN
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 
-    close(unit=numfile_sol)
+    close(unit=numfile_sol);    close(unit=numfile_solex)
     close(unit=numfile_data)
     close(unit=numfile_meshout)
 

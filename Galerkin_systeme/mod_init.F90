@@ -17,8 +17,9 @@ CONTAINS
         ! print *, (nomfile_sol)
         print *,"red"
     
-        ! IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
+        IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
 
+        nomfile_solex = TRIM(nomfile_sol)//"ex.txt"
         nomfile_sol = TRIM(nomfile_sol)//".txt"
 
         print *, "init"
@@ -168,7 +169,9 @@ CONTAINS
         read(numfile_param,  *) xR;      
         read(numfile_param,  *) tmax;  
 
-        CALL Skip_lines(numfile_param,3) 
+        CALL Skip_lines(numfile_param,1) 
+        read(numfile_param,  *) flux_num
+        CALL Skip_lines(numfile_param,1) 
 
         read(numfile_param,  *) subcell_use
         read(numfile_param,  *) monolithique
@@ -181,6 +184,7 @@ CONTAINS
         CALL Skip_lines(numfile_param,3) 
         
         read(numfile_param,  *) cfl;   
+        read(numfile_param,  *) convergence; 
         read(numfile_param,  *) error_calc; 
         read(numfile_param,  *) max_check; 
         read(numfile_param,  *) print_rule;     

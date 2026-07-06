@@ -88,9 +88,9 @@ CONTAINS
           voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2))
           voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2))
 
-
           IF(flux_num == 0) f_FV = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
           IF(flux_num == 1) f_FV = (flux(ug) + flux(ud) - gamma_calc(ug,ud)*(ud-ug))  * 0.5_prec
+
           DF   = (flux_h(ni)%val_subcells(jj)- f_FV)
           theta_(ni,jj) = theta(voi_L,voi_R, DF)
           
@@ -301,7 +301,7 @@ CONTAINS
     REAL(prec) :: gamma_temp_bf, gamma_temp, dt_loc
 
     max_dflux = 0._prec; gamma_temp_bf = 0._prec
-    dt_loc = 1._prec
+    dt_loc = 100._prec
     if(subcell_use) THEN
       DO i=1,nb_cell
         DO j=1,nb_subcell
@@ -317,7 +317,7 @@ CONTAINS
             max_dflux = max(max_dflux, gamma_temp)
           END IF
 
-          dt_loc = min(dt_loc,CFL*(subcell_size(j)*cell_size(i)) /(gamma_temp + gamma_temp_bf));
+          dt_loc = min(dt_loc,CFL*(subcell_size(j)*cell_size(i)) /(2._prec*(gamma_temp + gamma_temp_bf)));
           gamma_temp_bf = gamma_temp
 
         END DO
@@ -343,7 +343,7 @@ CONTAINS
     dt_old = dt
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time)
 
-    ! IF(order_x .GT. order_t) THEN
+    ! IF((order_x .GT. order_t).or. error_calc )THEN
     ! dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
     ! END IF 
 
@@ -387,6 +387,25 @@ CONTAINS
             out1 = sol(i)%val_subcells(j)
             write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1, 0._prec
           END DO
+
+        ELSE IF(subcell_use) THEN
+        
+          
+          xi = Ref_to_loc(i,x_middle(i))
+          out1 = Sum(sol(i)%val_subcells(:))/Real(nb_subcell,prec)
+
+          IF(TRIM(flux_name) == "advection") THEN 
+            out2 =Q_init(xi - time*vit_adv,0)
+          ELSE 
+            call pied_charact(xi,time,out2)
+          END IF
+
+          write(unit=numfile_sol,  fmt='(f10.6, f16.6, f16.6)') xi,out1, out2
+
+          ! errLi = max(errLi , abs(out1-out2))
+          ! err1 = err1 + abs(out1-out2)*w_quad(j)    *cell_size(i)/2
+          ! err2 = err2 + ((out1-out2)*w_quad(j))**2  *cell_size(i)/2
+        
 
         ELSE
           

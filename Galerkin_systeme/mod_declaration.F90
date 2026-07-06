@@ -52,8 +52,8 @@ MODULE mod_declaration
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc
-  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, convergence
+  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema, flux_num
 
 
   INTEGER :: nb_var
@@ -72,9 +72,9 @@ MODULE mod_declaration
 
   CHARACTER(LEN=32):: DG_meth, quad_meth, sol_ini_name, flux_name, bdry_cond, subcell_repartition
 
-  INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4, numfile_meshout = 5
+  INTEGER   :: numfile_sol=1, numfile_param=2, numfile_data = 3, numfile_conv = 4, numfile_meshout = 5, numfile_solex = 7
   CHARACTER(len=32)    :: nomfile_sol = 'file_sol.txt', nomfile_param = 'param.txt', nomfile_data= 'file_data.txt', & 
-                        & nomfile_conv= 'convergence_err.txt', nomfile_meshout = 'mesh_out.txt'
+                        & nomfile_conv= 'convergence_err.txt', nomfile_meshout = 'mesh_out.txt', nomfile_solex = 'file_solex.txt'
 
 
 

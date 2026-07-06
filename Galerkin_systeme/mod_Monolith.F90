@@ -64,11 +64,14 @@ CONTAINS
       return
     END IF
     
-    IF(minval(abs(DF)) < eps0) THEN; theta = 0._prec; return; END IF
+    IF(minval(abs(DF)) < eps0) THEN; theta = 1._prec; return; END IF
 
     ug = sol_step(mc(1))%val_subcells(mc(2),:)
     ud = sol_step(pv(1))%val_subcells(pv(2),:)
-    gamma_mp = gamma_calc(ug,ud)
+    
+    IF(flux_num == 0) gamma_mp = max_dflux
+    IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
+    
     u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
     IF(TRIM(flux_name)=="Euler") THEN 
@@ -89,7 +92,7 @@ CONTAINS
       DO ii=1,nb_var
       
         IF(max_rule ==1) THEN
-          IF((abs(DF(ii))) < eps0) THEN; theta = 0._prec; return; END IF
+          IF((abs(DF(ii))) < eps0) THEN; theta = 1._prec; return; END IF
           IF(DF(ii) .LT. -eps0) THEN
             beta = minmax_loc(mc,"max",nvar=ii)
             alpha= minmax_loc(pv,"min",nvar=ii)

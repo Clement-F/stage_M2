@@ -3,9 +3,13 @@ import matplotlib.pyplot as plt
 
 with open('file_data.txt') as f:
     lines = f.readlines()
-ordert = int(lines[2][10:15])
-nx = int(lines[3][5:11])
-sm = int(lines[4][5:11])
+nb_var = int(lines[0][10:16])
+orderx = int(lines[1][10:16])
+ordert = int(lines[2][10:16])
+nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
+nx = nb_cell * nb_sub
+
+sm = int(lines[5][5:11])
 
 with open('mesh_out.txt') as f:
     lines = f.readlines()

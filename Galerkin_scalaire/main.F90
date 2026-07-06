@@ -18,8 +18,14 @@ PROGRAM MAIN
     write(unit= numfile_data, fmt='("ordre x = ",i5)') order_x
     write(unit= numfile_data, fmt='("ordre t = ",i5)') order_t
 
-    IF(subcell_use .and. (.not. error_calc))  write(unit= numfile_data, fmt='("nx = ",i5)') nb_cell*nb_subcell
-    IF((.not. subcell_use) .or. error_calc)   write(unit= numfile_data, fmt='("nx = ",i5)') nb_cell*order_x
+    IF(subcell_use) THEN
+        write(unit= numfile_data, fmt='("nb_cell = ",i5)') nb_cell
+        write(unit= numfile_data, fmt='("nb_subcell = ",i5)') nb_subcell
+    ELSE
+        write(unit= numfile_data, fmt='("nb_cell = ",i5)') nb_cell
+        write(unit= numfile_data, fmt='("blablab = 00000000 ")') 
+    END IF
+
         
     CALL writout
 

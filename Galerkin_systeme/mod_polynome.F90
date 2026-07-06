@@ -42,7 +42,6 @@ CONTAINS
 
     END FUNCTION sod_tube
 
-
     FUNCTION smooth_isentropique(x,ni,nvar)
         IMPLICIT NONE
         REAL(prec), INTENT(IN):: x

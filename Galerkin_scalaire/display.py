@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 
 with open('file_data.txt') as f:
     lines = f.readlines()
-order = int(lines[0][10:16])
-nx = int(lines[2][5:11])
-sm = int(lines[3][5:11])
+ordert = int(lines[1][10:16])
+orderx = int(lines[0][10:16])
+nb_cell =int(lines[2][10:16]) ; nb_sub= int(lines[3][13:18])
 
+nx = nb_cell*nb_sub 
+sm = int(lines[4][5:11])
 T=[]
 #for k in range(4,4+sm):
  #   T.append(float(lines[k][14:30]))
@@ -34,7 +36,7 @@ for k in range(0,sm):
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i]   = lines1[k*(nx+1) +i][11:23]
         #U_t2[k][i]   = lines2[k*(nx+1) +i][11:23]
-        #U_ex[k][i]  = lines1[k*(nx+1) +i][27:43]        
+        U_ex[k][i]  = lines1[k*(nx+1) +i][27:43]        
         err[k][i] = abs(U_t[k][i] - U_ex[k][i]) 
                    
         
@@ -44,9 +46,9 @@ for k in range(0,sm):
     #plt.plot(X,U_t2[k],'g-')
     
     print(max(U_t[k]), min(U_t[k]), sum(U_t[k]))
-    #plt.plot(X,U_ex[k],'g')
-    #plt.ylim(0.8,1.2); plt.xlim(-0.75,-0.45)
-    plt.ylim(-1.2,1.2)
+    #plt.plot(X,U_t[0],'g')
+    #plt.xlim(0.65,0.9); plt.ylim(-0.8,-1.1)
+    #plt.ylim(-1.2,1.2)
     plt.show()         
 
 

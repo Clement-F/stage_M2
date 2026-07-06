@@ -64,7 +64,8 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u,v
     REAL(prec), DIMENSION(nb_var) :: Flux_FV
 
-    Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
+    IF(flux_num == 0) Flux_FV = (flux(u) + flux(v) - max_dflux*(v-u))  * 0.5_prec
+    IF(flux_num == 1) Flux_FV = (flux(u) + flux(v) - gamma_calc(u,v)*(v-u))  * 0.5_prec
 
   END FUNCTION Flux_FV
 
@@ -92,8 +93,32 @@ CONTAINS
     END IF
 
   END FUNCTION gamma_calc
-
   
+  FUNCTION flux_d(u)
+    IMPLICIT NONE
+    REAL(prec), INTENT(in) :: u
+    REAL(prec) :: flux_d
+
+    SELECT CASE (TRIM(flux_name))
+    CASE("advection")
+      flux_d = vit_adv
+    CASE("burgers_SCL")
+      flux_d = u  
+    CASE("Buckley")
+      IF((abs(u) .GT. eps0) .and. (abs(u-1._prec) .GT. eps0) )THEN
+        flux_d = 8._prec*u* (4._prec*u**2 + (1._prec-u)**2 - u*(4._prec*u-(1._prec-u))) &
+              &/(4._prec*u**2 + (1._prec-u)**2)**2
+      ELSE 
+        flux_d = eps0
+      END IF
+
+    CASE DEFAULT
+      WRITE(*,*) "flux_d non reconnu ",flux_name
+      flux_d = 0._prec
+      STOP
+    END SELECT
+
+  END FUNCTION flux_d
 
 
   

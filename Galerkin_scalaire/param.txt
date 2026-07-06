@@ -1,7 +1,7 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-40              | noeuds du maillage 
+20              | noeuds du maillage 
 -1D0             | xd
 1D0             | xf
 4D-1              | T
@@ -10,18 +10,18 @@
 ---------------------------------------------------
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
-1               | Null(0), Max Global(1), Local_cell(2), Local_sub(3)
+2               | Null(0), Max Global(1), Local_cell(2), Local_sub(3)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
 2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-10               | nb subcellules du sous maillage
+7               | nb subcellules du sous maillage
 Unif            | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
-0.6             | cfl
+0.7             | cfl
 False           | Error calc    (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-20              | print rule
+20               | print rule
 solRel          | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
@@ -33,7 +33,7 @@ Lobatto        | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-creneau         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
-Buckley         | problème (advection, burgers, Buckley)
-5D0            | vitesse advection (si pb = advection)
+Riemann         | solution initiale (sinus,unit,Riemann,creneau,Burgers_choc)
+burgers         | problème (advection, burgers, Buckley)
+1D0            | vitesse advection (si pb = advection)
 Sym        | condition au bord (period, Sym)

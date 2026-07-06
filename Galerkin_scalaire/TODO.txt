@@ -14,10 +14,14 @@
         BUG à corriger
 ===================================
 
+corriger le calcul Monolithique -> theta
+corriger le calcul Monolithique -> relaxation (sinus applati)
 
 ===================================
         à faire
 ===================================
+
+Rajouter cas test multi-signal
 
 quadrature Legendre (ordre > 5)
 
