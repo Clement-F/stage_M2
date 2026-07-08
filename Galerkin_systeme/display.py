@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 p = lambda U:  2.*(U[2] - 0.5*(U[1])**2 /U[0] )
-
+    
 with open('file_data.txt') as f:
     lines = f.readlines()
     
@@ -16,8 +16,8 @@ nx = nb_cell *nb_sub
 sm = int(lines[5][5:11])
 
 T=[]
-#for k in range(4,4+sm):
- #   T.append(float(lines[k][14:30]))
+for k in range(6,6+sm):
+   T.append(float(lines[k][14:30]))
 
 
 #   solDG   SolSub   file_sol    
@@ -59,8 +59,10 @@ for k in range(0,sm):
         #P_[k,i] = p(U_t[k,i,:])
                   
         
-    plt.plot(X,U_t[k,:,0],'b')
-    #plt.plot(X,U_2t[k,:,0],'b-', marker='.')
+    plt.plot(X,U_t[k,:,0],'b', marker='.')
+    #plt.plot(X,-np.sin(X),'g')
+    #plt.plot(X,U_t[0,:,0],'g-')
+    plt.plot(X,U_2t[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_2t[k,:,0]),'k-')
     if(nb_var>1):
         1+1
@@ -79,8 +81,29 @@ for k in range(0,sm):
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
     plt.ylim(m,M)
-    plt.show()     
-    #plt.savefig()    
+    #plt.xlim(-3.8, 3.8)
+    plt.show()    
+    #plt.savefig("save_"+str(T[k])+".png")    
+    #plt.cla() 
+ 
+    
+if(False):
+    with open('buckley.dat') as f:
+        lines = f.readlines()
+        
+    X_B   = np.zeros(30000)
+    U_B   = np.zeros(30000)
+    for i in range(0,30000):
+        X_B[i] = lines[i][0:16]
+        U_B[i] = lines[i][17:32]
+        
+    plt.plot(X_B,U_B, 'r')
+    
+    plt.plot(X,U_t[k],'b', marker=".")
+    #plt.plot(X,U_t2[k],'go')
+    plt.ylim(-.2,1.2)
+    #plt.show()     
+    plt.savefig("endfig_save.png")    
 
 
     

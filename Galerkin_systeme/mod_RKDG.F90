@@ -248,24 +248,25 @@ CONTAINS
     REAL(prec) :: gamma_temp, dt_loc, gamma_bf
     REAL(prec), DIMENSION(nb_var) :: u_,v_
 
-    IF(TRIM(flux_name) == "advection") THEN
+    IF(TRIM(flux_name) == "advection" .AND. (.NOT. monolithique)) THEN
       max_dflux = abs(vit_adv)
     ELSE 
       max_dflux = 0._prec
 
-      IF(subcell_use) THEN
-      gamma_bf = 0._prec; dt_loc = 100._prec
+      IF(monolithique) THEN
+      gamma_bf =eps0; dt_loc = tmax-time
 
       DO i=1,nb_cell;    DO j=1,nb_subcell
         nxt_ = Voisin_Face(i,j,'R')
 
         u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
-        gamma_temp = gamma_calc(u_, v_)
+        gamma_temp = max(gamma_calc(u_, v_),eps0)
 
         dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
-        ! print *, dt_loc
+
 
         max_dflux = max(max_dflux, gamma_temp)
+        IF(flux_name == "Buckley") max_dflux =2.4_prec
         gamma_bf = gamma_temp
       END DO;END DO
 
@@ -280,17 +281,15 @@ CONTAINS
         END DO;END DO
       END IF
     END IF
-    
-    ! print *,"===================="
-    ! print *, dt_loc
-    ! print *,"===================="
+
+    if(.not. monolithique) dt_loc = tmax-time
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time, dt_loc)
+
+    print *,dt
 
     IF((order_x .GT. order_t).AND. convergence ) THEN
     dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
     END IF 
-
-
 
 
 
@@ -338,6 +337,9 @@ CONTAINS
           DO j=1,nb_subcell; 
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
+            ! out = DOT_PRODUCT(sol_step(i)%deriv(:,1), Projection_VF(j,:))/( cell_size(i)*0.5_prec)
+            ! out =  (4._prec/(subcell_size(j) * cell_size(i)**2))*&
+            ! &(eval_poly(1._prec,j,sol_step(i)%deriv(:,1), LOC=LSub)  - eval_poly(-1._prec,j,sol_step(i)%deriv(:,1), LOC=LSub))
             IF(TRIM(flux_name) == "advection") THEN       
               DO k=1,nb_var        
               out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)

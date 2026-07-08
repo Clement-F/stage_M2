@@ -30,25 +30,30 @@ CONTAINS
         if((quad_meth)=="Lobatto") nb_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
         if((quad_meth)=="Legendre")nb_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
 
-
-        IF((flux_name) == "advection") THEN 
+        SELECT Case(trim(flux_name))
+        Case("advection")  
             max_dflux = abs(vit_adv)
-            nb_var=2
-        ELSE IF((flux_name) == "burgers") THEN
-            nb_var=2
-        ELSE IF((flux_name) == "burgers_SCL") THEN
             nb_var=1
-        ELSE IF((flux_name) == "Shallow") THEN
+        Case("burgers") 
             nb_var=2
-        ELSE IF((flux_name) == "Euler") THEN
+        Case("burgers_SCL") 
+            nb_var=1
+        Case("Buckley") 
+            nb_var=1
+
+        Case("Shallow") 
+            nb_var=2
+
+        Case("Euler")
             nb_var=3;
             gamma_iso = 1.4_prec
             IF((sol_ini_name) == "Sod") gamma_iso = 1.4_prec
             IF((sol_ini_name) == "isentropique") gamma_iso = 3._prec
-        ELSE
-            print *," flux non reconnue "
-            STOP
-        END IF
+
+        CASE DEFAULT
+        WRITE(*,*) " flux non reconnue "
+        STOP
+        END SELECT
 
         print *, "allocation"
 

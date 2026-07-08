@@ -20,9 +20,52 @@ CONTAINS
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: creneau 
-        creneau = eps0
+        creneau = 0._prec
         if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
     END FUNCTION creneau
+
+    FUNCTION composite(x,ni) result(res)
+        IMPLICIT NONE
+        REAL(prec), INTENT(in) :: x
+        INTEGER,    INTENT(in) :: ni
+        REAL(prec) :: res 
+
+        REAL(prec), parameter :: delta =0.005_prec, alpha = 10._prec ,z=-0.7_prec,a=0.5_prec
+        REAL(prec), parameter :: beta =LOG(2._prec)/(36._prec*delta**2)
+
+        res = 0._prec
+        
+            IF((-0.8_prec .LT. x )  .AND. (x .LT. -0.6_prec) ) THEN
+        res = 1._prec/6._prec *(G(x,beta,z-delta) +G(x,beta,z+delta)+4*G(x,beta,z))
+        
+        ELSEIF((-0.4_prec .LT. x )  .AND. (x .LT. -0.2_prec) ) THEN
+        res = 1._prec
+        
+        ELSEIF((  0._prec .LT. x )  .AND. (x .LT.  0.2_prec) ) THEN
+        res = 1-abs(10*(x-0.1_prec))
+        
+        ELSEIF(( 0.4_prec .LT. x )  .AND. (x .LT.  0.6_prec) ) THEN
+        res = 1._prec/6._prec *(F(x,alpha,a-delta) +F(x,alpha,a+delta)+4*F(x,alpha,a))
+
+        END IF
+
+        CONTAINS
+        FUNCTION F(x,alpha,a)
+            IMPLICIT NONE
+            REAL(prec), INTENT(IN) :: x,alpha,a
+            REAL(prec) :: F
+            F = sqrt(max(1-alpha**2 *(x-a)**2, 0._prec))
+        END FUNCTION
+
+        FUNCTION G(x,beta,z)
+            IMPLICIT NONE
+            REAL(prec), INTENT(IN) :: x,beta,z
+            REAL(prec) :: G
+            G = exp(-beta* (x-z)**2)
+        END FUNCTION
+
+    END FUNCTION composite
+
 
     FUNCTION sod_tube(x,ni,nvar)
         IMPLICIT NONE
@@ -63,26 +106,39 @@ CONTAINS
         INTEGER,    INTENT(IN) :: ni,nvar
         REAL(prec) :: Q_init
 
-        IF     (TRIM(sol_ini_name)=="sinus") THEN
-            Q_init = sinus(x,ni)
-        ELSE IF(TRIM(sol_ini_name)=="unit") THEN
+        SELECT CASE(TRIM(sol_ini_name))
+        CASE("sinus")
+        Q_init = sinus(x,ni)
+
+        CASE("unit")
             Q_init = unit(x,ni)
-        ELSE IF(TRIM(sol_ini_name)=="Riemann") THEN
-            Q_init = eps0
+
+        CASE("Riemann")
+            Q_init = 0._prec
             if(x<0._prec) Q_init =1._prec
-        ELSE IF(TRIM(sol_ini_name)=="creneau") THEN
+
+        CASE("creneau")
             Q_init = creneau(x,ni)
-        ELSE IF(TRIM(sol_ini_name)=="Burgers_choc") THEN
-            Q_init = eps0
+
+        CASE("composite")
+            Q_init = composite(x,ni)
+
+        CASE("Burgers_choc")
+            Q_init = 0._prec
             if(0.3_prec<x .and. x<0.7_prec) Q_init = -1._prec
             if(x>0.7_prec) Q_init = 0.5_prec
-        ELSE IF(TRIM(sol_ini_name)=="Sod") THEN
+
+        CASE("Sod")
             Q_init = sod_tube(x,ni,nvar)
 
-        ELSE IF(TRIM(sol_ini_name)=="isentropique") THEN
+        CASE("isentropique")
             Q_init = smooth_isentropique(x,ni,nvar)
 
-        END IF
+        CASE DEFAULT
+        WRITE(*,*) "Sol initiale non reconnue"
+        STOP
+        END SELECT
+
     END FUNCTION Q_init
 
 ! ---------------------------------------------------------------
