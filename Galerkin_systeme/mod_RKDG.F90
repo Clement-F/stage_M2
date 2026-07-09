@@ -52,7 +52,7 @@ CONTAINS
 
     DO ni = 1,nb_cell
       DO ii=1,nb_nodes
-        u_temp = sol_step(ni)%val_nodes(ii,:)
+        u_temp = sol_step(ni)%val_quad(ii,:)
         flux_uh_val(ii,:) = flux(u_temp)
       END DO
 
@@ -114,7 +114,7 @@ CONTAINS
 
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
-      sol_step(ni)%val_nodes  = sol(ni)%val_nodes
+      sol_step(ni)%val_quad  = sol(ni)%val_quad
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
       
@@ -139,12 +139,12 @@ CONTAINS
                                     &+ RK_beta(tni)    * dt * L_step
                           
         DO ii=1,nb_nodes          
-          sol_step(ni)%val_nodes(ii,jj)  = eval_step(x_quad(ii),nvar= jj,ni=ni,kk= ii,LOC= LRef )
+          sol_step(ni)%val_quad(ii,jj)  = eval_step(x_quad(ii),nvar= jj,ni=ni,kk= ii,LOC= LRef )
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,jj)      = sol_step(ni)%val_nodes(1,jj)
-          sol_step(ni)%inter(2,jj)      = sol_step(ni)%val_nodes(nb_nodes,jj)
+          sol_step(ni)%inter(1,jj)      = sol_step(ni)%val_quad(1,jj)
+          sol_step(ni)%inter(2,jj)      = sol_step(ni)%val_quad(nb_nodes,jj)
         ELSE 
           sol_step(ni)%inter(1,jj)      = eval_step(x_cell(ni),  ni=ni, LOC= LLoc, nvar=jj)
           sol_step(ni)%inter(2,jj)      = eval_step(x_cell(ni+1),ni=ni, LOC= LLoc, nvar=jj)
@@ -159,12 +159,12 @@ CONTAINS
         sol(ni)%base_poly  = sol_step(ni)%base_poly
 
         DO ii=1,nb_nodes          
-          sol(ni)%val_nodes(ii,jj)  = eval_sol(x_quad(ii),nvar= jj,ni=ni,kk= ii,LOC= LRef )
+          sol(ni)%val_quad(ii,jj)  = eval_sol(x_quad(ii),nvar= jj,ni=ni,kk= ii,LOC= LRef )
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol(ni)%inter(1,jj)      = sol(ni)%val_nodes(1,jj)
-          sol(ni)%inter(2,jj)      = sol(ni)%val_nodes(nb_nodes,jj)
+          sol(ni)%inter(1,jj)      = sol(ni)%val_quad(1,jj)
+          sol(ni)%inter(2,jj)      = sol(ni)%val_quad(nb_nodes,jj)
         ELSE 
           sol(ni)%inter(1,jj)      = eval_sol(x_cell(ni),  ni=ni,LOC=LLoc,nvar=jj)
           sol(ni)%inter(2,jj)      = eval_sol(x_cell(ni+1),ni=ni,LOC=LLoc,nvar=jj)
@@ -185,7 +185,7 @@ CONTAINS
 
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
-      sol_step(ni)%val_nodes  = sol(ni)%val_nodes
+      sol_step(ni)%val_quad  = sol(ni)%val_quad
       sol_step(ni)%val_subcells=sol(ni)%val_subcells
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
@@ -213,11 +213,11 @@ CONTAINS
         END DO
 
         DO jj=1,nb_nodes
-          sol_step(ni)%val_nodes(jj,kk)  = eval_step(x_quad(jj),nvar=kk,ni=ni, kk=jj, LOC= LRef)
+          sol_step(ni)%val_quad(jj,kk)  = eval_step(x_quad(jj),nvar=kk,ni=ni, kk=jj, LOC= LRef)
         END DO
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,kk)      = sol_step(ni)%val_nodes(1,kk)
-          sol_step(ni)%inter(2,kk)      = sol_step(ni)%val_nodes(nb_nodes,kk)
+          sol_step(ni)%inter(1,kk)      = sol_step(ni)%val_quad(1,kk)
+          sol_step(ni)%inter(2,kk)      = sol_step(ni)%val_quad(nb_nodes,kk)
         ELSE 
           sol_step(ni)%inter(1,kk)      = eval_step(x_cell(ni),   nvar=kk,ni=ni,LOC= LLoc)
           sol_step(ni)%inter(2,kk)      = eval_step(x_cell(ni+1), nvar=kk,ni=ni,LOC= LLoc)
@@ -231,7 +231,7 @@ CONTAINS
 
     DO ni=1,nb_cell
       sol(ni)%base_poly    = sol_step(ni)%base_poly
-      sol(ni)%val_nodes    = sol_step(ni)%val_nodes
+      sol(ni)%val_quad    = sol_step(ni)%val_quad
       sol(ni)%val_subcells = sol_step(ni)%val_subcells
       sol(ni)%inter        = sol_step(ni)%inter
     END DO
@@ -252,43 +252,53 @@ CONTAINS
       max_dflux = abs(vit_adv)
     ELSE 
       max_dflux = 0._prec
+        DO i=1,nb_cell;
+        nxt_ = Voisin_quad(i,nb_nodes,'R')
 
-      IF(monolithique) THEN
-      gamma_bf =eps0; dt_loc = tmax-time
-
-      DO i=1,nb_cell;    DO j=1,nb_subcell
-        nxt_ = Voisin_Face(i,j,'R')
-
-        u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
-        gamma_temp = max(gamma_calc(u_, v_),eps0)
-
-        dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
-
-
+        u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)
+        gamma_temp = gamma_calc(u_, v_)
+                  
         max_dflux = max(max_dflux, gamma_temp)
-        IF(flux_name == "Buckley") max_dflux =2.4_prec
-        gamma_bf = gamma_temp
-      END DO;END DO
+      END DO
 
-      ELSE 
-        DO i=1,nb_cell;    DO j=1,nb_nodes
-          nxt_ = Voisin_quad(i,j,'R')
+      IF(flux_num ==1 ) THEN;
 
-          u_=sol(i)%val_nodes(j,:); v_ = sol(nxt_(1))%val_nodes(nxt_(2),:)
-          gamma_temp = gamma_calc(u_, v_)
-                    
-          max_dflux = max(max_dflux, gamma_temp)
-        END DO;END DO
+        IF(monolithique) THEN
+        gamma_bf =eps0; dt_loc = 2._prec
+
+          DO i=1,nb_cell;    DO j=1,nb_subcell
+            nxt_ = Voisin_Face(i,j,'R')
+
+            u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
+
+            IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
+            gamma_temp = 2.4_prec
+            dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
+            ELSE; 
+            gamma_temp = max(gamma_calc(u_, v_),eps0)
+            dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
+            END IF
+
+
+
+            max_dflux = max(max_dflux, gamma_temp)
+            gamma_bf = gamma_temp
+          END DO;END DO 
+        END IF
+
+      ELSE IF(flux_num == 0) THEN; 
+        ! print *, max_dflux
+        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))       
       END IF
+
     END IF
 
-    if(.not. monolithique) dt_loc = tmax-time
+    if(.not. monolithique) dt_loc =  2._prec
     dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time, dt_loc)
 
-    print *,dt
-
     IF((order_x .GT. order_t).AND. convergence ) THEN
-    dt = min(   (CFL*dx/(REAL(2*order_x-1,prec)*max_dflux)) **(Real(order_x,prec) * 1._prec/Real(order_t,prec)) ,tmax-time) 
+      IF(      monolithique) dt = min(tmax-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)), dt_loc**(Real(order_x,prec)/Real(order_t,prec)))
+      IF(.not. monolithique) dt = min(tmax-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)))
     END IF 
 
 
@@ -298,7 +308,7 @@ CONTAINS
       CALL Emergency_stop
     END IF
     
-    IF(ISNAN(sol(1)%val_nodes(1,1))) THEN
+    IF(ISNAN(sol(1)%val_quad(1,1))) THEN
       write(*, fmt ='("NAN found emergency stop")')
       CALL Emergency_stop
     END IF
@@ -330,7 +340,7 @@ CONTAINS
       CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
-        IF(subcell_use ) THEN
+        IF(subcell_use .AND.(.not. convergence) ) THEN
 
           save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
 
@@ -356,9 +366,11 @@ CONTAINS
 
             END IF
 
-            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
-            write(unit=numfile_sol,    fmt=save_format) xi,out
-            write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
+            write(unit=numfile_sol,    fmt=save_format) xi,out, Ref_to_loc(i,x_subcell(j))
+            IF(error_calc)write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+
+
           END DO 
 
         ELSE
@@ -366,7 +378,7 @@ CONTAINS
           DO j=1,size_base
             xi = Ref_to_loc(i,x_quad(j))
 
-            out = sol(i)%val_nodes(j,:)
+            out = sol(i)%val_quad(j,:)
 
             IF(TRIM(flux_name) == "advection") THEN       
               DO k=1,nb_var        
@@ -386,7 +398,7 @@ CONTAINS
 
             save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
             write(unit=numfile_sol,    fmt=save_format,  advance="no") xi,out
-            write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
+            IF(error_calc) write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
 
 
             errLi = max(errLi , maxval(abs(out-out_ex)))
@@ -394,7 +406,7 @@ CONTAINS
             err2 = err2 + SUM(((out-out_ex)*w_quad(j))**2)  *cell_size(i)/2
 
             ! IF(TRIM(flux_name)== "Euler" ) THEN
-            ! u_ = sol(i)%val_nodes(j,:); pression_ = pression(u_)
+            ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
             ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
             ! write(unit=numfile_sol, fmt= '(f10.6)') pression_
             ! ELSE;
@@ -407,8 +419,9 @@ CONTAINS
         END IF
       END DO
 
+
+
       err2 = sqrt(err2)
-      IF(TRIM(flux_name)== "Euler" ) write(*,fmt='("pression in [", f10.6,",",f10.6,"]")') p_min,p_max
       write(*, fmt ='("err L1 = ", e20.12)')  err1
       write(*, fmt ='("err L2 = ", e20.12)')  err2
       write(*, fmt ='("err Li = ", e20.12)')  errLi
@@ -452,7 +465,7 @@ CONTAINS
       u = (w_m+w_p)/2._prec
 
       sol(1) = c/sqrt(gamma_iso); sol(2) = sol(1)*u
-      sol(3) = (sol(1)**3) /(gamma_iso-1._prec) + (sol(2)**2)/2._prec
+      sol(3) = (sol(1)**3) /(gamma_iso-1._prec) + (sol(2)**2)/(2._prec*sol(1))
 
     END IF 
 
@@ -537,6 +550,7 @@ CONTAINS
 
 
     print *, "EMERGENCY STOP"
+    STOP
   END SUBROUTINE Emergency_stop
 
 

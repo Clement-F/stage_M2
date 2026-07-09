@@ -20,7 +20,7 @@ CONTAINS
         REAL(prec), INTENT(in) :: x
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: creneau 
-        creneau = 0._prec
+        creneau = eps0
         if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
     END FUNCTION creneau
 
@@ -33,7 +33,7 @@ CONTAINS
         REAL(prec), parameter :: delta =0.005_prec, alpha = 10._prec ,z=-0.7_prec,a=0.5_prec
         REAL(prec), parameter :: beta =LOG(2._prec)/(36._prec*delta**2)
 
-        res = 0._prec
+        res = eps0
         
             IF((-0.8_prec .LT. x )  .AND. (x .LT. -0.6_prec) ) THEN
         res = 1._prec/6._prec *(G(x,beta,z-delta) +G(x,beta,z+delta)+4*G(x,beta,z))
@@ -74,13 +74,15 @@ CONTAINS
         REAL(prec) :: sod_tube 
 
         sod_tube = eps0
-        IF(x .LT. 0._prec) THEN
+        IF(x .LT. 0.4_prec) THEN
             IF(nvar==1) sod_tube = 1._prec
-            IF(nvar==3) sod_tube = 1._prec
+            IF(nvar==2) sod_tube = 0.75_prec
+            IF(nvar==3) sod_tube = 1._prec/(gamma_iso-1._prec) + 0.5_prec* (0.75_prec)**2 
         ELSE
             
             IF(nvar==1) sod_tube = 0.125_prec
-            IF(nvar==3) sod_tube = 0.1_prec
+            IF(nvar==2) sod_tube = eps0
+            IF(nvar==3) sod_tube = 0.1_prec/(gamma_iso-1._prec)
         END IF
 
     END FUNCTION sod_tube
@@ -93,8 +95,8 @@ CONTAINS
 
         smooth_isentropique = eps0
 
-        if(nvar ==1) smooth_isentropique = 1._prec  +  0.9999999_prec* sin(pi*x)
-        if(nvar ==3) smooth_isentropique = ((1._prec  +  0.9999999_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
+        if(nvar ==1) smooth_isentropique = 1._prec  +  0.99_prec* sin(pi*x)
+        if(nvar ==3) smooth_isentropique = ((1._prec  +  0.99_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
 
         if(abs(smooth_isentropique) .LT. eps0) smooth_isentropique = eps0
 

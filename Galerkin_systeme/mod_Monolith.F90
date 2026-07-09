@@ -92,7 +92,7 @@ CONTAINS
 
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
-    IF(.not. extrema ) THEN
+    IF(.not. extrema) THEN
       DO ii=1,nb_var
       
         IF(max_rule ==1) THEN
@@ -106,7 +106,7 @@ CONTAINS
             alpha= minmax_loc(mc,"min",nvar=ii)
           END IF
 
-        ELSE IF(max_rule==2) THEN; alpha= min_glob; beta = max_glob
+        ELSE IF(max_rule==2) THEN; alpha= 1.1_prec*(min_glob+eps0); beta = 0.99_prec*(max_glob-eps0)
         END IF
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
@@ -117,13 +117,17 @@ CONTAINS
         ! ELSE IF(param .LT. eps0) THEN ; theta_temp(ii) = 1._prec;
         ! ELSE;
         
-        theta_temp(ii) =min(1._prec, abs(gamma_mp/DF(ii)) * param);
+        theta_temp(ii) =max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec);
         ! END IF      
         
         theta = min(theta,theta_temp(ii))
 
       END DO
     END IF
+
+    theta = max(theta,0._prec)
+
+    IF(ISNAN(theta)) print *,"theta nan"
 
     ! IF(theta .LT. eps0) THEN 
     !   voi_L = subcells_(mc(1),mc(2))%L;
@@ -138,6 +142,7 @@ CONTAINS
     !   write(*, fmt="( 'theta = ', f10.6, ' gamma = ', f10.6)") theta, gamma_mp
     !   write(* ,fmt="( 'param = ', e12.6, ' DF = ', e12.6)") param, DF
     ! END IF
+    ! theta =1._prec
 
   END FUNCTION
 
@@ -168,7 +173,7 @@ CONTAINS
 
         ddu  = 2._prec/(cell_size(ni)**2)  *&
         &(eval_poly(-1._prec,ni,sol_step(ni)%deriv(:,n_var), LOC=LRef)  - eval_poly(1._prec,ni,sol_step(ni)%deriv(:,n_var), LOC=LRef))
-        ! IF(abs(ddu) .LT. eps0) ddu = 0._prec
+        IF(abs(ddu) .LT. eps0) ddu = 0._prec
 
         vL = du - 0.5_prec*cell_size(ni)*ddu
         vR = du + 0.5_prec*cell_size(ni)*ddu
@@ -180,15 +185,16 @@ CONTAINS
           subcells_(ni,:)%extrema = .TRUE.
         END IF
 
-        ! du_L = du; du = du_R
-        ! IF(.true.) THEN
+        du_L = du; du = du_R
+        ! IF(ni .GT. 1) THEN
+        ! IF(subcells_(ni,1)%extrema .AND. subcells_(ni-1,1)%extrema) THEN
         !   print *,"================" ,ni,'----------',n_sub,"============================"
         !   print *,nL, nR
         !   write(*, fmt="( 'between : [',f10.6,',',f10.6,'], at t=',f10.6)") x_cell(ni),x_cell(ni+1), time
         !   write(*,fmt='("u = ",e12.6 )') eval_sol(0._prec,nvar =n_var,ni=ni,Loc=LRef)
         !   write(*,fmt='("du_L = ",e12.6,", du = ",e12.6,", du_R = ",e12.6)') du_L, du, du_R
         !   write(*,fmt='("vL   = ",e12.6,",ddu = ",e12.6,", vR   = ",e12.6)') vL, ddu,vR
-        ! END IF
+        ! END IF; END IF
 
 
       END DO; END DO
@@ -200,17 +206,11 @@ CONTAINS
         nR = Voisin_cell(ni,n_sub, 'R') 
 
         du     = DOT_PRODUCT(sol_step(ni   )%deriv(:,n_var), Projection_VF(n_sub,:))/( cell_size(ni)*0.5_prec)
-        ! IF(abs(du)   .LT. eps0) du   = 0._prec
-
         du_L   = DOT_PRODUCT(sol_step(nL(1))%deriv(:,n_var), Projection_VF(nL(2),:))/( cell_size(ni)*0.5_prec)
-        ! IF(abs(du_L) .LT. eps0) du_L = 0._prec
-
         du_R   = DOT_PRODUCT(sol_step(nR(1))%deriv(:,n_var), Projection_VF(nR(2),:))/( cell_size(ni)*0.5_prec)
-        ! IF(abs(du_R) .LT. eps0) du_R = 0._prec
-        
+
         ddu  = (4._prec/(subcell_size(n_sub) * cell_size(ni)**2))*&
         &(eval_poly(1._prec,n_sub,sol_step(ni)%deriv(:,n_var), LOC=LSub)  - eval_poly(-1._prec,n_sub,sol_step(ni)%deriv(:,n_var), LOC=LSub))
-        ! IF(abs(ddu) .LT. eps0) ddu = 0._prec
 
         vL = du - 0.25_prec*cell_size(ni)*subcell_size(n_sub)*ddu
         vR = du + 0.25_prec*cell_size(ni)*subcell_size(n_sub)*ddu
@@ -222,10 +222,11 @@ CONTAINS
           subcells_(ni,n_sub)%extrema = .TRUE.
         END IF
 
-        ! IF(.not.subcells_(ni,n_sub)%extrema) THEN
+        ! IF(subcells_(ni,n_sub)%extrema) THEN
         !   print *,"================" ,ni,'----------',n_sub,"============================"
-        !   write(*, fmt="( 'between : [',f10.6,',',f10.6,'], at t=',f10.6)") Ref_to_loc(ni,x_subcell(n_sub)),Ref_to_loc(ni,x_subcell(n_sub+1)), time
-        !   write(*,fmt='("u = ",e12.6 )') sol_step(ni)%val_subcells(n_sub,:)
+        !   print *,nL, nR
+        !   write(*, fmt="( 'between : [',f10.6,',',f10.6,'], at t=',f10.6)") x_cell(ni),x_cell(ni+1), time
+        !   write(*,fmt='("u = ",e12.6 )') eval_sol(0._prec,nvar =n_var,ni=ni,Loc=LRef)
         !   write(*,fmt='("du_L = ",e12.6,", du = ",e12.6,", du_R = ",e12.6)') du_L, du, du_R
         !   write(*,fmt='("vL   = ",e12.6,",ddu = ",e12.6,", vR   = ",e12.6)') vL, ddu,vR
         ! END IF

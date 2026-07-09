@@ -131,11 +131,11 @@ CONTAINS
 
             DO jj=1,nb_var; DO ii=1,nb_nodes
                 
-                sol(ni)%val_nodes(ii,jj)  = eval_sol(x_quad(ii),ni= ni,nvar=jj, kk=ii, LOC= LRef)
+                sol(ni)%val_quad(ii,jj)  = eval_sol(x_quad(ii),ni= ni,nvar=jj, kk=ii, LOC= LRef)
                         
                 IF((quad_meth)=="Lobatto") THEN
-                sol(ni)%inter(1,jj)      = sol(ni)%val_nodes(1,jj)
-                sol(ni)%inter(2,jj)      = sol(ni)%val_nodes(nb_nodes,jj)
+                sol(ni)%inter(1,jj)      = sol(ni)%val_quad(1,jj)
+                sol(ni)%inter(2,jj)      = sol(ni)%val_quad(nb_nodes,jj)
                 ELSE 
                 sol(ni)%inter(1,jj)      = eval_sol(x_cell(ni),ni= ni,nvar=jj  ,LOC=LLoc)
                 sol(ni)%inter(2,jj)      = eval_sol(x_cell(ni+1),ni= ni,nvar=jj,LOC=LLoc)
@@ -144,7 +144,29 @@ CONTAINS
             END DO; END DO
 
         END DO
-                
+
+        SELECT Case(trim(sol_ini_name))
+        CASE("sinus")
+            min_glob = -1._prec; max_glob = 1._prec
+        CASE("unit")
+            min_glob =  1._prec; max_glob = 1._prec
+        CASE("Riemann")
+            min_glob =  0._prec; max_glob = 1._prec
+        CASE("creneau")
+            min_glob =  0._prec; max_glob = 1._prec
+        CASE("composite")
+            min_glob = 0._prec; max_glob = 1.1_prec
+        CASE("Burgers_choc")
+            min_glob = -1._prec; max_glob = 0.5_prec
+        CASE("Sod")
+            min_glob = 0._prec; max_glob = 10._prec
+        CASE("isentropique")
+            min_glob = 0._prec; max_glob = 10._prec
+        CASE DEFAULT
+        WRITE(*,*) " solution non reconnue "
+        STOP
+        END SELECT
+
 
         err_L1 = 0._prec; err_L2 =0._prec;  err_Li=0._prec
         print *,"end init"

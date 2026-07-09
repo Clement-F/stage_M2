@@ -30,7 +30,7 @@ all: $(PROG)
 $(PROG): $(OBJS)
 	$(FC) $(LDFLAGS)  $(LIBPATH)  $(MODPATH) -o $@ $(OBJS) $(LIB)
 clean:
-	rm -f $(PROG) $(OBJS) *.mod core *~ .*~ \#*# .#*
+	rm -f $(PROG) $(OBJS) *.mod core *~ .*~ \#*# .#* *.png
 
 .SUFFIXES: .F90
 
