@@ -1,8 +1,8 @@
-PWD /home/zephyr/Documents/stage_M2/TeX/rapport
+PWD /home/zephyr/Documents/stage_M2/TeX/rapport/main
 INPUT /usr/local/texlive/2026/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /home/zephyr/Documents/stage_M2/TeX/rapport/main.TEX
+INPUT /home/zephyr/Documents/stage_M2/TeX/rapport/main/main.TEX
 OUTPUT main.log
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls
@@ -11,11 +11,11 @@ INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/base/size11.clo
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/base/size11.clo
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map
 INPUT /usr/local/texlive/2026/texmf-dist/fonts/tfm/public/cm/cmr10.tfm
-INPUT ./macro.TEX
-INPUT ./macro.TEX
-INPUT ./macro.TEX
-INPUT ./macro.TEX
-INPUT macro.TEX
+INPUT ../macro.TEX
+INPUT ../macro.TEX
+INPUT ../macro.TEX
+INPUT ../macro.TEX
+INPUT ../macro.TEX
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
 INPUT /usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty

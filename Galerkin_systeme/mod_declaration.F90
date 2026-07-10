@@ -102,7 +102,6 @@ MODULE mod_declaration
 
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
-    ALLOCATE( L_step(size_base))
     ALLOCATE( Time_stemp(print_rule+2))
     
     ALLOCATE( pts_DG(size_base)) 
@@ -114,10 +113,10 @@ MODULE mod_declaration
     ALLOCATE( Rigid(size_base,size_base), Rigid_inv(size_base,size_base) ) 
 
     DO i =1,nb_cell
-      ALLOCATE(sol(i)%base_poly(size_base,nb_var));       ALLOCATE(sol(i)%val_quad(nb_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var))
-      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));   ALLOCATE(sol_exa(i)%val_quad(nb_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var)) 
-      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_step(i)%val_quad(nb_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var))
-      ALLOCATE(sol(i)%inter(2,nb_var));                   ALLOCATE(sol_exa(i)%inter(2,nb_var));             ALLOCATE(sol_step(i)%inter(2,nb_var))
+      ALLOCATE(sol(i)%base_poly(size_base,nb_var));       ALLOCATE(sol(i)%val_quad(nb_nodes,nb_var));      ALLOCATE(sol(i)%val_subcells(nb_subcell,nb_var));      ALLOCATE(sol(i)%inter(2,nb_var));
+      ALLOCATE(sol_exa(i)%base_poly(size_base,nb_var));   ALLOCATE(sol_exa(i)%val_quad(nb_nodes,nb_var));  ALLOCATE(sol_exa(i)%val_subcells(nb_subcell,nb_var));  ALLOCATE(sol_exa(i)%inter(2,nb_var)); 
+      ALLOCATE(sol_step(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_step(i)%val_quad(nb_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var)); ALLOCATE(sol_step(i)%inter(2,nb_var))
+                                     
 
       ALLOCATE(flux_h(i)%flux_DG(size_base,nb_var))      
       ALLOCATE(flux_h(i)%flux_tilde(nb_subcell+1,nb_var));ALLOCATE(flux_h(i)%flux_VF(nb_subcell+1,nb_var)); ALLOCATE(flux_h(i)%flux_subcells(nb_subcell+1,nb_var));  
@@ -136,14 +135,16 @@ MODULE mod_declaration
     DO i =1,nb_cell
       DEALLOCATE(sol(i)%base_poly);       DEALLOCATE(sol(i)%val_quad);       DEALLOCATE(sol(i)%val_subcells)
       DEALLOCATE(sol_exa(i)%base_poly);   DEALLOCATE(sol_exa(i)%val_quad);   DEALLOCATE(sol_exa(i)%val_subcells) 
-      DEALLOCATE(sol_step(i)%base_poly);  DEALLOCATE(sol_step(i)%val_quad);  DEALLOCATE(sol_step(i)%val_subcells)
-      DEALLOCATE(flux_h(i)%flux_VF);      DEALLOCATE(flux_h(i)%flux_DG);      DEALLOCATE(flux_h(i)%flux_tilde)
+      DEALLOCATE(sol_step(i)%base_poly);  DEALLOCATE(sol_step(i)%val_quad);  DEALLOCATE(sol_step(i)%val_subcells); DEALLOCATE(sol_step(i)%deriv)
+      DEALLOCATE(flux_h(i)%flux_VF);      DEALLOCATE(flux_h(i)%flux_DG);      DEALLOCATE(flux_h(i)%flux_tilde); DEALLOCATE(flux_h(i)%flux_subcells)
+
       DEALLOCATE(sol(i)%inter);           DEALLOCATE(sol_exa(i)%inter);       DEALLOCATE(sol_step(i)%inter)
     END DO
     
     DEALLOCATE( sol, sol_step, flux_h, sol_exa, g)
 
     DEALLOCATE (subcells_)
+    DEALLOCATE (theta_)
 
     DEALLOCATE( x_cell,     x_middle,     cell_size) 
     DEALLOCATE( x_subcell,  x_submiddle,  subcell_size)
@@ -154,7 +155,6 @@ MODULE mod_declaration
 
     DEALLOCATE( coeff_Taylor, coeff_legendre )
     DEALLOCATE( RK_alpha, RK_beta, RK_time )
-    DEALLOCATE( L_step)
     DEALLOCATE( Time_stemp)
     
     DEALLOCATE( pts_DG) 

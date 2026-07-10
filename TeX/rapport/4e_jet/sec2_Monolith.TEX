@@ -1,0 +1,25 @@
+
+\section{Schéma Monolithique (DG/FV)}
+La méthode se repose sur deux détails clées : une réecriture du schéma DG utilisant des sous-mailles et 
+un flux hybride entre le flux DG du schéma réecrit et un flux Volume Fini entre sous-mailles.
+\subsection{Réecriture du schéma DG}
+\paragraph{sous-maillage \\}
+
+On dote chaque maille $\omega_i$ d'un sous-maillage : $\{\omega_i^m\}_m$ vérifiant les mêmes propriétés que le maillage de $\mathbb{D}$ : \eqref{maillage1}-\eqref{maillage3}\\
+On cherchera à passer les degrées de libertés des polynomes de $ \sigma \in\mathbb{P}^k$, des moments sur la base polynomiale $\underline{\sigma}_p$ aux moyennes de ces polynomes sur $\omega_i^m$ : $\overline{\sigma}^m$ \\
+On voit très vite, qu'il va nous falloir plus de sous-mailles que de moments de polynomes : $N_k \geq N_s$.
+En vérité, la seul condition est que : \\
+Soit la matrice $$\mathcal{P}_{m,p} = \frac{1}{|\omega_i^m|} \int_{\omega_i^m} \sigma_p(x) dx$$ Alors $\mathcal{P}^t\,\mathcal{P}$ doit être inversible. Dans le cas $N_k=N_s$, cela revient à $\mathcal{P}$ inversible.\\
+
+Ces conditions, en plus de nous donner le nombre minimal de sous-mailles, nous donne un critère sur l'admissibilité du sous-maillage. 
+En effet, si le maillage est tel que $\mathcal{P}^t \, \mathcal{P}$ n'est pas inversible, alors le maillage n'est pas admissible.\\
+
+Il est alors simple de passer d'une représentation à une autre : 
+\begin{equation}
+    \overline{U} = \mathcal{P}\underline{U} \qquad \underline{U} = \mathcal{R}\overline{U}
+\end{equation}
+où $\mathcal{R}$ est l'opérateur de reconstruction : $\mathcal{R} = (\mathcal{P}^t \mathcal{P})^{-1} \mathcal{P}^t$, 
+
+
+\subsection{Flux hybride (DG/FV)}
+\subsection{choix du paramètre d'hybridation}

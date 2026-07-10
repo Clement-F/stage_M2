@@ -87,14 +87,15 @@ CONTAINS
       theta_temp(2) = min(1._prec, M/(abs(B)+ max(eps0,A)))
 
       ! positivité des deux 
-      theta = theta_temp(1)* theta_temp(2)       
+      theta = theta_temp(1)* theta_temp(2)    
     END IF
 
+    theta_temp = 0._prec
+    
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema) THEN
-      DO ii=1,nb_var
-      
+      DO ii=1,1
         IF(max_rule ==1) THEN
           IF((abs(DF(ii))) < eps0) THEN; theta = 1._prec; return; END IF
           IF(DF(ii) .LT. -eps0) THEN
@@ -110,12 +111,6 @@ CONTAINS
         END IF
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
-
-        !! ATTENTION !!
-        ! 3 lignes du dessous sont peu justifier
-        ! IF(abs(beta-alpha) .LT. 2*eps0) THEN; theta_temp(ii) = 1._prec;
-        ! ELSE IF(param .LT. eps0) THEN ; theta_temp(ii) = 1._prec;
-        ! ELSE;
         
         theta_temp(ii) =max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec);
         ! END IF      
