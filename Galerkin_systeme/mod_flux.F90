@@ -91,7 +91,6 @@ CONTAINS
       gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))
     CASE("Euler") 
       gamma_calc = max(abs(u(2)/u(1)) + sqrt(gamma_iso* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(gamma_iso* pression(v)/v(1)))
-
     CASE("Buckley")
       u_step = (max(u(1),v(1))-min(u(1),v(1)))/10._prec
 

@@ -151,17 +151,17 @@ CONTAINS
         CASE("unit")
             min_glob =  1._prec; max_glob = 1._prec
         CASE("Riemann")
-            min_glob =  0._prec; max_glob = 1._prec
+            min_glob =  eps0; max_glob = 1._prec
         CASE("creneau")
-            min_glob =  0._prec; max_glob = 1._prec
+            min_glob =  eps0; max_glob = 1._prec
         CASE("composite")
-            min_glob = 0._prec; max_glob = 1.1_prec
+            min_glob = eps0; max_glob = 1.1_prec
         CASE("Burgers_choc")
             min_glob = -1._prec; max_glob = 0.5_prec
         CASE("Sod")
-            min_glob = 0._prec; max_glob = 10._prec
+            min_glob = eps0; max_glob = 1000._prec
         CASE("isentropique")
-            min_glob = 0._prec; max_glob = 10._prec
+            min_glob = eps0; max_glob = 1000._prec
         CASE DEFAULT
         WRITE(*,*) " solution non reconnue "
         STOP

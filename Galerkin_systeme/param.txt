@@ -1,8 +1,8 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-40              | noeuds du maillage 
--2D-1             | xd
+20              | noeuds du maillage 
+-0D-1             | xd
 10D-1              | xf
 2D-1            | T
 ---------------------------------------------------
@@ -10,19 +10,19 @@
 ---------------------------------------------------
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
-2               | Max global(2), local(1), Null(0)
+1               | Max global(2), local(1), Null(0)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
 2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-7               | nb subcellules du sous maillage
-Lobatto         | repartition des noeuds(Unif, Lobatto)
+8               | nb subcellules du sous maillage
+Unif         | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
-0.7             | cfl
+0.6             | cfl
 False           | Convergence 
 False           | Error calc    (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-10              | print rule
+50              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
