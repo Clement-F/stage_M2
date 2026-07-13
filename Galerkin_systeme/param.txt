@@ -1,13 +1,8 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
-<<<<<<< HEAD
 40              | noeuds du maillage 
 -10D-1             | xd
-=======
-20              | noeuds du maillage 
--0D-1             | xd
->>>>>>> 80b42ab (redraft TeX)
 10D-1              | xf
 40D-2            | T
 ---------------------------------------------------
@@ -17,39 +12,32 @@ True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 1               | Max global(2), local(1), Null(0)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
-<<<<<<< HEAD
-0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-5               | nb subcellules du sous maillage
-Lobatto         | repartition des noeuds(Unif, Lobatto)
-=======
 2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-8               | nb subcellules du sous maillage
-Unif         | repartition des noeuds(Unif, Lobatto)
->>>>>>> 80b42ab (redraft TeX)
+6               | nb subcellules du sous maillage
+Lobatto         | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
-0.6             | cfl
-False           | Convergence 
+0.7             | cfl
+False           | Convergence   (True, False)
 False           | Error calc    (True, False)
+False           | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-<<<<<<< HEAD
-500              | print rule
-=======
-50              | print rule
->>>>>>> 80b42ab (redraft TeX)
+10              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 --------------------------------------------------
-4               | ordre espace
+5               | ordre espace
 3               | ordre temps
 Lobatto        | polynomes  (Legendre,Lobatto)
 Lobatto         | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-creneau             | solution initiale (sinus, unit, Riemann, creneau, composite, Burgers_choc, Sod, isentropique)
-Buckley       | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+creneau    | solution initiale :
+                    SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
+                    Euler : Sod, isentropique
+Buckley           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-Sym          | condition au bord (period, Sym)
+period          | condition au bord (period, Sym)

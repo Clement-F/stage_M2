@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-#p = lambda U:  2.*(U[2] - 0.5*(U[1])**2 /U[0] )
+p = lambda U:  0.4*(U[2] - 0.5*(U[1])**2 /U[0] )
     
 with open('file_data.txt') as f:
     lines = f.readlines()
@@ -39,7 +39,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,5):
+for k in range(0,sm,2):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][11:27]
@@ -73,36 +73,38 @@ for k in range(0,sm,5):
     #plt.plot(X,U_t[0,:,0],'g-')
     #plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
-    print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
-    print(min(U_t[k]), max(U_t[k]))
+    #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
     if(nb_var>1):
         1+1
         #plt.plot(X,U_ex[k,:,1],'k-')
         #plt.plot(X,U_t[k,:,1],'r-', marker='.')
         #plt.plot(X,abs(U_t[k,:,1]-U_ex[k,:,1]),'k-')
-        #plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
+        plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
     if(nb_var>2):
         1+1
         #plt.plot(X,U_ex[k,:,2],'k-')
-        #plt.plot(X,U_t[k,:,2],'g-', marker='.')
+        plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
-    #plt.plot(X,P_[k,:],'k-x')
-    m=-.2; M=1.2
+    plt.plot(X,P_[k,:],'k-x')
+    #m=-.2; M=1.2
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
-    #plt.ylim(m,M);plt.xlim(-0.,1.)
+   # plt.ylim(m,M);plt.xlim(-0.,1.)
     #plt.xlim(-3.8, 3.8)
     plt.show()    
     #plt.savefig("save_"+str(T[k])+".png")    
-    #plt.cla() 
+    plt.cla() 
     
 plt.plot(X,U_t[k,:,0],'b', marker='.')
 #plt.ylim(m,M);plt.xlim(-0.,1.)
-#plt.savefig("save_"+str(T[k])+".png")    
+plt.savefig("save_"+str(T[k])+".png")    
     
-if(True):
-    with open('buckley.dat') as f:
+
+
+
+if(False):
+    with open('sol_ex/buckley.dat') as f:
         lines = f.readlines()
         
     X_B   = np.zeros(30000)
@@ -122,5 +124,43 @@ if(True):
     #plt.show()     
     plt.savefig("endfig_save.png")    
 
+
+if(False):
+    with open('sol_ex/sod_modif_den.dat') as f:
+        lines = f.readlines()
+    
+    rho_ex = np.zeros(5000)
+    
+    X_ex   = np.zeros(5000)
+    rho_ex = np.zeros(5000)
+    Xvel_ex= np.zeros(9998)
+    vel_ex = np.zeros(9998)
+    pre_ex = np.zeros(5000)
+    
+    for i in range(0,5000):
+        X_ex[i] = lines[i][0:18]
+        rho_ex[i] = lines[i][17:32]
+    
+    with open('sol_ex/sod_modif_vel.dat') as f:
+        lines = f.readlines()
+        
+    for i in range(0,9998):
+        Xvel_ex[i] = lines[i][0:17]
+        vel_ex[i] = lines[i][17:32]
+    
+    with open('sol_ex/sod_modif_pre.dat') as f:
+        lines = f.readlines()
+        
+    for i in range(0,5000):
+        pre_ex[i] = lines[i][17:32]
+        
+    # plt.plot(X,U_t[k,:,0],'b', marker='.')
+    # plt.plot(X_ex,rho_ex,'b')
+    plt.plot(Xvel_ex,vel_ex,'r')
+    plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r', marker='.')
+    #plt.plot(X_ex,pre_ex,'k')
+    #plt.plot(X,P_[k,:],'k', marker='.')
+    
+    plt.savefig("endfig_save.png")    
 
     

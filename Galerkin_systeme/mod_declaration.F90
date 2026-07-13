@@ -54,8 +54,8 @@ MODULE mod_declaration
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, convergence
-  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema, flux_num
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, convergence, mesh_out
+  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema, flux_num, entropie_rule, entropie_num
 
 
   INTEGER :: nb_var

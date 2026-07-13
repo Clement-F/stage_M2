@@ -74,7 +74,7 @@ CONTAINS
         REAL(prec) :: sod_tube 
 
         sod_tube = eps0
-        IF(x .LT. 0.4_prec) THEN
+        IF(x .LT. 0.3_prec) THEN
             IF(nvar==1) sod_tube = 1._prec
             IF(nvar==2) sod_tube = 0.75_prec
             IF(nvar==3) sod_tube = 1._prec/(gamma_iso-1._prec) + 0.5_prec* (0.75_prec)**2 
@@ -82,7 +82,7 @@ CONTAINS
             
             IF(nvar==1) sod_tube = 0.125_prec
             IF(nvar==2) sod_tube = eps0
-            IF(nvar==3) sod_tube = 0.1_prec/(gamma_iso-1._prec)
+            IF(nvar==3) sod_tube = 0.1_prec/(gamma_iso-1._prec) 
         END IF
 
     END FUNCTION sod_tube
@@ -95,8 +95,8 @@ CONTAINS
 
         smooth_isentropique = eps0
 
-        if(nvar ==1) smooth_isentropique = 1._prec  +  0.99_prec* sin(pi*x)
-        if(nvar ==3) smooth_isentropique = ((1._prec  +  0.99_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
+        if(nvar ==1) smooth_isentropique = 1._prec  +  0.9999999_prec* sin(pi*x)
+        if(nvar ==3) smooth_isentropique = ((1._prec  +  0.999999_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
 
         if(abs(smooth_isentropique) .LT. eps0) smooth_isentropique = eps0
 
