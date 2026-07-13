@@ -61,10 +61,10 @@ CONTAINS
     REAL(prec) :: theta
     
     theta = 1._prec
-    IF(max_rule == 0) THEN 
-      theta = 1._prec
-      return
-    END IF
+    ! IF(max_rule == 0) THEN 
+    !   theta = 1._prec
+    !   return
+    ! END IF
     
     IF(minval(abs(DF)) < eps0) THEN; theta = 1._prec; return; END IF
 
@@ -78,26 +78,29 @@ CONTAINS
 
     IF(TRIM(flux_name)=="Euler") THEN 
       ! positivité de rho
-      theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*u_Riemann(1))
+      theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*(u_Riemann(1)-eps0))
 
       ! positivité de E//P
       A = 1/(gamma_mp**2) *(0.5_prec*abs(DF(2))**2 - theta_temp(1)*DF(1)*DF(3))
       B = 1/(gamma_mp)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - theta_temp(1)*u_Riemann(3)*DF(1))
       M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
-      theta_temp(2) = min(1._prec, M/(abs(B)+ max(eps0,A)))
+
+      theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
 
       ! positivité des deux 
-      theta = theta_temp(1)* theta_temp(2)    
+      theta = theta_temp(1)* theta_temp(2)  
     END IF
 
     theta_temp = 0._prec
     
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
-    IF(.not. extrema) THEN
+
+    IF(.not. extrema .AND. max_rule .GT. 0) THEN
       DO ii=1,1
         IF(max_rule ==1) THEN
           IF((abs(DF(ii))) < eps0) THEN; theta = 1._prec; return; END IF
+
           IF(DF(ii) .LT. -eps0) THEN
             beta = minmax_loc(mc,"max",nvar=ii)
             alpha= minmax_loc(pv,"min",nvar=ii)
@@ -109,7 +112,7 @@ CONTAINS
 
         ELSE IF(max_rule==2) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
-          beta = 0.99_prec*(max_glob-eps0)
+          beta = 0.99_prec*(max_glob-eps0);
         END IF
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
@@ -123,23 +126,8 @@ CONTAINS
     END IF
 
     theta = max(theta,0._prec)
-
-    IF(ISNAN(theta)) print *,"theta nan"
-
-    ! IF(theta .LT. eps0) THEN 
-    !   voi_L = subcells_(mc(1),mc(2))%L;
-    !   voi_R = subcells_(pv(1),pv(2))%R; 
-    !   print *,"================" ,mc,"---------", pv ,"============================"
-    !   write(*, fmt="( 'between : [',f10.6,',',f10.6,'], at t=',f10.6)") Ref_to_loc(mc(1),x_submiddle(mc(2))),Ref_to_loc(pv(1),x_submiddle(pv(2))), time
-    !   write(*, fmt="( 'stencil = (', e12.6, 2x,e12.6, 2x ,e12.6, 2x,e12.6 ,')')") sol_step(voi_L(1))%val_subcells(voi_L(2),:), ug, ud , sol_step(voi_R(1))%val_subcells(voi_R(2),:) 
-    !   write(*, fmt="( 'sol interface : ', e12.6,1x, e12.6 )") ug,ud
-    !   write(*, fmt="( 'sol Riemann : ', e12.6 )") u_Riemann
-    !   write(*, fmt="( 'alpha,beta = ',e12.6,2x, e12.6 )") alpha, beta
-    !   print *,"theta_temp = ", theta_temp
-    !   write(*, fmt="( 'theta = ', f10.6, ' gamma = ', f10.6)") theta, gamma_mp
-    !   write(* ,fmt="( 'param = ', e12.6, ' DF = ', e12.6)") param, DF
-    ! END IF
-    ! theta =1._prec
+    
+    IF(ISNAN(theta)) THEN; print *,"theta nan"; STOP; END IF
 
   END FUNCTION
 
@@ -153,19 +141,21 @@ CONTAINS
     
     subcells_(:,:)%extrema = .FALSE. 
 
-    DO ni=1,nb_cell;  DO n_var=1,nb_var
+    DO ni=1,nb_cell;  DO n_var=1,1
       sol_step(ni)%deriv(:,n_var)= MATMUL(Masse_inv, MATMUL(sol_step(ni)%base_poly(:,n_var), Rigid))
     END DO;           END DO
 
     IF(smooth_extrema == 1) THEN 
 
-      DO ni=1,nb_cell; DO n_var=1,nb_var
+      DO n_var=1,1; DO ni=1,nb_cell; 
         face_L = .FALSE.; face_R = .FALSE.
         nL = Voisin_cell(ni,1         , 'L')
         nR = Voisin_cell(ni,nb_subcell, 'R')
 
-        du   = 1._prec/(cell_size(ni))    * (sol_step(ni   )%inter(2,n_var)-sol_step(ni   )%inter(1,n_var))
+        IF(ni == 1)  THEN 
         du_L = 1._prec/(cell_size(nL(1))) * (sol_step(nL(1))%inter(2,n_var)-sol_step(nL(1))%inter(1,n_var))
+        du   = 1._prec/(cell_size(ni))    * (sol_step(ni   )%inter(2,n_var)-sol_step(ni   )%inter(1,n_var))
+        END IF
         du_R = 1._prec/(cell_size(nR(1))) * (sol_step(nR(1))%inter(2,n_var)-sol_step(nR(1))%inter(1,n_var))
 
         ddu  = 2._prec/(cell_size(ni)**2)  *&
@@ -197,13 +187,15 @@ CONTAINS
       END DO; END DO
     ELSE 
 
-      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; DO n_var = 1,nb_var
+      DO n_var = 1,1;  DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; 
         face_L = .FALSE.; face_R = .FALSE.
         nL = Voisin_cell(ni,n_sub, 'L') 
         nR = Voisin_cell(ni,n_sub, 'R') 
 
-        du     = DOT_PRODUCT(sol_step(ni   )%deriv(:,n_var), Projection_VF(n_sub,:))/( cell_size(ni)*0.5_prec)
+        IF(n_sub ==1) THEN
         du_L   = DOT_PRODUCT(sol_step(nL(1))%deriv(:,n_var), Projection_VF(nL(2),:))/( cell_size(ni)*0.5_prec)
+        du     = DOT_PRODUCT(sol_step(ni   )%deriv(:,n_var), Projection_VF(n_sub,:))/( cell_size(ni)*0.5_prec)
+        END IF
         du_R   = DOT_PRODUCT(sol_step(nR(1))%deriv(:,n_var), Projection_VF(nR(2),:))/( cell_size(ni)*0.5_prec)
 
         ddu  = (4._prec/(subcell_size(n_sub) * cell_size(ni)**2))*&
@@ -218,6 +210,8 @@ CONTAINS
         IF( face_L .AND. face_R) THEN
           subcells_(ni,n_sub)%extrema = .TRUE.
         END IF
+
+        du_L = du; du = du_R
 
         ! IF(subcells_(ni,n_sub)%extrema) THEN
         !   print *,"================" ,ni,'----------',n_sub,"============================"

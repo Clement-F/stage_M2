@@ -109,7 +109,7 @@ CONTAINS
     INTEGER :: ni, tni
 
     INTEGER :: ii,jj
-    REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB
+    REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB,L_step
 
 
     DO ni=1,nb_cell
@@ -132,7 +132,7 @@ CONTAINS
         BB  = (V_B + S_B)
         ! write(*,fmt='(  3( 2(f10.6) ) )')V_B,S_B,BB
         
-        L_step = MATMUL(Masse_inv, BB  )*(2._prec/(cell_size(ni))) 
+        L_step = MATMUL(Masse_inv, BB)*(2._prec/(cell_size(ni))) 
 
         sol_step(ni)%base_poly(:,jj) = RK_alpha(tni,1) * sol(ni)%base_poly(:,jj)& 
                                     &+ RK_alpha(tni,2) * sol_step(ni)%base_poly(:,jj) &
@@ -337,7 +337,7 @@ CONTAINS
     END IF
 
     IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0) .OR. force )  THEN
-      CALL Out_The_Mesh(time)
+      IF(mesh_out)CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
       DO i=1,nb_cell
         IF(subcell_use .AND.(.not. convergence) ) THEN
@@ -401,9 +401,9 @@ CONTAINS
             IF(error_calc) write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
 
 
-            errLi = max(errLi , maxval(abs(out-out_ex)))
-            err1 = err1 + SUM(abs(out-out_ex))*w_quad(j)    *cell_size(i)/2
-            err2 = err2 + SUM(((out-out_ex)*w_quad(j))**2)  *cell_size(i)/2
+            errLi = max(errLi , (abs(out(1)-out_ex(1))))
+            err1 = err1 + (abs(out(1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
+            err2 = err2 + (((out(1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
             ! IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
