@@ -5,21 +5,65 @@ un flux hybride entre le flux DG du schéma réecrit et un flux Volume Fini entr
 \subsection{Réecriture du schéma DG}
 \paragraph{sous-maillage \\}
 
-On dote chaque maille $\omega_i$ d'un sous-maillage : $\{\omega_i^m\}_m$ vérifiant les mêmes propriétés que le maillage de $\mathbb{D}$ : \eqref{maillage1}-\eqref{maillage3}\\
-On cherchera à passer les degrées de libertés des polynomes de $ \sigma \in\mathbb{P}^k$, des moments sur la base polynomiale $\underline{\sigma}_p$ aux moyennes de ces polynomes sur $\omega_i^m$ : $\overline{\sigma}^m$ \\
-On voit très vite, qu'il va nous falloir plus de sous-mailles que de moments de polynomes : $N_k \geq N_s$.
-En vérité, la seul condition est que : \\
-Soit la matrice $$\mathcal{P}_{m,p} = \frac{1}{|\omega_i^m|} \int_{\omega_i^m} \sigma_p(x) dx$$ Alors $\mathcal{P}^t\,\mathcal{P}$ doit être inversible. Dans le cas $N_k=N_s$, cela revient à $\mathcal{P}$ inversible.\\
+On dote chaque maille $\omega_i$ d'un sous-maillage : $\{S_m^i\}_m = ]\tilde{x}^i_{m-1/2}, \tilde{x}^i_{m+1/2}[$ vérifiant les mêmes propriétés que le maillage de $\mathbb{D}$ : \eqref{maillage1}-\eqref{maillage3}\\
+On cherchera à passer les degrées de libertés des polynomes de $ \sigma \in\mathbb{P}^k$, des moments sur la base polynomiale $ \left\{ \underline{\sigma}_p \right\}_p$ aux moyennes de ces polynomes sur le sous-mailles $\{S_m^i \}$ : $ \left\{\overline{\sigma}^m \right\}_m$ \\
+\noindent Soit la matrice $$\mathcal{P}_{m,p} = \frac{1}{|S_m^i|} \int_{S_m^i} \sigma_p(x) dx$$ 
+On remarque que pour que le passage des moments polynomiaux $\left\{ \underline{\sigma}_p \right\}_p$ aux sous-volumes finis soit injectif, il nous faut : $N_s \geq N_k$. 
+De manière général, on dit que le sous-maillage est admissible si et seulement si la matrice $\mathcal{P}^t\,\mathcal{P}$ est inversible.
 
-Ces conditions, en plus de nous donner le nombre minimal de sous-mailles, nous donne un critère sur l'admissibilité du sous-maillage. 
-En effet, si le maillage est tel que $\mathcal{P}^t \, \mathcal{P}$ n'est pas inversible, alors le maillage n'est pas admissible.\\
+\paragraph{Remarque \\}
+On note que pour avoir une équivalence au sens le plus stricte possible, il nous faut $N_s = N_k$. 
+Dans le cas échéant ($N_s \geq N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  qui nous donnera les moments polynomiaux au sens des moindres carrés.
+\newline
 
 Il est alors simple de passer d'une représentation à une autre : 
 \begin{equation}
     \overline{U} = \mathcal{P}\underline{U} \qquad \underline{U} = \mathcal{R}\overline{U}
 \end{equation}
-où $\mathcal{R}$ est l'opérateur de reconstruction : $\mathcal{R} = (\mathcal{P}^t \mathcal{P})^{-1} \mathcal{P}^t$, 
 
+On en profite pour introduire les fonctions $\{\phi_m^i\}_{1\leq m\leq N_s}$ les projections $\mathbb{P}^k$ de $\mathbb{1}_{S^i_m}$ : 
+$\int_{\omega_i} \phi_m \sigma dx = \int_{S_m^i} \sigma dx$, $\forall \sigma \in \mathbb{P}^k(\omega_i)$
 
+\paragraph{ Construction des flux reconstruit \\}
+
+En reprenant la formulation variationnelle \eqref{Formulation_Variationnelle}, si l'on projette $\mathbf{f}(\mathbf{u_h})$ sur $\mathbb{P}^k$ : $\mathbf{f_h}$, on obtient une formulation équivalente : 
+$$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx - \int_{\omega_i} \mathbf{f}_h^i \partial_x \sigma dx 
++ \left[ \mathcal{F}\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
+Alors par le biais d'une intégration par partie, on obtient la forme forte des schéma DG :  
+$$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx = \int_{\omega_i} \partial_x \mathbf{f}_h^i  \sigma dx 
+- \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
+
+Comme cette équation est vrai pour tout polynome de $\mathbb{P}^k(\omega_i)$, il est en particulier vrai pour $\phi_m$. Cela nous ammène presque à un flux ne dépendant que de $S_m^i$ : 
+\begin{equation}
+    \int_{S_m^i} \partial_t \mathbf{u_h} dx = - \left(\int_{S_m^i}  \partial_x \mathbf{f}_h^i dx - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\right) \qquad \forall m\in \{ 1, \dots, N_s\}
+\end{equation}
+Il est cependant possible d'obtenir un schéma volume fini sur les $\{\overline{u_h}^m\}$ en fabriquant un flux avec pour unique but de ressembler à un flux volume fini : \\
+Soit $\hat{F}^i_{m + 1/2}$ ces flux reconstruits posé telle que : 
+
+\begin{align}
+&\hat{F}^i_{m+1/2} - \hat{F}^i_{m-1/2} =  -  \left[\mathbf{f}_h^i\right]_{\tilde{x}^i_{m-1/2}}^{\tilde{x}^i_{m+1/2}}  - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall m\in \{ 1, \dots, N_s\} \\
+& \text{où l'on impose : } \hat{F}^i_{1/2} = \mathcal{F}_{i-1/2} \qquad \hat{F}^i_{ N_s + 1/2} = \mathcal{F}_{i+1/2}
+\end{align}
+Il est possible d'obtenir une forme close de $\hat{F}^i_{m+1/2}$: 
+\begin{align}
+    &\hat{F}^i_{m+1/2} = \mathbf{f}_h^i(\tilde{x}^i_{m+1/2}) 
+    -C^{i-1/2}_{m+1/2} ( \mathbf{f}_h^i(x_{i-1/2}) - \mathcal{F}_{i-1/2}) 
+    -C^{i+1/2}_{m+1/2} ( \mathbf{f}_h^i(x_{i+1/2}) - \mathcal{F}_{i+1/2}) \\
+    & \text{où }  C^{i-1/2}_{m+1/2} = (1- \sum_{p=1}^{m}\phi_p(x_{i-1/2})) \, , \qquad
+        C^{i+1/2}_{m+1/2} =     \sum_{p=1}^{m}\phi_p(x_{i+1/2})
+\end{align}
+
+Tout ceci nous permet d'écrire le schéma DG sous une forme Volumes Finis : 
+
+\begin{equation}\label{DG_as_FV}
+    \partial_t \overline{\mathbf{u_h}}^m = \frac{1}{|S_m^i|}(\hat{F}^i_{m+1/2} - \hat{F}^i_{m-1/2})
+\end{equation}
+
+\paragraph{Remarque \\}
+\noindent Même si la forme de \eqref{DG_as_FV} laisse à penser que l'évolution de $\overline{\mathbf{u_h}}^m$ 
+ne dépend uniquement des sous-cellules voisines à $S_m^i$, 
+il faut se rappeler que $\hat{F}^i_{m+1/2}$ dépend non seulement des sous-cellules voisines, 
+mais aussi des cellules voisines $\omega_{i\pm1}$ par le biais du flux numérique évalué aux l'interfaces des cellules $x_{i\pm1/2}$
+ 
 \subsection{Flux hybride (DG/FV)}
 \subsection{choix du paramètre d'hybridation}

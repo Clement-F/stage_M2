@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.7.2)  10 JUL 2026 18:03
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.7.2)  15 JUL 2026 18:21
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -9,8 +9,8 @@ LaTeX2e <2026-06-01>
 L3 programming layer <2026-06-18>
 (/usr/local/texlive/2026/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
-(/usr/local/texlive/2026/texmf-dist/tex/latex/base/size12.clo
-File: size12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count276
 \c@section=\count277
@@ -749,7 +749,12 @@ Package: shorttoc 2002/08/20 v1.3 Short table of contents (JPFD)
 )) (/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2026-02-18 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count357
-) (./main.aux
+)
+
+LaTeX Warning: Unused global option(s):
+    [16pt].
+
+(./main.aux
 Package babel Info: 'french' activates 'french' shorthands.
 (babel)             Reported on input line 8.
 )
@@ -774,27 +779,27 @@ LaTeX Font Info:    ... okay on input line 11.
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
 * driver: pdftex
-* paper: a4paper
+* paper: <default>
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(89.62709pt, 418.25368pt, 89.6271pt)
-* v-part:(T,H,B)=(101.40665pt, 591.5302pt, 152.11pt)
-* \paperwidth=597.50787pt
-* \paperheight=845.04684pt
-* \textwidth=418.25368pt
-* \textheight=591.5302pt
-* \oddsidemargin=17.3571pt
-* \evensidemargin=17.3571pt
-* \topmargin=-7.86334pt
+* h-part:(L,W,R)=(56.9055pt, 500.484pt, 56.9055pt)
+* v-part:(T,H,B)=(56.9055pt, 681.15898pt, 56.9055pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=500.484pt
+* \textheight=681.15898pt
+* \oddsidemargin=-15.36449pt
+* \evensidemargin=-15.36449pt
+* \topmargin=-52.36449pt
 * \headheight=12.0pt
 * \headsep=25.0pt
-* \topskip=12.0pt
+* \topskip=10.0pt
 * \footskip=30.0pt
-* \marginparwidth=35.0pt
-* \marginparsep=10.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
 * \columnsep=10.0pt
-* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
 * \hoffset=0.0pt
 * \voffset=0.0pt
 * \mag=1000
@@ -844,9 +849,6 @@ Package grfext Info: Graphics extension search list:
  (/usr/local/texlive/2026/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
-
-Package todonotes Warning: The length marginparwidth is less than 2cm and will most likely cause issues with the appearance of inserted todonotes. The issue can be solved by adding a line like \setlength {\marginparwidth }{2cm} prior to loading the todonotes package. on input line 11.
-
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: french babel package is loaded.
 Package caption Info: listings package is loaded.
@@ -854,7 +856,7 @@ Package caption Info: End \AtBeginDocument code.
 LaTeX Info: Redefining \degres on input line 11.
 \c@lstlisting=\count364
 Package babel Info: Main language set to 'french'.
-(./sec1_methDG.TEX
+ (./sec1_methDG.TEX
 LaTeX Font Info:    Trying to load font information for U+stmry on input line 8.
  (/usr/local/texlive/2026/texmf-dist/tex/latex/stmaryrd/Ustmry.fd)
 LaTeX Font Info:    Trying to load font information for U+bbold on input line 8.
@@ -867,9 +869,6 @@ LaTeX Font Info:    Freeze math alphabet allocation in version normal.
 (Font)              Allocated math groups: 14 (local: 2) on input line 27.
 LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 27.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 28.
-[1
-
-{/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolD.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolA.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolE.enc}]
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 32.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 32.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 34.
@@ -906,122 +905,117 @@ LaTeX Font Info:    Nested math: keeping math alphabet allocation in version nor
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 46.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 48.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 48.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 49.
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 53.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 53.
+[1
+
+{/usr/local/texlive/2026/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolD.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolE.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolC.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolA.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolS.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolF.enc}]
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 50.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 50.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 51.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 55.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 55.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 56.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 56.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 57.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 61.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 61.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 58.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 58.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 59.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 63.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 63.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 63.
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 64.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 65.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 65.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 66.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 66.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 66.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 66.
- [2{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolS.enc}{/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/mnsymbol/MnSymbolF.enc}]
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 71.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 71.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 71.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 71.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 72.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 74.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 74.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 65.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 68.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 69.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 69.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 69.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 69.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 72.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 73.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 77.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 77.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 77.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 77.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 78.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 78.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 83.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 83.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 86.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 86.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 86.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 87.
-
-Overfull \hbox (2.6024pt too wide) in paragraph at lines 85--88
-\T1/cmr/m/n/12 En re-gar-dant $\OMX/MnSymbolE/m/n/12 ò[][]à\OML/cmm/m/it/12 t\OMX/MnSymbolE/m/n/12 çù[]$ \T1/cmr/m/n/12 comme un vec-teur : $[]$ et en po-sant $\OML/cmm/m/it/12 M[] \U/MnSymbolD/m/n/12 ^^@ [][] \OML/cmm/m/it/12 ^^[[]\OMX/MnSymbolE/m/n/12 à\OML/cmm/m/it/12 x\OMX/MnSymbolE/m/n/12 ç\OML/cmm/m/it/12 ^^[[]\OMX/MnSymbolE/m/n/12 à\OML/cmm/m/it/12 x\OMX/MnSymbolE/m/n/12 ç\OML/cmm/m/it/12 dx$\T1/cmr/m/n/12 ,
- []
-
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 91.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 91.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 91.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 91.
-
-Underfull \hbox (badness 10000) in paragraph at lines 89--92
-
- []
-
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 96.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 96.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 107.
-[3]
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 109.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 109.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 111.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 112.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 112.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 112.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 80.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 80.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 84.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 84.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 89.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 89.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 92.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 92.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 92.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 93.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 97.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 97.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 97.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 97.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 104.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 104.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 106.
+ [2]
 LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 117.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 117.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 118.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 118.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 118.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 118.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 119.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 119.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 121.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 122.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 122.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 122.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 127.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 127.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 128.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 128.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 128.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 128.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 129.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 129.
 
-Underfull \hbox (badness 10000) in paragraph at lines 117--120
+Underfull \hbox (badness 10000) in paragraph at lines 127--130
 
  []
 
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 121.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 121.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 121.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 121.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 134.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 134.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 137.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 137.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 137.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 137.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 131.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 131.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 131.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 131.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 143.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 143.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 146.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 146.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 146.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 146.
 
-Underfull \hbox (badness 10000) in paragraph at lines 136--138
+Underfull \hbox (badness 10000) in paragraph at lines 145--147
 
  []
 
-[4]) (./sec2_Monolith.TEX
+) (./sec2_Monolith.TEX
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 8.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 8.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 8.
@@ -1029,49 +1023,98 @@ LaTeX Font Info:    No math alphabet change to frozen version normal on input li
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 9.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 9.
 LaTeX Font Info:    No math alphabet change to frozen version normal on input line 9.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 10.
+ [3]
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 10.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 11.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 11.
 LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 12.
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 12.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 12.
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 12.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 15.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 16.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 16.
 
-Underfull \hbox (badness 10000) in paragraph at lines 12--13
+Underfull \hbox (badness 10000) in paragraph at lines 15--18
 
  []
 
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 15.
-
-Underfull \hbox (badness 10000) in paragraph at lines 14--16
-
- []
-
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 20.
-LaTeX Font Info:    No math alphabet change to frozen version normal on input line 20.
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 21.
-LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 21.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 22.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 22.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 24.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 24.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 24.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 25.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 25.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 29.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 29.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 29.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 31.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 34.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 36.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 36.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 36.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 39.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 39.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 40.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 41.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 46.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 47.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Nested math: keeping math alphabet allocation in version normal on input line 54.
+LaTeX Font Info:    Undo math alphabet allocation in version normal on input line 54.
+[4]
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 60.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 60.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 63.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 64.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 65.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 66.
+LaTeX Font Info:    No math alphabet change to frozen version normal on input line 66.
 ) (./annex.TEX)
 \tf@thm=\write4
 \openout4 = `main.thm'.
 
- [5] [6] (./main.aux)
+ [5] (./main.aux)
  ***********
 LaTeX2e <2026-06-01>
 L3 programming layer <2026-06-18>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 26177 strings out of 467168
- 490844 string characters out of 5409469
- 864047 words of memory out of 5000000
- 54970 multiletter control sequences out of 15000+600000
- 646713 words of font info for 94 fonts, out of 8000000 for 9000
+ 26170 strings out of 467168
+ 490737 string characters out of 5409469
+ 872142 words of memory out of 5000000
+ 54967 multiletter control sequences out of 15000+600000
+ 646950 words of font info for 91 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  104i,10n,120p,503b,385s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/local/texlive/2026/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/bbold-type1/bbold10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/bbold-type1/bbold7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfbx1728.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1440.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm2074.pfb>
-Output written on main.pdf (6 pages, 239665 bytes).
+</usr/local/texlive/2026/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/mnsymbol/MnSymbol7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/bbold-type1/bbold10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/bbold-type1/bbold7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfbx1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfrm1728.pfb></usr/local/texlive/2026/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb>
+Output written on main.pdf (5 pages, 305386 bytes).
 PDF statistics:
- 136 PDF objects out of 1000 (max. 8388607)
- 87 compressed objects within 1 object stream
+ 154 PDF objects out of 1000 (max. 8388607)
+ 98 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  13 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -5,7 +5,7 @@
 Nous nous restreinderons ici aux problèmes hyperboliques 1D. Pour un développement 2D, voir {\color{red}[papier 2024]}. 
 
 \paragraph{Problème hyperbolique \\}
-Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D}\subset \R$ le domaine de calcul et $\mathbf{f} : \Omega \mapsto \R^M$ une fonction régulière. 
+Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D} =]\alpha,\beta[ \subset \R$, le domaine de calcul et $\mathbf{f} : \Omega \mapsto \R^M$ une fonction régulière. 
 Soit $\mathbf{u} : \mathbb{D} \times \R^+ \mapsto \Omega$ la solution du problème : 
 
 \begin{equation}\label{system_hyperbolique}
@@ -28,7 +28,7 @@ En multipliant par une fonction test $\phi \in \mathcal{D}(\R)$ \eqref{system_hy
 On obtient une nouvelle formulation du problème \eqref{system_hyperbolique} qui demande moins de régularité des solutions $\mathbf{u}$ : 
 
 \begin{equation}\label{Formulation_Faible}
-    \int_\mathbb{D} \partial_t \mathbf{u} \phi dx - \int_\mathbb{D} \mathbf{f}(\mathbf{u}) \partial_x \phi dx + \int_{\partial\mathbb{D}} \mathbf{f}(\mathbf{u}) \phi d\nu = 0 
+    \int_\mathbb{D} \partial_t \mathbf{u} \phi dx - \int_\mathbb{D} \mathbf{f}(\mathbf{u}) \partial_x \phi dx + \left[\mathbf{f}(\mathbf{u})\phi\right]^{x=\alpha}_{x=\beta} = 0 
 \end{equation}
 
 On dit que si $\mathbf{u}$ est solution de \eqref{Formulation_Faible}, elle est solution faible du problème \eqref{system_hyperbolique}. \\
@@ -45,6 +45,8 @@ Nous allons d'abord nous dôté d'un maillage de $\mathbb{D}$ :
 \label{maillage3}     & \bigcup_{i=0}^{N_x} \omega_i = \mathbb{D}
 \end{align}
 
+Et par simplicité, nous dirons que tout $\omega_i$ s'écrit comme $\omega_i = ]x_{i-\frac{1}{2}}, x_{i+\frac{1}{2}}[$
+
 On cherche à approcher $\mathbf{u}$ solution faible par $\mathbf{u_h}$ une fonction calculable.\\
 La particularité de la méthode DG est le choix de l'espace d'approximation dans lequel nous allons chercher $\mathbf{u_h}$ : 
 
@@ -52,21 +54,25 @@ La particularité de la méthode DG est le choix de l'espace d'approximation dan
     \mathbf{u_h} \in V_h = \left\{ \mathbf{u_h} \in (\mathcal{D'})^M \,|\, \mathbf{u_h} \in \mathbb{P}^k(\omega_i)^M \quad \forall x\in \omega_i \right\}
 \end{equation}
 
-Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i, \omega_v$.\\
-Si l'on essaye de substituer $\mathbf{u}$ par $\mathbf{u_h}$, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. \\
+Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i, \omega_v$. D'où le nom de schéma de Galerkin \textit{Discontinue} \\
+Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. \\
 De plus par la théorie des formulation variationnelles, il est raisonnable de regarder si l'équation est vrai pour des fonctions tests dans $V_h$.
 
 \begin{equation}\label{Formulation_Variationnelle}
-    \int_{\omega_i} \partial_t \mathbf{u_h} \phi dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \phi dx + \int_{\partial \omega_i} \mathbf{f}(\mathbf{u_h})\, n \, \phi d\nu = 0 \qquad \forall \phi \in \mathbb{P}^k
+    \int_{\omega_i} \partial_t \mathbf{u_h} \phi dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \phi dx + \left[ \mathbf{f}(\mathbf{u_h})\,\phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall \phi \in \mathbb{P}^k
 \end{equation}
 
-On remarque très vite un problème dans cette écriture : $\mathbf{u_h}$ est continue sur $\omega_i$, mais il n'est pas défini sur $\partial \omega_i$.
-Pour contourner ce problème, nous remplaçons ce terme par une approximation $ \sum_{\omega_v \in S_i} \int_{\partial \omega_i\cap \omega_v} \mathcal{F}(\mathbf{u_h}^i, \mathbf{u_h}^v,n_{c,v}) \,\phi  d\nu$.
-où $S_i$ est l'ensemble des voisins de la cellule $\omega_i$. 
-Il y a égalité entre l'approximation et le terme originale si $\mathbf{u_h}$ est continue sur $\partial \omega_i$ i.e $\mathbf{u_h}^i = \mathbf{u_h}^v$ à la frontière de $\omega_i$. \\
-On appelle ce terme le terme surfacique.
+On remarque très vite un problème dans cette écriture : $\mathbf{u_h}$ est continue sur $\omega_i$, mais il n'est pas défini en son bord : $ {x_{i\pm\frac{1}{2}}}$. 
+Pour contourner ce problème, nous remplaçons ce terme par une approximation 
+$$ \left[ \mathcal{F}\, \phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}
+=  \mathcal{F}(u_h^i(x_{i+\frac{1}{2}},t), u_h^{i+1}(x_{i+\frac{1}{2}},t)) \, \phi(x_{i+\frac{1}{2}}) - \mathcal{F}(u_h^{i-1}(x_{i-\frac{1}{2}},t), u_h^i(x_{i-\frac{1}{2}},t)) \, \phi(x_{i-\frac{1}{2}})    $$ 
+$\mathcal{F}$ est le flux numérique. Il est dit consistant si l'approximation est exacte dans le cas où $u_h$ est continue sur $\overline{w_i}$ : $\mathcal{F}(\mathbf{u},\mathbf{u}) =  \mathbf{f}(\mathbf{u})$.
 
-\paragraph{Astuces de calcul et matrice de masse \\}
+\noindent
+Dans notre cas, nous prendrons le flux numérique très utilisé de Lax-Friedrich : $ \mathcal{F}(\mathbf{u},\mathbf{v}) = \frac{1}{2}(\mathbf{f}(\mathbf{u}) + \mathbf{f}(\mathbf{v}) - \gamma(\mathbf{v}-\mathbf{u}) )  $
+où $\gamma = \max_{\mathbf{w} \in I(u,v)} (|\mathbf{F'(\mathbf{w})}| )$
+
+\paragraph{Ecriture dans une base polynomiale \\}
 
 Soit $\{\sigma_p\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k$, si l'équation \eqref{Formulation_Variationnelle} est vrai pour tout $\sigma_p$, alors elle l'est aussi pour tout $\phi \in \mathbb{P}^k$.\\
 Il est donc suffisant de regarder uniquement pour $\sigma_p$.\\ 
@@ -83,17 +89,21 @@ si l'on insère cette expression dans le premier terme de \eqref{Formulation_Var
 \end{equation}
 
 \noindent
-En regardant $ \{\underline{\mathbf{u}^i}_p(t) \}_p$ comme un vecteur : $\underline{U^i}$ et en posant $M^i_{p,q} = \int_{\omega_i} \sigma_p(x) \sigma_q(x) dx$, la matrice de masse. 
+En regardant chaque variable de $ \{\underline{\mathbf{u}^i}_p(t) \}_p$ comme un vecteur : $\underline{U^i}$ et en posant $M^i_{p,q} = \int_{\omega_i} \sigma_p(x) \sigma_q(x) dx$, la matrice de masse. 
 On peut voir le premier terme comme un calcul matrice vecteur : $(\partial_t \underline{U^i} M)_q$
 
-Le dernier terme, dit terme volumique, peut se calculer de deux manières : \\
+Le deuxième terme, dit terme volumique, peut se calculer de deux manières : \\
 -on utilise une méthode de quadrature.\\
 -on projète $f(\mathbf{u_h})$ sur $\mathbb{P}^k$, $F_h$, et l'on se réduit à un produit matrice vecteur avec cette fois la matrice de rigidité $K^i_{p,q} = \int_{\omega_i}  \sigma_p \sigma_q' dx $\\
-
-Le choix a été fait ici d'utiliser la seconde méthode. On se retrouve alors avec une équation dictant l'évolution des moments polynomiaux de la solutions : 
+Le choix a été fait ici d'utiliser la seconde méthode. 
+En effet, en plus d'être exacte dans les cas rare où le flux est linéraire. 
+Si la base polynomiale est nodale, alors on économise des évaluations de la solution car nous avons déjà évaluer la solutions aux interfaces pour calculer le flux numérique.
+On se retrouve alors avec une équation dictant l'évolution des moments polynomiaux de la solutions : 
 \begin{equation}
     \partial_t \underline{U^i}= M^{-1} (F_h K + \mathcal{S})
 \end{equation}
+
+où $ \mathcal{S} = \left\{ \left[ \mathcal{F}\, \sigma_q \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \right\}_q $ 
 
 \subsection{Discretisation en temps et schéma RK SSP}
 
@@ -119,12 +129,11 @@ Où $L$ est le nombre de pas intermédiaire pour compléter un pas entre $t_n$ e
 les paramètres $\alpha,\beta$ et $d$ vont définir la méthode et son ordre. \\
 
 Si l'on prend $L=1$, $\alpha_{1,0}=1$, $\beta_{1,0}=1$, $d_1=0$, on retrouve le schéma d'Euler explicite. 
-Ce schéma, au défaut d'être ordre élevée, possède beaucoup de propriétés très intéressante, comme la conservation de la positivité ou d'être stable entropique.
-
+Ce schéma, au défaut d'être ordre élevée, possède beaucoup de propriétés très intéressante, comme la conservation de la positivité et la stabilité entropique.
 Il est naturelle de souhaiter avoir les mêmes propriétés pour des schéma d'ordre plus élevée. 
 \paragraph{schéma RK SSP \\}
 
-les schéma Runge-Kutta Strong Stability Preserving vont nous permettre de récupérer toutes les propriétés du schéma Euler explicite en utilisant des combinaisons convexe de ce schéma : 
+les schéma Runge-Kutta \textit{Strong Stability Preserving} vont nous permettre de récupérer toutes les propriétés du schéma Euler explicite en utilisant des combinaisons convexe de ce schéma : 
 Soit un schéma RK SSP d'ordre 2 :
 
 \begin{align*}
@@ -133,6 +142,6 @@ Soit un schéma RK SSP d'ordre 2 :
     &u^{n+1} = \frac{u_0}{2} + \frac{1}{2} (u_1 + \Delta t_n L(u_1,t_n)) 
 \end{align*}
 
-Alors par convexité, il est clair que toutes propriétés vérifiées pour le schéma d'Euler explicite est aussi vérifiée par le schéma RK SSP.\\
-Ces schéma ont de plus la qualité de nécessité uniquement $u_{l-1}$ et $u_0$ pour calculer $u_{l}$, tout du moins pour les schéma RK SSP d'ordre inferieur ou égal à $3$.\\
+\noindent Alors par convexité, il est clair que toutes propriétés vérifiées pour le schéma d'Euler explicite est aussi vérifiée par le schéma RK SSP.
+Ces schéma ont de plus la qualité de nécessité uniquement $u_{l-1}$ et $u_0$ pour calculer $u_{l}$ pour les schéma RK SSP d'ordre inferieur ou égal à $3$.\\
 
