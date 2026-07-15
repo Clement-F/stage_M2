@@ -321,9 +321,9 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER :: i,j,k
-    REAL(prec), DIMENSION(nb_var) :: out, out_ex,u_
+    REAL(prec), DIMENSION(nb_var) :: out, out_ex
     REAL(prec) :: xi
-    REAL(prec) :: err1 , err2, errLi, pression_,p_max,p_min
+    REAL(prec) :: err1 , err2, errLi
     LOGICAL, optional :: switch
     LOGICAL :: force
     Character(len=63) :: save_format
@@ -332,7 +332,7 @@ CONTAINS
     ELSE; force = .FALSE.
     END IF
 
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec; p_max = 0._prec
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
     END IF
