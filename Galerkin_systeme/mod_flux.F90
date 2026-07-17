@@ -11,6 +11,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(in) :: u
     REAL(prec), DIMENSION(nb_var) :: flux
 
+    flux = eps0
     SELECT CASE (TRIM(flux_name))
     CASE("advection")
       flux = vit_adv*u
@@ -26,8 +27,8 @@ CONTAINS
       flux(2) = u(1)*u(2) + (u(1)**2)/2._prec
     CASE("Euler")
       flux(1) = u(2)
-      flux(2) = u(2)**2/u(1)  + pression(u)
-      flux(3) = (u(2)/u(1))*(u(3)+ pression(u)) 
+      IF(u(1) .GT. eps0 ) flux(2) = u(2)**2/u(1)  + pression(u)
+      IF(u(1) .GT. eps0 ) flux(3)  = (u(2)/u(1))*(u(3)+ pression(u)) 
     CASE DEFAULT
       WRITE(*,*) "flux non reconnu _flux",flux_name
       flux = 0._prec
@@ -87,10 +88,19 @@ CONTAINS
       gamma_calc = max(abs(u(1)), abs(v(1)))
     CASE("burgers_SCL") 
       gamma_calc = max(abs(u(1)), abs(v(1)))
+      
     CASE("Shallow") 
       gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))
+      IF(ISNAN(gamma_calc)) gamma_calc = eps0
+
     CASE("Euler") 
-      gamma_calc = max(abs(u(2)/u(1)) + sqrt(gamma_iso* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(gamma_iso* pression(v)/v(1)))
+      IF(u(1) .LT. eps0 .AND. v(1) .LT. eps0) THEN;
+        gamma_calc = eps0
+      ELSE 
+        gamma_calc = max(abs(u(2)/u(1)) + sqrt(gamma_iso* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(gamma_iso* pression(v)/v(1)))
+      END IF
+      IF(ISNAN(gamma_calc)) gamma_calc = eps0
+
     CASE("Buckley")
       u_step = (max(u(1),v(1))-min(u(1),v(1)))/10._prec
 

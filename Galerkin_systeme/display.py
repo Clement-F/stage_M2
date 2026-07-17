@@ -68,12 +68,14 @@ for k in range(0,sm,2):
         1+1
         #plt.plot([X_cell[i],X_cell[i]],[-1,2],linestyle='--', color='gray')
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
+    #plt.plot(X,U_t[k,:,0],'b-.')
     plt.plot(X,U_t[k,:,0],'b', marker='.')
     #plt.plot(X,-np.sin(X),'g')
     #plt.plot(X,U_t[0,:,0],'g-')
     #plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
+    print(sum(U_t[k,:,0]))
     if(nb_var>1):
         1+1
         #plt.plot(X,U_ex[k,:,1],'k-')
@@ -83,7 +85,7 @@ for k in range(0,sm,2):
     if(nb_var>2):
         1+1
         #plt.plot(X,U_ex[k,:,2],'k-')
-        plt.plot(X,U_t[k,:,2],'g-', marker='.')
+        #plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
     plt.plot(X,P_[k,:],'k-x')
@@ -91,14 +93,14 @@ for k in range(0,sm,2):
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
    # plt.ylim(m,M);plt.xlim(-0.,1.)
-    #plt.xlim(-3.8, 3.8)
+    #plt.ylim(-.2, 4.8)
     plt.show()    
-    #plt.savefig("save_"+str(T[k])+".png")    
-    plt.cla() 
+    # plt.savefig("save_"+str(T[k])+".png")    
+    # plt.cla() 
     
-plt.plot(X,U_t[k,:,0],'b', marker='.')
-#plt.ylim(m,M);plt.xlim(-0.,1.)
-plt.savefig("save_"+str(T[k])+".png")    
+# plt.plot(X,U_t[k,:,0],'b', marker='.')
+# plt.ylim(3.,4.8);plt.xlim(0.5,2.3)
+# plt.savefig("save_"+str(T[k])+"zoom.png")    
     
 
 
@@ -154,12 +156,12 @@ if(False):
     for i in range(0,5000):
         pre_ex[i] = lines[i][17:32]
         
-    # plt.plot(X,U_t[k,:,0],'b', marker='.')
-    # plt.plot(X_ex,rho_ex,'b')
+    plt.plot(X,U_t[k,:,0],'b', marker='.')
+    plt.plot(X_ex,rho_ex,'b')
     plt.plot(Xvel_ex,vel_ex,'r')
     plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r', marker='.')
-    #plt.plot(X_ex,pre_ex,'k')
-    #plt.plot(X,P_[k,:],'k', marker='.')
+    plt.plot(X_ex,pre_ex,'k')
+    plt.plot(X,P_[k,:],'k', marker='.')
     
     plt.savefig("endfig_save.png")    
 

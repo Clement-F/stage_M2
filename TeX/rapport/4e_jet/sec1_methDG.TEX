@@ -2,7 +2,7 @@
 \section{Méthode Galerkin Discontinue (DG)}
 \subsection{Formulation faible d'un problème hyperbolique}
 
-Nous nous restreinderons ici aux problèmes hyperboliques 1D. Pour un développement 2D, voir {\color{red}[papier 2024]}. 
+Nous nous restreindrons ici aux problèmes hyperboliques 1D. Pour un développement 2D, voir {\color{red}[papier 2024]}. 
 
 \paragraph{Problème hyperbolique \\}
 Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D} =]\alpha,\beta[ \subset \R$, le domaine de calcul et $\mathbf{f} : \Omega \mapsto \R^M$ une fonction régulière. 
@@ -18,8 +18,8 @@ On pose
 \end{equation*}
 
 On dit que le système \eqref{system_hyperbolique} est hyperbolique si et seulement si : 
-$A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres bien ordonée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \lambda_m(\mathbf{u})$.
-et leurs vecteurs propres associée sont linéairement indépendant.\\
+$A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres bien ordonnée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \lambda_m(\mathbf{u})$.
+Et leurs vecteurs propres associés sont linéairement indépendants.\\
 On note que si l'inégalité sur les valeurs propres est stricte, alors le système \eqref{system_hyperbolique} est strictement hyperbolique.\\
 
 \paragraph{solution faible \\}
@@ -47,7 +47,7 @@ Nous allons d'abord nous dôté d'un maillage de $\mathbb{D}$ :
 
 Et par simplicité, nous dirons que tout $\omega_i$ s'écrit comme $\omega_i = ]x_{i-\frac{1}{2}}, x_{i+\frac{1}{2}}[$
 
-On cherche à approcher $\mathbf{u}$ solution faible par $\mathbf{u_h}$ une fonction calculable.\\
+On cherche à approcher $\mathbf{u}$ comme solution faible par $\mathbf{u_h}$ une fonction calculable.\\
 La particularité de la méthode DG est le choix de l'espace d'approximation dans lequel nous allons chercher $\mathbf{u_h}$ : 
 
 \begin{equation}
@@ -56,7 +56,7 @@ La particularité de la méthode DG est le choix de l'espace d'approximation dan
 
 Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i, \omega_v$. D'où le nom de schéma de Galerkin \textit{Discontinue} \\
 Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. \\
-De plus par la théorie des formulation variationnelles, il est raisonnable de regarder si l'équation est vrai pour des fonctions tests dans $V_h$.
+De plus par la théorie des formulations variationnelles, il est raisonnable de regarder si l'équation est vraie pour des fonctions tests dans $V_h$.
 
 \begin{equation}\label{Formulation_Variationnelle}
     \int_{\omega_i} \partial_t \mathbf{u_h} \phi dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \phi dx + \left[ \mathbf{f}(\mathbf{u_h})\,\phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall \phi \in \mathbb{P}^k
@@ -74,7 +74,7 @@ où $\gamma = \max_{\mathbf{w} \in I(u,v)} (|\mathbf{F'(\mathbf{w})}| )$
 
 \paragraph{Ecriture dans une base polynomiale \\}
 
-Soit $\{\sigma_p\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k$, si l'équation \eqref{Formulation_Variationnelle} est vrai pour tout $\sigma_p$, alors elle l'est aussi pour tout $\phi \in \mathbb{P}^k$.\\
+Soit $\{\sigma_p\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k$, si l'équation \eqref{Formulation_Variationnelle} est vraie pour tout $\sigma_p$, alors elle l'est aussi pour tout $\phi \in \mathbb{P}^k$.\\
 Il est donc suffisant de regarder uniquement pour $\sigma_p$.\\ 
 De la même manière, il est possible de regarder l'équation sur chaque variable de manière indépendante.
 En regardant le premier terme, et en se rappelant que $\mathbf{u_h} \in \mathbb{P}^k$ sur $\omega_i$ i.e 
@@ -98,7 +98,7 @@ Le deuxième terme, dit terme volumique, peut se calculer de deux manières : \\
 Le choix a été fait ici d'utiliser la seconde méthode. 
 En effet, en plus d'être exacte dans les cas rare où le flux est linéraire. 
 Si la base polynomiale est nodale, alors on économise des évaluations de la solution car nous avons déjà évaluer la solutions aux interfaces pour calculer le flux numérique.
-On se retrouve alors avec une équation dictant l'évolution des moments polynomiaux de la solutions : 
+On se retrouve alors avec une équation dictant l'évolution des moments polynomiaux de la solution : 
 \begin{equation}
     \partial_t \underline{U^i}= M^{-1} (F_h K + \mathcal{S})
 \end{equation}
@@ -112,8 +112,8 @@ Soit l'équation d'évolution
 \begin{equation}
     \left\{
     \begin{aligned}
-    \frac{du}{dt} = L(u,t)
-    u(0) = v
+    &\frac{du}{dt} = L(u,t) \\
+    &u(0) = v
     \end{aligned}
     \right.
 \end{equation}
@@ -128,12 +128,10 @@ $u^0= v$ et l'on passe de $u^n$ à $u^{n+1}$ en suivant ces règles :
 Où $L$ est le nombre de pas intermédiaire pour compléter un pas entre $t_n$ et $t_{n+1}$ et $\Delta t_n = t_{n+1} - t_n$.
 les paramètres $\alpha,\beta$ et $d$ vont définir la méthode et son ordre. \\
 
-Si l'on prend $L=1$, $\alpha_{1,0}=1$, $\beta_{1,0}=1$, $d_1=0$, on retrouve le schéma d'Euler explicite. 
-Ce schéma, au défaut d'être ordre élevée, possède beaucoup de propriétés très intéressante, comme la conservation de la positivité et la stabilité entropique.
-Il est naturelle de souhaiter avoir les mêmes propriétés pour des schéma d'ordre plus élevée. 
+Si l'on prend $L=1$, $\alpha_{1,0}=1$, $\beta_{1,0}=1$, $d_1=0$,on retrouve le schéma d’Euler explicite. Ce schéma, au défaut d’être ordre élevé, possède beaucoup de propriétés très intéressantes, comme la conservation de la positivité et la stabilité entropique. Il est naturel de souhaiter avoir les mêmes propriétés pour des schémas d’ordre plus élevé.
 \paragraph{schéma RK SSP \\}
 
-les schéma Runge-Kutta \textit{Strong Stability Preserving} vont nous permettre de récupérer toutes les propriétés du schéma Euler explicite en utilisant des combinaisons convexe de ce schéma : 
+les schémas Runge-Kutta \textit{Strong Stability Preserving} vont nous permettre de récupérer toutes les propriétés du schéma Euler explicite en utilisant des combinaisons convexes de ce schéma : 
 Soit un schéma RK SSP d'ordre 2 :
 
 \begin{align*}
@@ -143,5 +141,4 @@ Soit un schéma RK SSP d'ordre 2 :
 \end{align*}
 
 \noindent Alors par convexité, il est clair que toutes propriétés vérifiées pour le schéma d'Euler explicite est aussi vérifiée par le schéma RK SSP.
-Ces schéma ont de plus la qualité de nécessité uniquement $u_{l-1}$ et $u_0$ pour calculer $u_{l}$ pour les schéma RK SSP d'ordre inferieur ou égal à $3$.\\
-
+Ces schémas ont de plus la qualité de nécessité uniquement $u_{l-1}$ et $u_0$ pour calculer $u_{l}$ pour les schémas RK SSP d'ordre inférieur ou égal à $3$.\\

@@ -8,7 +8,7 @@ orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
 nx = nb_cell * nb_sub
-
+    
 sm = int(lines[5][5:11]) -1
 
 with open('mesh_out.txt') as f:
