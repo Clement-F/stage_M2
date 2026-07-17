@@ -29,6 +29,8 @@ PROGRAM MAIN
         write(unit= numfile_data, fmt='("blablab = 00000000 ")') 
     END IF
 
+    close(unit=numfile_data)
+
     CALL writout
 
 
@@ -47,7 +49,9 @@ PROGRAM MAIN
         
     CALL writout 
 
+    open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='old',  position='append')
     write(unit= numfile_data, fmt='("nt = ",i5)') n_imp
+    
     DO i=1,n_imp
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
@@ -56,15 +60,17 @@ PROGRAM MAIN
     close(unit=numfile_data)
     close(unit=numfile_meshout)
 
-    open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='unknown', position='append')
-    write(unit=numfile_conv, fmt='("=====================")') 
-    write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) size_base-1, order_t
-    write(unit=numfile_conv, fmt='("for nx = ",i5," we have error :")' ) nb_cell
-    write(unit=numfile_conv, fmt='("err_L1 :", e20.12 )') err_L1
-    write(unit=numfile_conv, fmt='("err_L2 :", e20.12 )') err_L2
-    write(unit=numfile_conv, fmt='("err_Li :", e20.12 )') err_Li
-    write(unit=numfile_conv, fmt='("=====================")') 
-    close(unit=numfile_conv)
+    IF(convergence) THEN
+        open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='unknown', position='append')
+        write(unit=numfile_conv, fmt='("=====================")') 
+        write(unit=numfile_conv, fmt='("for elements P",i1," and RK SSP of order ",i1)' ) size_base-1, order_t
+        write(unit=numfile_conv, fmt='("for nx = ",i5," we have error :")' ) nb_cell
+        write(unit=numfile_conv, fmt='("err_L1 :", e20.12 )') err_L1
+        write(unit=numfile_conv, fmt='("err_L2 :", e20.12 )') err_L2
+        write(unit=numfile_conv, fmt='("err_Li :", e20.12 )') err_Li
+        write(unit=numfile_conv, fmt='("=====================")') 
+        close(unit=numfile_conv)
+    END IF
 
     print *,"closed"
     print *, counter1, counter2

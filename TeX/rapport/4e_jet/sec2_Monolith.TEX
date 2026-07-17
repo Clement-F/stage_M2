@@ -1,7 +1,7 @@
 
 \section{Schéma Monolithique (DG/FV)}
-La méthode se repose sur deux détails clées : une réecriture du schéma DG utilisant des sous-mailles et 
-un flux hybride entre le flux DG du schéma réecrit et un flux Volume Fini entre sous-mailles.
+La méthode se repose sur deux détails clés : une réécriture du schéma DG utilisant des sous-mailles et 
+un flux hybride entre le flux DG du schéma réécrit et un flux Volume Fini entre sous-mailles.
 \subsection{Réecriture du schéma DG}
 \paragraph{sous-maillage \\}
 
@@ -9,10 +9,10 @@ On dote chaque maille $\omega_i$ d'un sous-maillage : $\{S_m^i\}_m = ]\tilde{x}^
 On cherchera à passer les degrées de libertés des polynomes de $ \sigma \in\mathbb{P}^k$, des moments sur la base polynomiale $ \left\{ \underline{\sigma}_p \right\}_p$ aux moyennes de ces polynomes sur le sous-mailles $\{S_m^i \}$ : $ \left\{\overline{\sigma}^m \right\}_m$ \\
 \noindent Soit la matrice $$\mathcal{P}_{m,p} = \frac{1}{|S_m^i|} \int_{S_m^i} \sigma_p(x) dx$$ 
 On remarque que pour que le passage des moments polynomiaux $\left\{ \underline{\sigma}_p \right\}_p$ aux sous-volumes finis soit injectif, il nous faut : $N_s \geq N_k$. 
-De manière général, on dit que le sous-maillage est admissible si et seulement si la matrice $\mathcal{P}^t\,\mathcal{P}$ est inversible.
+De manière générale, on dit que le sous-maillage est admissible si et seulement si la matrice $\mathcal{P}^t\,\mathcal{P}$ est inversible.
 
 \paragraph{Remarque \\}
-On note que pour avoir une équivalence au sens le plus stricte possible, il nous faut $N_s = N_k$. 
+On note que pour avoir une équivalence au sens le plus strict possible, il nous faut $N_s = N_k$. 
 Dans le cas échéant ($N_s \geq N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  qui nous donnera les moments polynomiaux au sens des moindres carrés.
 \newline
 
@@ -33,20 +33,20 @@ Alors par le biais d'une intégration par partie, on obtient la forme forte des 
 $$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx = \int_{\omega_i} \partial_x \mathbf{f}_h^i  \sigma dx 
 - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
 
-Comme cette équation est vrai pour tout polynome de $\mathbb{P}^k(\omega_i)$, il est en particulier vrai pour $\phi_m$. Cela nous ammène presque à un flux ne dépendant que de $S_m^i$ : 
+Comme cette équation est vrai pour tout polynôme de $\mathbb{P}^k(\omega_i)$, il est en particulier vrai pour $\phi_m$. Cela nous amène presque à un flux ne dépendant que de $S_m^i$ : 
 \begin{equation}
     \int_{S_m^i} \partial_t \mathbf{u_h} dx = - \left(\int_{S_m^i}  \partial_x \mathbf{f}_h^i dx - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\right) \qquad \forall m\in \{ 1, \dots, N_s\}
 \end{equation}
 Il est cependant possible d'obtenir un schéma volume fini sur les $\{\overline{u_h}^m\}$ en fabriquant un flux avec pour unique but de ressembler à un flux volume fini : \\
-Soit $\hat{F}^i_{m + 1/2}$ ces flux reconstruits posé telle que : 
+Soit $\widehat{F^i}_{m+1/2}$ ces flux reconstruits posé telle que : 
 
 \begin{align}
-&\hat{F}^i_{m+1/2} - \hat{F}^i_{m-1/2} =  -  \left[\mathbf{f}_h^i\right]_{\tilde{x}^i_{m-1/2}}^{\tilde{x}^i_{m+1/2}}  - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall m\in \{ 1, \dots, N_s\} \\
-& \text{où l'on impose : } \hat{F}^i_{1/2} = \mathcal{F}_{i-1/2} \qquad \hat{F}^i_{ N_s + 1/2} = \mathcal{F}_{i+1/2}
+&\widehat{F^i}_{m+1/2} - \widehat{F^i}_{m-1/2} =  -  \left[\mathbf{f}_h^i\right]_{\tilde{x}^i_{m-1/2}}^{\tilde{x}^i_{m+1/2}}  - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall m\in \{ 1, \dots, N_s\} \\
+& \text{où l'on impose : } \widehat{F^i}_{1/2} = \mathcal{F}_{i-1/2} \qquad \widehat{F^i}_{ N_s + 1/2} = \mathcal{F}_{i+1/2}
 \end{align}
-Il est possible d'obtenir une forme close de $\hat{F}^i_{m+1/2}$: 
+Il est possible d'obtenir une forme close de $\widehat{F^i}_{m+1/2}$: 
 \begin{align}
-    &\hat{F}^i_{m+1/2} = \mathbf{f}_h^i(\tilde{x}^i_{m+1/2}) 
+    &\widehat{F^i}_{m+1/2} = \mathbf{f}_h^i(\tilde{x}^i_{m+1/2}) 
     -C^{i-1/2}_{m+1/2} ( \mathbf{f}_h^i(x_{i-1/2}) - \mathcal{F}_{i-1/2}) 
     -C^{i+1/2}_{m+1/2} ( \mathbf{f}_h^i(x_{i+1/2}) - \mathcal{F}_{i+1/2}) \\
     & \text{où }  C^{i-1/2}_{m+1/2} = (1- \sum_{p=1}^{m}\phi_p(x_{i-1/2})) \, , \qquad
@@ -54,16 +54,81 @@ Il est possible d'obtenir une forme close de $\hat{F}^i_{m+1/2}$:
 \end{align}
 
 Tout ceci nous permet d'écrire le schéma DG sous une forme Volumes Finis : 
-
+ 
 \begin{equation}\label{DG_as_FV}
-    \partial_t \overline{\mathbf{u_h}}^m = \frac{1}{|S_m^i|}(\hat{F}^i_{m+1/2} - \hat{F}^i_{m-1/2})
+    \partial_t \overline{\mathbf{u}_m}^i = -\frac{1}{|S_m^i|}(\widehat{F^i}_{m+1/2} - \widehat{F^i}_{m-1/2})
 \end{equation}
 
 \paragraph{Remarque \\}
 \noindent Même si la forme de \eqref{DG_as_FV} laisse à penser que l'évolution de $\overline{\mathbf{u_h}}^m$ 
 ne dépend uniquement des sous-cellules voisines à $S_m^i$, 
-il faut se rappeler que $\hat{F}^i_{m+1/2}$ dépend non seulement des sous-cellules voisines, 
-mais aussi des cellules voisines $\omega_{i\pm1}$ par le biais du flux numérique évalué aux l'interfaces des cellules $x_{i\pm1/2}$
- 
+il faut se rappeler que $\widehat{F^i}_{m+1/2}$ dépend non seulement des sous-cellules voisines, 
+mais aussi des cellules voisines $\omega_{i\pm1}$ par le biais du flux numérique évalué aux interfaces des cellules $x_{i\pm1/2}$ \\
+
+Les flux $\widehat{F^i}_{m+1/2}$ pouvant se trouver entre deux sous-cellules appartenant à la même maille ou de mailles différentes, 
+Par soucis de claireté, nous écrirons $\widehat{F_{mp}}$ le flux allant de la sous-cellule $S_m^i$ à la sous-cellule $S_p^j$, $j\in \{i-1,i,i+1\}$ 
+
 \subsection{Flux hybride (DG/FV)}
-\subsection{choix du paramètre d'hybridation}
+
+Maintenant que nous établie un schéma agissant sur les sous valeurs moyennes, 
+équivalent au schéma DG agissant sur les moments polynomiaux. 
+Il devient alors possible de combiner les flux DG $\widehat{F_{mp}}$ 
+avec des flux proprement volumes finis défini sur les sous-mailles $F^{\text{FV}}_{mp}$. 
+
+\begin{equation} 
+\begin{aligned}
+    \widetilde{F_{mp}}  &= F^{\text{FV}}_{mp} + \theta_{mp}\,\, (\widehat{F_{mp}} - F^{\text{FV}}_{mp})\\
+                        &= F^{\text{FV}}_{mp} + \theta_{mp}\,\, \Delta F_{mp}
+\end{aligned}
+\end{equation}
+
+Le schéma dépend alors du choix de $\theta_{mp}$. 
+Si l'on pose $\theta_{mp} = 1$, alors nous obtiendrons un schéma DG qui pourra être d'ordre élevée.
+Si l'on pose $\theta_{mp} = 0$, alors nous obtiendrons un schéma Volumes Finis qui sera entropique et suivra le principe du maximum local. \\
+Avant de s'attarder sur le choix des $\theta_mp$, regardons un minimum le schéma que nous avons obtenus : 
+
+\begin{equation}\label{DG_as_FV}
+    \partial_t \overline{\mathbf{u}_m}^i =  - \frac{1}{|S_m^i|} \sum_{S_p^j \in \mathcal{V}_m^i} \widetilde{F_{mp}}
+\end{equation}
+
+En se souvenant que toutes propriétés d'un schéma \textit{RK-SSP} d'ordre élevée est dérivée des propriétés du schéma d'Euler explicite, 
+il est possible de vois que $\overline{\mathbf{u}_m}^{i,n+1}$ peut se voir comme une combinaison convexe entre $\overline{\mathbf{u}_m}^{i,n}$ et ce que l'on définira comme des états de Riemann intermédiaires hybrides : 
+$ \widetilde{\mathbf{u}}_{mp}^- = \overline{\mathbf{u}_m}^{i,n} - \frac{\widetilde{F_{mp}} -  F_h^i(\overline{\mathbf{u}_m}^{i,n})\cdot n_{mp} }{\gamma_{mp}}$
+
+\begin{align*}
+&\overline{\mathbf{u}_m}^{i,n+1} = \overline{\mathbf{u}_m}^{i,n} - \frac{\Delta t_n}{|S_m^i|} \sum_{S_p^j \in \mathcal{V}_m^i} \widetilde{F_{mp}} 
+\pm \frac{\Delta t_n}{|S_m^i|} \sum_{S_p^j \in \mathcal{V}_m^i} \gamma_{mp}\overline{\mathbf{u}_m}^{i,n} \pm \frac{\Delta t_n}{|S_m^i|} F_h^i(\overline{\mathbf{u}_m}^{i,n}) \\
+&\overline{\mathbf{u}_m}^{i,n+1}= \left( 1-  \frac{\Delta t_n}{|S_m^i|} \sum_{S_p^j \in \mathcal{V}_m^i} \gamma_{mp}\right) \overline{\mathbf{u}_m}^{i,n} 
+                                + \frac{\Delta t_n}{|S_m^i|} \sum_{S_p^j \in \mathcal{V}_m^i} \gamma_{mp} \left( \overline{\mathbf{u}_m}^{i,n} - \frac{\widetilde{F_{mp}} -  F_h^i(\overline{\mathbf{u}_m}^{i,n})\cdot n_{mp} }{\gamma_{mp}} \right)
+\end{align*}
+On note ici que la combinaison est convexe seulement si $ \frac{\Delta t_n}{|S_m^i|} \sum_{S_p^j \in \mathcal{V}_m^i} \gamma_{mp} \leq 1$, ce qui nous donne une condition CFL : 
+
+\begin{equation}
+    \Delta t \leq \frac{|S_m^i|}{\sum_{S_p^j \in \mathcal{V}_m^i} \gamma_{mp}}
+\end{equation} 
+Elle sera par ailleurs la seul condition CFL à prendre en compte car plus stricte que la condition CFL du schéma DG.\\ 
+
+Il sera souvent plus simple d'étudier les combinaisons convexes de $\overline{\mathbf{u}_m}^{i,n+1}$ en découpant $ \widetilde{\mathbf{u}}_{mp}^-$ comme : 
+\begin{equation}
+\begin{aligned}
+    \widetilde{\mathbf{u}}_{mp}^- =& \left( \frac{\overline{\mathbf{u}_m}^{i,n}+ \overline{\mathbf{u}_p}^{j,n}}{2} - \frac{(F_h^i(\overline{\mathbf{u}_p}^{j,n}) - F_h^i(\overline{\mathbf{u}_m}^{i,n})   )\cdot n_{mp}}{2 \gamma_{mp}}   \right) - \theta_{mp} \frac{\Delta F_{mp}}{\gamma_{mp}} \\
+    =& \mathbf{u}_{mp}^{*,FV} - \theta_{mp} \frac{\Delta F_{mp}}{\gamma_{mp}}
+\end{aligned}    
+\end{equation}
+
+On note au passage ces égalité de symmétrie/ d'antisymmétrie : \\
+$n_{mp}= -n_{pm}$, et donc : $F^{\text{FV}}_{mp} = - F^{\text{FV}}_{pm}$, $\widehat{F_{mp}} = -\widehat{F_{pm}}$ et $\widetilde{F_{mp}} = -\widetilde{F_{pm}}$\\
+tandis que l'on pose $\theta_{pm} = \theta_{mp}$, ce qui nous donne : $\widetilde{\mathbf{u}}_{pm}^- = \widetilde{\mathbf{u}}_{mp}^+ = \mathbf{u}_{mp}^{*,FV} + \theta_{mp} \frac{\Delta F_{mp}}{\gamma_{mp}}$, car $ \mathbf{u}_{mp}^{*,FV} = \mathbf{u}_{pm}^{*,FV}$ \\
+
+Tout ceci nous ammène donc à la remarque suivante : si l'on souhaite que la solution se trouve dans un ensemble convexe $\Omega$, tant que $\overline{\mathbf{U}}^{n} \in \Omega$, 
+il est toujours possible de trouver $\theta_{mp}$ pour que $\overline{\mathbf{U}}^{n+1} \in \Omega$ car $\mathbf{u}_{mp}^{*,FV}$ est combinaison convexe de $ \overline{\mathbf{u}}_{mp}^{n}$ {\color{red} Voir annexe}.
+
+\subsection{choix du paramètre d'hybridation {\color{red} nom à changer}}
+
+\paragraph{Global Maximal Principle (GMP)}
+La première propriété que nous allons étudier et qui nous servira d'exemple pour la suite est comment imposer un principe du maximum global dans le cas scalaire $\Omega \subset \R$, $M=1$ : 
+$$ \alpha \leq \overline{U}^{0} \leq \beta \implies \alpha \leq \overline{U}^{n} \leq \beta \quad \forall n$$
+
+\paragraph{Local  Maximal Principle (LMP)}
+\paragraph{positivité d'un schéma sur le problème de la dynamique des gaz}
+\paragraph{Détections d'extrema locaux}

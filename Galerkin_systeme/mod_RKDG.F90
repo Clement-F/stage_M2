@@ -64,6 +64,7 @@ CONTAINS
     IF(subcell_use) THEN
       
     DO ni = 1,nb_cell; DO ii = 1,nb_var
+      ! F(uh(x)) .ne. Fh(x)
       fh_L = eval_poly(-1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
       fh_R = eval_poly( 1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
 
@@ -71,8 +72,8 @@ CONTAINS
         x_s = x_subcell(jj)
 
         flux_h(ni)%flux_subcells(jj,ii) = eval_poly(x_s,ni=ni, base_poly=flux_h(ni)%flux_DG(:,ii),LOC= LRef) &
-                                  & - C_m(jj)*(fh_L-g(ni  ,ii)) &
-                                  & - C_p(jj)*(fh_R-g(ni+1,ii))
+                                        & - C_m(jj)*(fh_L-g(ni  ,ii)) &
+                                        & - C_p(jj)*(fh_R-g(ni+1,ii))
                               
       END DO
 
@@ -215,8 +216,9 @@ CONTAINS
         DO jj=1,nb_nodes
           sol_step(ni)%val_quad(jj,kk)  = eval_step(x_quad(jj),nvar=kk,ni=ni, kk=jj, LOC= LRef)
         END DO
+        
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,kk)      = sol_step(ni)%val_quad(1,kk)
+          sol_step(ni)%inter(1,kk)      = sol_step(ni)%val_quad(1       ,kk)
           sol_step(ni)%inter(2,kk)      = sol_step(ni)%val_quad(nb_nodes,kk)
         ELSE 
           sol_step(ni)%inter(1,kk)      = eval_step(x_cell(ni),   nvar=kk,ni=ni,LOC= LLoc)
@@ -295,16 +297,14 @@ CONTAINS
     END IF
 
     if(.not. monolithique) dt_loc =  2._prec
-    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),tmax-time, dt_loc)
+    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),Time_stemp(n_imp+1)-time, dt_loc)
 
     IF((order_x .GT. order_t).AND. convergence ) THEN
-      IF(      monolithique) dt = min(tmax-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)), dt_loc**(Real(order_x,prec)/Real(order_t,prec)))
-      IF(.not. monolithique) dt = min(tmax-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)))
+      IF(      monolithique) dt = min(Time_stemp(n_imp+1)-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)), dt_loc**(Real(order_x,prec)/Real(order_t,prec)))
+      IF(.not. monolithique) dt = min(Time_stemp(n_imp+1)-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)))
     END IF 
 
-
-
-    IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.tmax)) THEN
+    IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.Time_stemp(n_imp+1))) THEN
       write(*, fmt ='("dt trop petit : dt =",e16.6, 1x,",max dflux =",e16.6 )') dt, max_dflux
       CALL Emergency_stop
     END IF
@@ -334,12 +334,12 @@ CONTAINS
 
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
     IF(modulo(n_time,500) == 0)  THEN
-      write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
+      write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
 
     IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0) .OR. force )  THEN
       IF(mesh_out)CALL Out_The_Mesh(time)
-      write(*,fmt='("---------------",i7,2x,f10.6,2x,e16.6, "--------------")') n_time, time, dt
+      write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
       DO i=1,nb_cell
         IF(subcell_use .AND.(.not. convergence) ) THEN
 
@@ -348,9 +348,6 @@ CONTAINS
           DO j=1,nb_subcell; 
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
-            ! out = DOT_PRODUCT(sol_step(i)%deriv(:,1), Projection_VF(j,:))/( cell_size(i)*0.5_prec)
-            ! out =  (4._prec/(subcell_size(j) * cell_size(i)**2))*&
-            ! &(eval_poly(1._prec,j,sol_step(i)%deriv(:,1), LOC=LSub)  - eval_poly(-1._prec,j,sol_step(i)%deriv(:,1), LOC=LSub))
             IF(TRIM(flux_name) == "advection") THEN       
               DO k=1,nb_var        
               out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)
@@ -423,10 +420,17 @@ CONTAINS
 
 
       err2 = sqrt(err2)
+      IF(error_calc) THEN 
       write(*, fmt ='("err L1 = ", e20.12)')  err1
       write(*, fmt ='("err L2 = ", e20.12)')  err2
       write(*, fmt ='("err Li = ", e20.12)')  errLi
+      END IF
 
+      IF(monolithique) THEN
+      write(*, fmt ='("avg theta = ", f12.6)')  Sum(theta_(:,:))/REAL((nb_cell)*(nb_subcell+1),prec)
+      write(*, fmt ='("max theta = ", f12.6)')  maxval(theta_(:,:))
+      write(*, fmt ='("min theta = ", f12.6)')  minval(theta_(:,:))
+      END IF
       err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
 
       n_imp = n_imp +1
@@ -525,12 +529,15 @@ CONTAINS
 
     CALL writout(.TRUE.)
 
+    open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='old',  position='append')
     write(unit= numfile_data, fmt='("nt = ",i5)') n_imp
     DO i=1,n_imp
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 
     close(unit=numfile_sol);    close(unit=numfile_solex)
+
+    
     close(unit=numfile_data)
 
     open(unit=numfile_conv,  file=nomfile_conv, form ='formatted', status ='old', position='append')

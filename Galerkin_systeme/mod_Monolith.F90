@@ -55,7 +55,6 @@ CONTAINS
 
     REAL(prec) :: A,B,M
     INTEGER :: ii
-    INTEGER, DIMENSION(2) :: voi_L, voi_R
     LOGICAL :: extrema
 
     REAL(prec) :: theta

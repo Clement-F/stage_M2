@@ -102,6 +102,47 @@ CONTAINS
 
     END FUNCTION smooth_isentropique
 
+
+    FUNCTION acoustic_wave(x,ni,nvar) result(res)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN):: x
+        INTEGER, INTENT(IN) :: ni,nvar
+        REAL(prec) :: res 
+
+        res = eps0
+        IF(x .LT. -4._prec) THEN
+            IF(nvar==1) res = 3.857143_prec
+            IF(nvar==2) res = 2.629369_prec *  3.857143_prec
+            IF(nvar==3) res = 10.333333_prec/(gamma_iso-1._prec)  + 0.5_prec* (2.629369_prec)**2 *  3.857143_prec
+        ELSE
+            
+            IF(nvar==1) res = 1._prec + 0.2_prec* sin(5._prec*x)
+            IF(nvar==2) res = eps0
+            IF(nvar==3) res = 1._prec/(gamma_iso-1._prec)
+        END IF
+
+    END FUNCTION acoustic_wave
+
+
+    FUNCTION Blast(x,ni,nvar) result(res)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN):: x
+        INTEGER, INTENT(IN) :: ni,nvar
+        REAL(prec) :: res 
+
+        res = eps0
+
+        IF(nvar==1) res = 1._prec
+        IF(nvar==2) res = eps0
+        IF(nvar.ne.3) return
+        
+        IF(x .LT. 0.1_prec)                      res = Real(1D3 ,prec)/(gamma_iso-1._prec) 
+        IF(0.1_prec .LT. x .AND. x .LT. 0.9_prec)res = Real(1D-2,prec)/(gamma_iso-1._prec)  
+        IF(0.9_prec .LT. x .AND. x .LT. 1._prec) res = Real(1D2 ,prec)/(gamma_iso-1._prec) 
+
+    END FUNCTION Blast
+
+
     FUNCTION Q_init(x,ni,nvar)
         IMPLICIT NONE
         REAL(prec), INTENT(IN) :: x
@@ -135,6 +176,11 @@ CONTAINS
 
         CASE("isentropique")
             Q_init = smooth_isentropique(x,ni,nvar)
+
+        CASE("acoustic_wave")
+            Q_init = acoustic_wave(x,ni,nvar)
+        CASE("Blast")
+            Q_init = Blast(x,ni,nvar)
 
         CASE DEFAULT
         WRITE(*,*) "Sol initiale non reconnue"

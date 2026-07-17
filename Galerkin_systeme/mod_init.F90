@@ -47,7 +47,6 @@ CONTAINS
         Case("Euler")
             nb_var=3;
             gamma_iso = 1.4_prec
-            IF((sol_ini_name) == "Sod") gamma_iso = 1.4_prec
             IF((sol_ini_name) == "isentropique") gamma_iso = 3._prec
 
         CASE DEFAULT
@@ -76,7 +75,13 @@ CONTAINS
         n_imp = 0
         t_imp = tmax/Real(print_rule,prec)
 
+        DO i=1,print_rule
+            Time_stemp(i+1) = REAL(i,prec)*t_imp
+        END DO
+        ! print *, Time_stemp
+
         dt = 10._prec**(-8)
+        theta_(:,:) = 1._prec
 
 
 
@@ -160,8 +165,11 @@ CONTAINS
             min_glob = -1._prec; max_glob = 0.5_prec
         CASE("Sod")
             min_glob = eps0; max_glob = 1000._prec
-            !min_glob = 0.125_prec; max_glob = 1._prec
         CASE("isentropique")
+            min_glob = eps0; max_glob = 1000._prec
+        CASE("acoustic_wave")
+            min_glob = eps0; max_glob = 1000._prec
+        CASE("Blast")
             min_glob = eps0; max_glob = 1000._prec
         CASE DEFAULT
         WRITE(*,*) " solution non reconnue "
