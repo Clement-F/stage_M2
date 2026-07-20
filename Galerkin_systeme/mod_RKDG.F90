@@ -13,7 +13,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: ug,ud,u_temp, DF
 
     REAL(prec) :: x_s
-    REAL(prec) :: fh_L, fh_R
+    REAL(prec) :: fh_L, fh_R, gamma_mp
     INTEGER, DIMENSION(2) :: voi_L,voi_R
 
     DO ni = 1,nb_cell+1
@@ -84,19 +84,21 @@ CONTAINS
     IF(monolithique) THEN 
     IF(smooth_extrema .GT. 0) CALL extrema_detect
 
-    DO ni=1,nb_cell; DO jj=1,nb_subcell+1
-          voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
-          voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+    CALL Construct_thetaMesh
 
-          IF(flux_num == 0) flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
-          IF(flux_num == 1) flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_calc(ug,ud)*(ud-ug))  * 0.5_prec
+    DO ni=1,nb_cell; DO jj=1,nb_subcell+1                    
 
-          DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
-          If(ISNAN(DF(1)))  DF = 0._prec
+      voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
+      voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
 
-          theta_(ni,jj) = theta(voi_L,voi_R, DF)
-                    
-          flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_(ni,jj)*DF
+      IF(flux_num == 0) gamma_mp = max_dflux
+      IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
+
+      flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_mp*(ud-ug))  * 0.5_prec
+
+      DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
+
+      flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_(ni,jj)*DF
     END DO; END DO
 
     END IF
@@ -432,8 +434,11 @@ CONTAINS
       END IF
       err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
 
+
+      IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0)) THEN
       n_imp = n_imp +1
-      Time_stemp(n_imp) = time
+      Time_stemp(n_imp) = time    
+      END IF
       
       write(unit=numfile_sol  , fmt='("----------",f10.6,"--------------")' ) time
       write(unit=numfile_solex, fmt='("----------",f10.6,"--------------")' ) time
@@ -530,7 +535,7 @@ CONTAINS
 
     open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='old',  position='append')
     write(unit= numfile_data, fmt='("nt = ",i5)') n_imp
-    DO i=1,n_imp
+    DO i=1,n_imp+1
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 

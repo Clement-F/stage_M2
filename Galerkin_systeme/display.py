@@ -39,7 +39,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,2):
+for k in range(0,sm,1):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][11:27]
@@ -62,7 +62,7 @@ for k in range(0,sm,2):
             
         
         P_[k,i] = p(U_t[k,i,:])
-    U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
+    #U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
                   
     for i in range(0,nb_cell+1): 
         1+1

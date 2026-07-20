@@ -27,18 +27,18 @@ CONTAINS
     voi_R = subcells_(mc(1),nb_subcell)%R
     END IF 
     IF(TRIM(minmax) == "min") THEN
-    IF(max_rule == 1)   minmax_loc= min( sol_mc, &
+    IF(max_rule == 2)   minmax_loc= min( sol_mc, &
                                         &sol_step(voi_L(1))%val_subcells(voi_L(2),nvar), &
                                         &sol_step(voi_R(1))%val_subcells(voi_R(2),nvar))
 
-    IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = min_glob
+    IF(max_rule == 1 .or. max_rule == 0)  minmax_loc = min_glob
 
     ELSE IF(TRIM(minmax) == "max") THEN
-    IF(max_rule == 1)   minmax_loc= max( sol_mc, &
+    IF(max_rule == 2)   minmax_loc= max( sol_mc, &
                                         &sol_step(voi_L(1))%val_subcells(voi_L(2),nvar), &
                                         &sol_step(voi_R(1))%val_subcells(voi_R(2),nvar))
 
-    IF(max_rule == 2 .or. max_rule == 0)  minmax_loc = max_glob
+    IF(max_rule == 1 .or. max_rule == 0)  minmax_loc = max_glob
     END IF
 
 
@@ -60,10 +60,6 @@ CONTAINS
     REAL(prec) :: theta
     
     theta = 1._prec
-    ! IF(max_rule == 0) THEN 
-    !   theta = 1._prec
-    !   return
-    ! END IF
     
     IF(minval(abs(DF)) < eps0) THEN; theta = 1._prec; return; END IF
 
@@ -75,19 +71,31 @@ CONTAINS
     
     u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
-    IF(TRIM(flux_name)=="Euler") THEN 
+    IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
       ! positivité de rho
       theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*(u_Riemann(1)-eps0))
 
       ! positivité de E//P
-      A = 1/(gamma_mp**2) *(0.5_prec*abs(DF(2))**2 - theta_temp(1)*DF(1)*DF(3))
-      B = 1/(gamma_mp)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - theta_temp(1)*u_Riemann(3)*DF(1))
-      M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
+      IF(positivity == 1) THEN 
+        A = 1/(gamma_mp**2)  *(0.5_prec*abs(DF(2))**2 - DF(1)*DF(3)*theta_temp(1))
+        B = 1/(gamma_mp)   *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1)*theta_temp(1))
+        M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
 
-      theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
+        theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
 
-      ! positivité des deux 
-      theta = theta_temp(1)* theta_temp(2)  
+        ! positivité des deux 
+        theta = theta_temp(1)* theta_temp(2) 
+
+      ELSE IF(positivity == 2) THEN  
+        A = 1/(gamma_mp**2) *theta_temp(1)**2 *(0.5_prec*abs(DF(2))**2 - DF(1)*DF(3))
+        B = 1/(gamma_mp) *theta_temp(1)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1))
+        M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
+
+        theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
+
+        ! positivité des deux 
+        theta = min(theta_temp(1), theta_temp(2)) 
+      END IF
     END IF
 
     theta_temp = 0._prec
@@ -97,7 +105,12 @@ CONTAINS
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
       DO ii=1,1
-        IF(max_rule ==1) THEN
+
+        IF(max_rule==1) THEN; 
+          alpha= 1.01_prec*(min_glob+eps0); 
+          beta = 0.99_prec*(max_glob-eps0);
+
+        ELSEIF(max_rule ==2) THEN
           IF((abs(DF(ii))) < eps0) THEN; theta = 1._prec; return; END IF
 
           IF(DF(ii) .LT. -eps0) THEN
@@ -109,9 +122,6 @@ CONTAINS
             alpha= minmax_loc(mc,"min",nvar=ii)
           END IF
 
-        ELSE IF(max_rule==2) THEN; 
-          alpha= 1.01_prec*(min_glob+eps0); 
-          beta = 0.99_prec*(max_glob-eps0);
         END IF
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
@@ -135,18 +145,19 @@ CONTAINS
     INTEGER :: ni, n_sub, n_var 
     INTEGER , DIMENSION(2) :: nL,nR
     REAL(prec) :: du_L,du_R, du,ddu, vL,vR
-
     LOGICAL :: face_L, face_R
     
+    n_var =1
     subcells_(:,:)%extrema = .FALSE. 
 
-    DO ni=1,nb_cell;  DO n_var=1,1
+    ! à optimiser!
+    DO ni=1,nb_cell
       sol_step(ni)%deriv(:,n_var)= MATMUL(Masse_inv, MATMUL(sol_step(ni)%base_poly(:,n_var), Rigid))
-    END DO;           END DO
+    END DO;      
 
     IF(smooth_extrema == 1) THEN 
 
-      DO n_var=1,1; DO ni=1,nb_cell; 
+      DO ni=1,nb_cell; 
         face_L = .FALSE.; face_R = .FALSE.
         nL = Voisin_cell(ni,1         , 'L')
         nR = Voisin_cell(ni,nb_subcell, 'R')
@@ -172,21 +183,11 @@ CONTAINS
         END IF
 
         du_L = du; du = du_R
-        ! IF(ni .GT. 1) THEN
-        ! IF(subcells_(ni,1)%extrema .AND. subcells_(ni-1,1)%extrema) THEN
-        !   print *,"================" ,ni,'----------',n_sub,"============================"
-        !   print *,nL, nR
-        !   write(*, fmt="( 'between : [',f10.6,',',f10.6,'], at t=',f10.6)") x_cell(ni),x_cell(ni+1), time
-        !   write(*,fmt='("u = ",e12.6 )') eval_sol(0._prec,nvar =n_var,ni=ni,Loc=LRef)
-        !   write(*,fmt='("du_L = ",e12.6,", du = ",e12.6,", du_R = ",e12.6)') du_L, du, du_R
-        !   write(*,fmt='("vL   = ",e12.6,",ddu = ",e12.6,", vR   = ",e12.6)') vL, ddu,vR
-        ! END IF; END IF
 
-
-      END DO; END DO
+      END DO;
     ELSE 
 
-      DO n_var = 1,1;  DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; 
+      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; 
         face_L = .FALSE.; face_R = .FALSE.
         nL = Voisin_cell(ni,n_sub, 'L') 
         nR = Voisin_cell(ni,n_sub, 'R') 
@@ -212,20 +213,128 @@ CONTAINS
 
         du_L = du; du = du_R
 
-        ! IF(subcells_(ni,n_sub)%extrema) THEN
-        !   print *,"================" ,ni,'----------',n_sub,"============================"
-        !   print *,nL, nR
-        !   write(*, fmt="( 'between : [',f10.6,',',f10.6,'], at t=',f10.6)") x_cell(ni),x_cell(ni+1), time
-        !   write(*,fmt='("u = ",e12.6 )') eval_sol(0._prec,nvar =n_var,ni=ni,Loc=LRef)
-        !   write(*,fmt='("du_L = ",e12.6,", du = ",e12.6,", du_R = ",e12.6)') du_L, du, du_R
-        !   write(*,fmt='("vL   = ",e12.6,",ddu = ",e12.6,", vR   = ",e12.6)') vL, ddu,vR
-        ! END IF
-
-      END DO;           END DO;                  END DO
+      END DO;           END DO;                
 
     END IF
 
   END SUBROUTINE extrema_detect
 
+  SUBROUTINE Construct_thetaMesh
+    IMPLICIT NONE
+    INTEGER, DIMENSION(2) :: voi_L,voi_R
+    REAL(prec), DIMENSION(nb_var) :: theta_temp
+    REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
+    REAL(prec), DIMENSION(nb_var) :: DF
+    REAL(prec) :: gamma_mp, param
+    REAL(prec) :: alpha,beta
+
+    REAL(prec) :: A,B,M
+    INTEGER :: ii
+    LOGICAL :: extrema
+    INTEGER :: ni, jj
+
+  extrema = .FALSE.
+  theta_(:,:) = 1._prec;  
+  
+  DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+    ! print *,"------------------------------"
+    ! print *, ni,jj
+    IF(jj==1) THEN
+    voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
+    voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+    ELSE 
+    voi_L = voi_R; ug = ud;
+    voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+    END IF
+    ! print *,voi_L
+    ! print *,voi_R
+
+    IF(flux_num == 0) gamma_mp = max_dflux
+    IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
+
+    flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_mp*(ud-ug))  * 0.5_prec
+
+    DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
+
+    IF(ISNAN(DF(1)))  DF = 0._prec
+
+    ! theta_(ni,jj) = theta(voi_L,voi_R, DF)
+
+    IF(minval(abs(DF)) < eps0) THEN; theta_(ni,jj) = 1._prec;  
+    ELSE 
+            
+      u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
+
+      IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
+        ! positivité de rho
+        theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*(u_Riemann(1)-eps0))
+
+        ! positivité de E//P
+        IF(positivity == 1) THEN 
+          A = 1/(gamma_mp**2)  *(0.5_prec*abs(DF(2))**2 - DF(1)*DF(3)*theta_temp(1))
+          B = 1/(gamma_mp)   *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1)*theta_temp(1))
+          M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
+
+          theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
+
+          ! positivité des deux 
+          theta_(ni,jj) = theta_temp(1)* theta_temp(2) 
+
+        ELSE IF(positivity == 2) THEN  
+          A = 1/(gamma_mp**2) *theta_temp(1)**2 *(0.5_prec*abs(DF(2))**2 - DF(1)*DF(3))
+          B = 1/(gamma_mp) *theta_temp(1)    *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1))
+          M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
+
+          theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
+
+          ! positivité des deux 
+          theta_(ni,jj) = min(theta_temp(1), theta_temp(2)) 
+        END IF
+      END IF
+
+      theta_temp = 0._prec
+      
+      IF(smooth_extrema .GT. 0) extrema = subcells_(voi_L(1),voi_L(2))%extrema .AND.  subcells_(voi_R(1),voi_R(2))%extrema 
+
+
+      IF(.not. extrema .AND. max_rule .GT. 0) THEN
+        DO ii=1,1
+
+          IF(max_rule==1) THEN; 
+            alpha= 1.01_prec*(min_glob+eps0); 
+            beta = 0.99_prec*(max_glob-eps0);
+
+          ELSEIF(max_rule ==2) THEN
+            IF((abs(DF(ii))) < eps0) THEN; theta_(ni,jj) = 1._prec; return; END IF
+
+            IF(DF(ii) .LT. -eps0) THEN
+              beta = minmax_loc(voi_L,"max",nvar=ii)
+              alpha= minmax_loc(voi_R,"min",nvar=ii)
+
+            ELSE IF(DF(ii) .GT. eps0) THEN
+              beta = minmax_loc(voi_R,"max",nvar=ii)
+              alpha= minmax_loc(voi_L,"min",nvar=ii)
+            END IF
+
+          END IF
+
+          param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
+          
+          theta_temp(ii) =max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec);
+          ! END IF      
+          
+          theta_(ni,jj) = min(theta_(ni,jj),theta_temp(ii))
+
+        END DO
+      END IF
+
+      theta_(ni,jj) = max(theta_(ni,jj),0._prec)
+      
+      IF(ISNAN(theta_(ni,jj))) THEN; print *,"theta nan"; STOP; END IF
+
+      END IF
+  END DO; END DO
+
+  END SUBROUTINE Construct_thetaMesh
 
 END MODULE mod_Monolith

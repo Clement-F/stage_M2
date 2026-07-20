@@ -11,18 +11,14 @@ CONTAINS
         INTEGER :: i,j
         REAL(prec) :: YY
 
-        print *,"read"
+        print *, "init"
 
         CALL READ_DATA
-        ! print *, (nomfile_sol)
-        print *,"red"
     
         IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
 
         nomfile_solex = TRIM(nomfile_sol)//"ex.txt"
         nomfile_sol = TRIM(nomfile_sol)//".txt"
-
-        print *, "init"
 
         IF((DG_meth)=="Lobatto")  size_base = order_x 
         IF((DG_meth)=="Legendre") size_base = order_x 
@@ -54,8 +50,6 @@ CONTAINS
         STOP
         END SELECT
 
-        print *, "allocation"
-
         CALL ALLOCATE_all
         dx = REAL((xR-xL)/Real(nb_cell,prec), prec)
         sub_dx = 2._prec/Real(nb_subcell,prec)
@@ -78,7 +72,7 @@ CONTAINS
         DO i=1,print_rule
             Time_stemp(i+1) = REAL(i,prec)*t_imp
         END DO
-        ! print *, Time_stemp
+        Time_stemp(print_rule+2) = Time_stemp(print_rule+1) 
 
         dt = 10._prec**(-8)
         theta_(:,:) = 1._prec
@@ -96,18 +90,11 @@ CONTAINS
           END DO
         END DO
 
-        print *, "matrice points quad "
-        CALL print_mat(sig_quad, size_base, nb_nodes)
-        
         CALL Coeff_RK_init(order_t)
         CALL Matrice_Masse_init
 
-        print *, "masse matrix "
-        CALL print_mat(Masse, size_base, size_base)
 
         CALL Matrice_Rigid_init
-        
-        print *,"matrices"
 
         IF(subcell_use) CALL sub_cells_init
 
@@ -205,17 +192,24 @@ CONTAINS
         read(numfile_param,  *) xR;      
         read(numfile_param,  *) tmax;  
 
-        CALL Skip_lines(numfile_param,1) 
-        read(numfile_param,  *) flux_num
-        CALL Skip_lines(numfile_param,1) 
+        CALL Skip_lines(numfile_param,3) 
 
+        read(numfile_param,  *) flux_num
         read(numfile_param,  *) subcell_use
         read(numfile_param,  *) monolithique
         read(numfile_param,  *) max_rule
+        read(numfile_param,  *) positivity
         read(numfile_param,  *) coeff_smooth
         read(numfile_param,  *) smooth_extrema
         read(numfile_param,  *) nb_subcell
         read(numfile_param,  *) subcell_repartition
+
+        CALL Skip_lines(numfile_param,3)
+        
+        read(numfile_param,  *) order_x;   
+        read(numfile_param,  *) order_t; 
+        read(numfile_param,  *) DG_meth; 
+        read(numfile_param,  *) quad_meth;
 
         CALL Skip_lines(numfile_param,3) 
         
@@ -226,13 +220,6 @@ CONTAINS
         read(numfile_param,  *) max_check; 
         read(numfile_param,  *) print_rule;     
         read(numfile_param,  *) nomfile_sol;     
-
-        CALL Skip_lines(numfile_param,3)
-        
-        read(numfile_param,  *) order_x;   
-        read(numfile_param,  *) order_t; 
-        read(numfile_param,  *) DG_meth; 
-        read(numfile_param,  *) quad_meth;
 
         CALL Skip_lines(numfile_param,3)
         
