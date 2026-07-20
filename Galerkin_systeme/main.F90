@@ -8,9 +8,11 @@ PROGRAM MAIN
 
 
 
+    CALL SYSTEM_CLOCK(COUNT_RATE=nb_prd_sec,COUNT_MAX=nb_prd_max)
+    CALL SYSTEM_CLOCK(COUNT=nb_prd_ini)
+    
     CALL INIT_ALL
 
-    CALL print_mat(Projection_VF_inv, size_base, size_base)
     open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='unknown')
     open(unit=numfile_sol,      file=nomfile_sol,       form ='formatted', status ='unknown')
     open(unit=numfile_solex,    file=nomfile_solex,     form ='formatted', status ='unknown')
@@ -33,8 +35,7 @@ PROGRAM MAIN
 
     CALL writout
 
-
-    DO WHILE (time .LT. tmax)     
+    DO WHILE (tmax-time  .GT. eps0 )
         CALL dt_calc
 
         IF(subcell_use) THEN;   CALL Time_step_subcell
@@ -75,6 +76,10 @@ PROGRAM MAIN
     print *,"closed"
     print *, counter1, counter2
     
+
+    !! Print the time lapse of the computation !!
+    CALL eval_time(nb_prd_ini,nb_prd_max,nb_prd_sec,0)
+    WRITE(*,*) " "
 
     CALL DEALLOCATE_all
 

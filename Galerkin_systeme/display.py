@@ -39,7 +39,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,2):
+for k in range(0,sm,1):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][11:27]
@@ -62,7 +62,9 @@ for k in range(0,sm,2):
             
         
         #P_[k,i] = p(U_t[k,i,:])
-    U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
+        U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
+    #    P_[k,i] = p(U_t[k,i,:])
+    #U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
                   
     for i in range(0,nb_cell+1): 
         1+1
@@ -75,20 +77,20 @@ for k in range(0,sm,2):
     #plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
-    print(sum(U_t[k,:,0]))
+    #print(sum(U_t[k,:,0]))
     if(nb_var>1):
         1+1
         #plt.plot(X,U_ex[k,:,1],'k-')
         #plt.plot(X,U_t[k,:,1],'r-', marker='.')
         #plt.plot(X,abs(U_t[k,:,1]-U_ex[k,:,1]),'k-')
-        plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
+        #plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
     if(nb_var>2):
         1+1
         #plt.plot(X,U_ex[k,:,2],'k-')
         #plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
-    plt.plot(X,P_[k,:],'k-x')
+    #plt.plot(X,P_[k,:],'k-x')
     #m=-.2; M=1.2
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)

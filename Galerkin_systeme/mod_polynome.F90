@@ -910,10 +910,6 @@ CONTAINS
             END DO
         END DO
 
-        print *, w_quad
-        print *, "masse"
-        CALL print_mat(masse, size_base, size_base)
-        
         CALL inv_mat(Masse,Masse_inv,1)
 
 

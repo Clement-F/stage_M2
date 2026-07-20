@@ -135,7 +135,6 @@ CONTAINS
 
     END FUNCTION factoriel
 
-
     FUNCTION Voisin_Face(ni,ns,LR)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni,ns
@@ -221,7 +220,6 @@ CONTAINS
 
     END FUNCTION Voisin_cell
 
-
     FUNCTION Voisin_quad(ni,nq,LR)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: ni,nq
@@ -265,5 +263,63 @@ CONTAINS
         ! print *,Voisin_quad
 
     END FUNCTION Voisin_quad
+
+
+  SUBROUTINE eval_time(prd_ini,prd_max,prd_sec,time_r)
+    IMPLICIT NONE
+
+    INTEGER,INTENT(IN) :: time_r,prd_ini,prd_max,prd_sec
+    INTEGER :: prd_fin,prd
+    REAL(prec) :: time_cal
+
+
+    CALL SYSTEM_CLOCK(COUNT=prd_fin)
+    prd=prd_fin-prd_ini
+    IF (prd_fin.LT.prd_ini) prd=prd+prd_max
+    time_cal=REAL(prd,prec)/REAL(prd_sec,prec)
+
+    CALL display_time(time_cal,"COMPUTATIONAL TIME :   ")
+
+    IF (time_r==1 .AND. time>0._prec) THEN
+       CALL display_time((tmax/time-1._prec)*time_cal," ~= REMAINING TIME :   ")
+    END IF
+
+  END SUBROUTINE eval_time
+
+  SUBROUTINE display_time(time_v,mess_v)
+    IMPLICIT NONE
+
+    REAL(prec),INTENT(IN) :: time_v
+    CHARACTER(LEN=23),INTENT(IN) :: mess_v
+    INTEGER :: vday,vhour,vminute,vseconde, vcent
+    CHARACTER(LEN=2) :: fday,fhour,fminute,fseconde, fcent
+
+    vday=INT(time_v)/86400
+    vhour=INT(time_v-REAL(vday*86400,prec))/3600
+    vminute=INT(time_v-REAL(vday*86400+vhour*3600,prec))/60
+    vseconde=INT(time_v-REAL(vday*86400+vhour*3600+vminute*60,prec))
+    vcent= INT(100._prec*(time_v-REAL(vday*86400+vhour*3600+vminute*60+vseconde,prec) ) )
+    WRITE(fday,'(i2.2)') vday
+    WRITE(fhour,'(i2.2)') vhour
+    WRITE(fminute,'(i2.2)') vminute
+    WRITE(fseconde,'(i2.2)') vseconde
+    WRITE(fcent,'(i2.2)') vcent
+    IF (vday+vhour+vminute==0) THEN
+       WRITE(*,*) mess_v,fseconde," SECONDES AND ", &
+            & fcent, " CENTIEME "
+    ELSE IF (vday+vhour==0) THEN
+       WRITE(*,*) mess_v,fminute," MINUTES AND ",&
+            & fseconde," SECONDES"
+    ELSE IF (vday==0) THEN
+       WRITE(*,*) mess_v,fhour," HOURS, ",&
+            & fminute," MINUTES AND ",fseconde," SECONDES"
+    ELSE
+       WRITE(*,*) mess_v,fday," DAYS,",fhour,&
+            & " HOURS, ",fminute," MINUTES AND ",fseconde," SECONDES"
+    END IF
+
+    print *,time_v
+
+  END SUBROUTINE display_time
     
 END MODULE mod_Divers
