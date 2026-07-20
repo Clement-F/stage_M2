@@ -226,34 +226,43 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
     REAL(prec), DIMENSION(nb_var) :: DF
     REAL(prec) :: gamma_mp, param
-    REAL(prec) :: alpha,beta
+    REAL(prec) :: alpha,beta,xi, out1, pos, LMP 
 
     REAL(prec) :: A,B,M
-    INTEGER :: ii
     LOGICAL :: extrema
     INTEGER :: ni, jj
 
-  extrema = .FALSE.
+  extrema = .FALSE. 
+  subcells_(:,:)%theta = 1._prec 
   theta_(:,:) = 1._prec;  
+  pos = 1._prec; LMP = 1._prec;
+   
   
-  DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+  IF((mesh_out.AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
+    write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) time
+  END IF
+
+  DO ni=1,nb_cell; DO jj=1,nb_subcell
     ! print *,"------------------------------"
     ! print *, ni,jj
-    IF(jj==1) THEN
+    ! IF(jj==1) THEN
     voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
     voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
-    ELSE 
-    voi_L = voi_R; ug = ud;
-    voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+    ! ELSE 
+    ! voi_L = voi_R; ug = ud;
+    ! voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+    ! END IF
+
+    IF(TRIM(bdry_cond)=="Solid" .AND. TRIM(flux_name)=="Euler") THEN
+    IF(ni == 1      .AND. jj ==1           )  ug(2) = -ug(2)
+    IF(ni ==nb_cell .AND. jj ==nb_subcell+1)  ud(2) = -ud(2)
     END IF
-    ! print *,voi_L
-    ! print *,voi_R
 
     IF(flux_num == 0) gamma_mp = max_dflux
     IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
 
     flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_mp*(ud-ug))  * 0.5_prec
-
+    
     DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
 
     IF(ISNAN(DF(1)))  DF = 0._prec
@@ -292,40 +301,39 @@ CONTAINS
         END IF
       END IF
 
-      theta_temp = 0._prec
+      pos = min(theta_temp(1), theta_temp(2))
+
+      theta_temp = 1._prec
       
       IF(smooth_extrema .GT. 0) extrema = subcells_(voi_L(1),voi_L(2))%extrema .AND.  subcells_(voi_R(1),voi_R(2))%extrema 
 
-
       IF(.not. extrema .AND. max_rule .GT. 0) THEN
-        DO ii=1,1
+        IF(max_rule==1) THEN; 
+          alpha= 1.01_prec*(min_glob+eps0); 
+          beta = 0.99_prec*(max_glob-eps0);
 
-          IF(max_rule==1) THEN; 
-            alpha= 1.01_prec*(min_glob+eps0); 
-            beta = 0.99_prec*(max_glob-eps0);
+        ELSEIF(max_rule ==2) THEN
+          IF((abs(DF(1))) < eps0) THEN; theta_(ni,jj) = 1._prec; return; END IF
 
-          ELSEIF(max_rule ==2) THEN
-            IF((abs(DF(ii))) < eps0) THEN; theta_(ni,jj) = 1._prec; return; END IF
+          IF(DF(1) .LT. -eps0) THEN
+            beta = minmax_loc(voi_L,"max",nvar=1)
+            alpha= minmax_loc(voi_R,"min",nvar=1)
 
-            IF(DF(ii) .LT. -eps0) THEN
-              beta = minmax_loc(voi_L,"max",nvar=ii)
-              alpha= minmax_loc(voi_R,"min",nvar=ii)
-
-            ELSE IF(DF(ii) .GT. eps0) THEN
-              beta = minmax_loc(voi_R,"max",nvar=ii)
-              alpha= minmax_loc(voi_L,"min",nvar=ii)
-            END IF
-
+          ELSE IF(DF(1) .GT. eps0) THEN
+            beta = minmax_loc(voi_R,"max",nvar=1)
+            alpha= minmax_loc(voi_L,"min",nvar=1)
           END IF
 
-          param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
-          
-          theta_temp(ii) =max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec);
-          ! END IF      
-          
-          theta_(ni,jj) = min(theta_(ni,jj),theta_temp(ii))
+        END IF
 
-        END DO
+        param = min(beta - u_Riemann(1), u_Riemann(1)- alpha)
+        
+        theta_temp(1) =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec);
+        ! END IF      
+        
+        theta_(ni,jj) = min(theta_(ni,jj),theta_temp(1))
+
+        LMP = theta_temp(1)
       END IF
 
       theta_(ni,jj) = max(theta_(ni,jj),0._prec)
@@ -333,7 +341,27 @@ CONTAINS
       IF(ISNAN(theta_(ni,jj))) THEN; print *,"theta nan"; STOP; END IF
 
       END IF
+
+    IF(coeff_smooth == 1) THEN 
+    subcells_(voi_L(1),voi_L(2))%theta = min(theta_(ni,jj), subcells_(voi_L(1),voi_L(2))%theta)
+    subcells_(voi_R(1),voi_R(2))%theta = min(theta_(ni,jj), subcells_(voi_R(1),voi_R(2))%theta)
+    ELSE IF(coeff_smooth == 2) THEN 
+    subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj)/2._prec + subcells_(voi_L(1),voi_L(2))%theta
+    subcells_(voi_R(1),voi_R(2))%theta = theta_(ni,jj)/2._prec + subcells_(voi_R(1),voi_R(2))%theta
+    ELSE IF(coeff_smooth == 0) THEN 
+    subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj)
+    END IF
+
+
+    IF((mesh_out.AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0) THEN 
+      xi = Ref_to_loc(voi_L(1),x_subcell(voi_L(2)))
+      out1 = theta_(ni,jj)
+      write(unit=numfile_meshout,  fmt='(f10.6, f9.6, 1x, f9.6,  f9.6,1x, l1)') xi,out1, pos,LMP,extrema
+    END IF
+    
   END DO; END DO
+
+  IF(outed_mesh == 0)  outed_mesh = 1
 
   END SUBROUTINE Construct_thetaMesh
 

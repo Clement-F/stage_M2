@@ -13,7 +13,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: ug,ud,u_temp, DF
 
     REAL(prec) :: x_s
-    REAL(prec) :: fh_L, fh_R, gamma_mp
+    REAL(prec) :: fh_L, fh_R, gamma_mp, theta_mp
     INTEGER, DIMENSION(2) :: voi_L,voi_R
 
     DO ni = 1,nb_cell+1
@@ -25,6 +25,10 @@ CONTAINS
         ELSE IF(TRIM(bdry_cond) == "Sym") THEN
           ug = sol_step(1)        %inter(1,:)
           ud = sol_step(1)        %inter(1,:)
+        ELSE IF(TRIM(bdry_cond) == "Solid" .AND. TRIM(flux_name)=="Euler") THEN
+          ug = sol_step(1)        %inter(1,:); ug(2) = -ug(2)
+          ud = sol_step(1)        %inter(1,:)
+
         ELSE 
           print *, "boundary condition non reconnue"
         END IF
@@ -36,6 +40,9 @@ CONTAINS
         ELSE IF(TRIM(bdry_cond) == "Sym") THEN
           ug = sol_step(nb_cell)  %inter(2,:)
           ud = sol_step(nb_cell)  %inter(2,:)
+        ELSE IF(TRIM(bdry_cond) == "Solid" .AND. TRIM(flux_name)=="Euler") THEN
+          ug = sol_step(nb_cell)  %inter(2,:)
+          ud = sol_step(nb_cell)  %inter(2,:);  ud(2) = -ud(2)
         ELSE 
           print *, "boundary condition non reconnue"
         END IF
@@ -49,7 +56,6 @@ CONTAINS
 
 
     END DO
-
     DO ni = 1,nb_cell
       DO ii=1,nb_nodes
         u_temp = sol_step(ni)%val_quad(ii,:)
@@ -98,7 +104,11 @@ CONTAINS
 
       DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
 
-      flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) + theta_(ni,jj)*DF
+      IF(coeff_smooth == 0)theta_mp =     theta_(ni,jj)
+      IF(coeff_smooth == 1)theta_mp = Min(theta_(ni,jj), 0.5_prec*(subcells_(voi_L(1),voi_L(2))%theta + subcells_(voi_R(1),voi_R(2))%theta)  )
+      IF(coeff_smooth == 2)theta_mp = Min(theta_(ni,jj), Min(      subcells_(voi_L(1),voi_L(2))%theta,  subcells_(voi_R(1),voi_R(2))%theta)  )
+
+      flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) +theta_mp*DF
     END DO; END DO
 
     END IF
@@ -184,7 +194,7 @@ CONTAINS
     INTEGER :: ii,jj,kk
     REAL(prec) :: L
 
-    ! print *,"---------------------"
+    outed_mesh = 0
 
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
@@ -288,6 +298,7 @@ CONTAINS
             max_dflux = max(max_dflux, gamma_temp)
             gamma_bf = gamma_temp
           END DO;END DO 
+
         END IF
 
       ELSE IF(flux_num == 0) THEN; 
@@ -338,8 +349,8 @@ CONTAINS
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
 
-    IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0) .OR. force )  THEN
-      IF(mesh_out)CALL Out_The_Mesh(time)
+    IF((time .GE.  Time_stemp(n_imp+1)-eps0) .OR. force )  THEN
+      ! IF(mesh_out)CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
       DO i=1,nb_cell
         IF(subcell_use .AND.(.not. convergence) ) THEN
@@ -428,14 +439,14 @@ CONTAINS
       END IF
 
       IF(monolithique) THEN
-      write(*, fmt ='("avg theta = ", f12.6)')  Sum(theta_(:,:))/REAL((nb_cell)*(nb_subcell+1),prec)
-      write(*, fmt ='("max theta = ", f12.6)')  maxval(theta_(:,:))
-      write(*, fmt ='("min theta = ", f12.6)')  minval(theta_(:,:))
+      write(*, fmt ='("avg theta = ", f12.6)')  Sum(subcells_(:,:)%theta)/REAL((nb_cell)*(nb_subcell+1),prec)
+      write(*, fmt ='("max theta = ", f12.6)')  maxval(subcells_(:,:)%theta)
+      write(*, fmt ='("min theta = ", f12.6)')  minval(subcells_(:,:)%theta)
       END IF
       err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
 
 
-      IF((time .GE.  REAL(n_imp,prec)*t_imp-eps0)) THEN
+      IF((time .GE.  Time_stemp(n_imp+1)-eps0)) THEN
       n_imp = n_imp +1
       Time_stemp(n_imp) = time    
       END IF
@@ -458,7 +469,7 @@ CONTAINS
     ELSE IF(bdry_cond =="period") THEN
       xd = xL-max_dflux*t; xf = xR + max_dflux*t
 
-    ELSE IF(bdry_cond =="Sym") THEN
+    ELSE IF(bdry_cond =="Sym" .OR. bdry_cond =="Solid" ) THEN
       xd = xL-eps0; xf = xR+eps0
     END IF
 
@@ -522,7 +533,7 @@ CONTAINS
     write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) ti
     DO ni =1,nb_cell;    DO n_sub=1,nb_subcell
       xi = Ref_to_loc(ni,x_subcell(n_sub))
-      out1 = theta_(ni,n_sub)
+      out1 = subcells_(ni,n_sub)%theta
       write(unit=numfile_meshout,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1
     END DO; END DO
 
