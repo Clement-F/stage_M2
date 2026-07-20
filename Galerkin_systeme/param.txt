@@ -4,7 +4,7 @@
 60              | noeuds du maillage 
 -10D-1             | xd
 10D-1              | xf
-40D-3            | T
+40D-2            | T
 ---------------------------------------------------
     Paramètres Monolithique // (DG/FV)
 --------------------------------------------------
@@ -13,8 +13,8 @@ True            | sous maillage      (True, False)
 True            | Monolithique      (True, False)
 2               | Maximum Principal : Null(0), GMP(1),  LMP(2)
 1               | Positivity Rule   : Null(0), prod(1), min(2)
-0               | coefficient smoothening, mean(2), min(1), Null(0)
-1               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
+0               | coefficient smoothening : Null(0), min(1), mean(2)
+2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 6               | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
 --------------------------------------------------
@@ -22,24 +22,24 @@ Lobatto         | repartition des noeuds(Unif, Lobatto)
 --------------------------------------------------
 5               | ordre espace
 3               | ordre temps
-Legendre        | polynomes   (Legendre,Lobatto)
-Legendre         | quadrature (Legendre,Lobatto)
+Lobatto        | polynomes   (Legendre,Lobatto)
+Lobatto        | quadrature (Legendre,Lobatto)
 --------------------------------------------------
     Paramètres de Sauvegarde
 --------------------------------------------------
 0.7             | cfl
 False           | Convergence   (True, False)
 False           | Error calc    (True, False)
-False            | Mesh out      (True, False)
+True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-20              | print rule
+100              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-Blast    | solution initiale :
+creneau    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
-Euler           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+Buckley           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-period          | condition au bord (period, Sym)
+Sym          | condition au bord (period, Sym, Solid)

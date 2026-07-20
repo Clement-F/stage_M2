@@ -147,7 +147,7 @@ CONTAINS
         IF(ni == 1 .AND. ns == 1) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
             Voisin_Face(1) = nb_cell; Voisin_Face(2) = nb_subcell
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            ELSE IF(TRIM(bdry_cond)=="Sym" .OR. TRIM(bdry_cond)=="Solid") THEN 
             Voisin_Face(1) = 1 ; Voisin_Face(2) = 1
             END IF
 
@@ -161,7 +161,7 @@ CONTAINS
         IF(ni == nb_cell .AND. ns == nb_subcell+1) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
             Voisin_Face(1) = 1; Voisin_Face(2) = 1
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            ELSE IF(TRIM(bdry_cond)=="Sym" .OR. TRIM(bdry_cond)=="Solid") THEN 
             Voisin_Face(1) = nb_cell ; Voisin_Face(2) = nb_subcell
             END IF
             
@@ -190,7 +190,7 @@ CONTAINS
         IF(ni == 1 .AND. n_sub ==1 ) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
             V_c = [nb_cell, nb_subcell]
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            ELSE IF(TRIM(bdry_cond)=="Sym" .OR. TRIM(bdry_cond)=="Solid") THEN 
             V_c = [1, 1]
             END IF
         ELSE IF (n_sub == 1) THEN 
@@ -203,7 +203,7 @@ CONTAINS
         IF(ni == nb_cell .AND. n_sub == nb_subcell) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
             V_c = [1,1]
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            ELSE IF(TRIM(bdry_cond)=="Sym" .OR. TRIM(bdry_cond)=="Solid") THEN 
             V_c = [nb_cell, nb_subcell]
             END IF
         ELSE IF(n_sub == nb_subcell) THEN
@@ -231,7 +231,7 @@ CONTAINS
         IF(ni == 1 .AND. nq == 1) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
             Voisin_quad(1) = nb_cell; Voisin_quad(2) = nb_nodes
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            ELSE IF(TRIM(bdry_cond)=="Sym" .OR. TRIM(bdry_cond)=="Solid") THEN 
             Voisin_quad(1) = 1 ; Voisin_quad(2) = 1
             END IF
 
@@ -245,7 +245,7 @@ CONTAINS
         IF(ni == nb_cell .AND. nq == nb_nodes) THEN 
             IF(TRIM(bdry_cond) == "period") THEN
             Voisin_quad(1) = 1; Voisin_quad(2) = 1
-            ELSE IF(TRIM(bdry_cond)=="Sym") THEN 
+            ELSE IF(TRIM(bdry_cond)=="Sym" .OR. TRIM(bdry_cond)=="Solid") THEN 
             Voisin_quad(1) = nb_cell ; Voisin_quad(2) = nb_nodes
             END IF
             

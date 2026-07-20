@@ -33,6 +33,11 @@ PROGRAM MAIN
 
     close(unit=numfile_data)
 
+
+    !! Print the time lapse of the computation !!
+    CALL eval_time(nb_prd_ini,nb_prd_max,nb_prd_sec,0)
+    WRITE(*,*) " "
+    
     CALL writout
 
     DO WHILE (tmax-time  .GT. eps0 )

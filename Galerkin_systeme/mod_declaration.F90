@@ -24,6 +24,7 @@ MODULE mod_declaration
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER, DIMENSION(2) :: L, LL, R, RR
+    REAL(prec) :: theta
     LOGICAL :: extrema
   END TYPE subcells
 
@@ -59,6 +60,8 @@ MODULE mod_declaration
               &flux_num, entropie_rule, entropie_num, positivity
   INTEGER :: nb_prd_ini,nb_prd_max,nb_prd_sec
 
+
+  INTEGER :: outed_mesh
   INTEGER :: nb_var
   INTEGER :: nb_cell, nb_subcell, order_x, order_t 
   INTEGER :: size_base, nb_nodes
