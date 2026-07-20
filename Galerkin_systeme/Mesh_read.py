@@ -22,7 +22,7 @@ T   = np.zeros(sm)
 for k in range(0,sm):
     print(k,k*(nx+1) )
     print (lines[k*(nx+1)])
-    #print (lines[k*(nx+1)+0+1][39])
+    print (lines[k*(nx+1)+0+1][39])
     T[k] = lines[k*(nx+1)][9:19]
     for i in range(0,(nx)):
         X[i] = lines[k*(nx+1)+i+1][0:10]
@@ -35,7 +35,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-1.; xR=1.
+xL=-5.; xR=5.
     
 plt.pcolormesh(X, T, theta_, shading='auto', cmap='viridis')
 plt.xlim(xL,xR)

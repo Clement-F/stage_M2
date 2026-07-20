@@ -534,7 +534,7 @@ CONTAINS
     write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) ti
     DO ni =1,nb_cell;    DO n_sub=1,nb_subcell
       xi = Ref_to_loc(ni,x_subcell(n_sub))
-      out1 = theta_(ni,n_sub)
+      out1 = subcells_(ni,n_sub)%theta
       write(unit=numfile_meshout,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1
     END DO; END DO
 

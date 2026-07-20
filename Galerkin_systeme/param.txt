@@ -4,7 +4,7 @@
 60              | noeuds du maillage 
 -10D-1             | xd
 10D-1              | xf
-40D-2            | T
+38D-2            | T
 ---------------------------------------------------
     Paramètres Monolithique // (DG/FV)
 --------------------------------------------------
@@ -30,9 +30,9 @@ Lobatto        | quadrature (Legendre,Lobatto)
 0.7             | cfl
 False           | Convergence   (True, False)
 False           | Error calc    (True, False)
-True            | Mesh out      (True, False)
+False            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-100              | print rule
+20              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres du problème

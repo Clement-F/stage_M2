@@ -306,34 +306,32 @@ CONTAINS
       IF(smooth_extrema .GT. 0) extrema = subcells_(voi_L(1),voi_L(2))%extrema .AND.  subcells_(voi_R(1),voi_R(2))%extrema 
 
       IF(.not. extrema .AND. max_rule .GT. 0) THEN
-        DO ii=1,1
+        IF(max_rule==1) THEN; 
+          alpha= 1.01_prec*(min_glob+eps0); 
+          beta = 0.99_prec*(max_glob-eps0);
 
-          IF(max_rule==1) THEN; 
-            alpha= 1.01_prec*(min_glob+eps0); 
-            beta = 0.99_prec*(max_glob-eps0);
+        ELSEIF(max_rule ==2) THEN
+          IF((abs(DF(1))) < eps0) THEN; theta_(ni,jj) = 1._prec; return; END IF
 
-          ELSEIF(max_rule ==2) THEN
-            IF((abs(DF(ii))) < eps0) THEN; theta_(ni,jj) = 1._prec; return; END IF
+          IF(DF(1) .LT. -eps0) THEN
+            beta = minmax_loc(voi_L,"max",nvar=1)
+            alpha= minmax_loc(voi_R,"min",nvar=1)
 
-            IF(DF(ii) .LT. -eps0) THEN
-              beta = minmax_loc(voi_L,"max",nvar=ii)
-              alpha= minmax_loc(voi_R,"min",nvar=ii)
-
-            ELSE IF(DF(ii) .GT. eps0) THEN
-              beta = minmax_loc(voi_R,"max",nvar=ii)
-              alpha= minmax_loc(voi_L,"min",nvar=ii)
-            END IF
-
+          ELSE IF(DF(1) .GT. eps0) THEN
+            beta = minmax_loc(voi_R,"max",nvar=1)
+            alpha= minmax_loc(voi_L,"min",nvar=1)
           END IF
 
-          param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
-          
-          theta_temp(ii) =max(min(1._prec, abs(gamma_mp/DF(ii)) * param),0._prec);
-          ! END IF      
-          
-          theta_(ni,jj) = min(theta_(ni,jj),theta_temp(ii))
+        END IF
 
-        END DO
+        param = min(beta - u_Riemann(1), u_Riemann(1)- alpha)
+        
+        theta_temp(1) =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec);
+        ! END IF      
+        
+        theta_(ni,jj) = min(theta_(ni,jj),theta_temp(1))
+
+        LMP = theta_temp(1)
       END IF
 
       theta_(ni,jj) = max(theta_(ni,jj),0._prec)
