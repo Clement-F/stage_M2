@@ -30,7 +30,7 @@ for k in range(0,sm):
         theta_[k,i] = lines[k*(nx+1) +i+1][10:20]
         pos[k,i] = lines[k*(nx+1) +i+1][20:30]
         LMP[k,i] = lines[k*(nx+1) +i+1][29:39]
-        ent[k,i] = lines[k*(nx+1) +i+1][39:49]
+        ent[k,i] = float(lines[k*(nx+1) +i+1][39:49])
         if(lines[k*(nx+1)+i+1][49] == "T") : ext[k,i] =1
         
     

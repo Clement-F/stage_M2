@@ -142,6 +142,13 @@ CONTAINS
 
   END FUNCTION flux_d
 
+  FUNCTION entropie_numerique(u)
+    IMPLICIT NONE
+    REAL(prec) :: entropie_numerique
+    REAL(prec), DIMENSION(nb_var) :: u
+    entropie_numerique = 0.5_prec * DOT_PRODUCT(u,u)
+  END FUNCTION entropie_numerique
+
 
   
 

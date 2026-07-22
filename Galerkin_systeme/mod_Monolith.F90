@@ -231,12 +231,11 @@ CONTAINS
 
     REAL(prec) :: A,B,M
     LOGICAL :: extrema
-    INTEGER :: ni, jj
+    INTEGER :: ni, jj,ii
 
   extrema = .FALSE. 
-  subcells_(:,:)%theta = 1._prec 
+  subcells_(:,:)%theta = 0._prec 
   theta_(:,:) = 1._prec;  
-  pos = 1._prec; LMP = 1._prec;
    
   
   IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
@@ -244,6 +243,7 @@ CONTAINS
   END IF
 
   DO ni=1,nb_cell; DO jj=1,nb_subcell
+    pos = 1._prec; LMP = 1._prec; ent =1._prec
 
     theta_temp = 1._prec
     ! print *,"------------------------------"
@@ -347,11 +347,16 @@ CONTAINS
         ! Entropie 
         IF(.not. extrema .AND. entropie_rule .GT. 0) THEN 
 
-          IF(entropie_rule == 1) theta_temp(1) = max(min(1._prec, (gamma_calc(ug,ud)-max_dflux)* minval(ud-ug/(2._prec *DF))),0._prec)
-
+          IF(entropie_rule == 1) THEN 
+            DO ii=1,nb_var
+            IF((ud(ii)-ug(ii))*DF(ii) .GT. eps0 ) theta_temp(1) = min(1._prec, (max_dflux-gamma_mp)*((ud(ii)-ug(ii))/(2._prec *DF(ii))))
+            END DO
+          ELSEIF(entropie_rule==2) THEN 
+            
+          END IF
           theta_(ni,jj) = min(theta_(ni,jj),theta_temp(1))
         END IF
-        ent = theta_temp(1)
+          ent = theta_temp(1)
 
         theta_(ni,jj) = max(theta_(ni,jj),0._prec)
         
