@@ -195,13 +195,26 @@ CONTAINS
         CALL Skip_lines(numfile_param,3) 
 
         read(numfile_param,  *) flux_num
+        read(numfile_param,  *) entropie_num
+
+        CALL Skip_lines(numfile_param,1) 
+
         read(numfile_param,  *) subcell_use
         read(numfile_param,  *) monolithique
+
+        CALL Skip_lines(numfile_param,1) 
+
         read(numfile_param,  *) max_rule
         read(numfile_param,  *) positivity
         read(numfile_param,  *) entropie_rule
+
+        CALL Skip_lines(numfile_param,1) 
+
         read(numfile_param,  *) smooth_extrema
         read(numfile_param,  *) coeff_smooth
+
+        CALL Skip_lines(numfile_param,1) 
+
         read(numfile_param,  *) nb_subcell
         read(numfile_param,  *) subcell_repartition
 
