@@ -1,19 +1,29 @@
 ---------------------------------------------------
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
+<<<<<<< HEAD
 60              | noeuds du maillage 
 -10D-1             | xd
 10D-1              | xf
 38D-2            | T
+=======
+200              | noeuds du maillage 
+-10D-1             | xd
+10D-1              | xf
+20D-2            | T
+>>>>>>> 67c1716 (update TeX annex entropie)
 ---------------------------------------------------
     Paramètres Monolithique // (DG/FV)
 --------------------------------------------------
 0               | flux numérique (0/1 : Lax Friedrich Global / Local)
 True            | sous maillage      (True, False)
 True            | Monolithique      (True, False)
-2               | Maximum Principal : Null(0), GMP(1),  LMP(2)
-1               | Positivity Rule   : Null(0), prod(1), min(2)
+0               | Maximum Principle : Null(0), GMP(1),  LMP(2)
+0               | Positivity Rule   : Null(0), prod(1), min(2)
+1               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
+0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : Null(0), min(1), mean(2)
+<<<<<<< HEAD
 2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 6               | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
@@ -21,6 +31,14 @@ Lobatto         | repartition des noeuds(Unif, Lobatto)
     Paramètres DG
 --------------------------------------------------
 5               | ordre espace
+=======
+3               | nb subcellules du sous maillage
+Unif            | repartition des noeuds(Unif, Lobatto)
+--------------------------------------------------
+    Paramètres DG
+--------------------------------------------------
+2               | ordre espace
+>>>>>>> 67c1716 (update TeX annex entropie)
 3               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
@@ -28,18 +46,31 @@ Lobatto        | quadrature (Legendre,Lobatto)
     Paramètres de Sauvegarde
 --------------------------------------------------
 0.7             | cfl
+<<<<<<< HEAD
 False           | Convergence   (True, False)
 False           | Error calc    (True, False)
 False            | Mesh out      (True, False)
+=======
+True           | Convergence   (True, False)
+True           | Error calc    (True, False)
+True            | Mesh out      (True, False)
+>>>>>>> 67c1716 (update TeX annex entropie)
 0               | max-rule check    (0,1,2) (only works on subcell use)
 20              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
+<<<<<<< HEAD
 creneau    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
 Buckley           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+=======
+sinus    | solution initiale :
+                    SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
+                    Euler : Sod, isentropique,acoustic_wave, Blast
+burgers_SCL           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+>>>>>>> 67c1716 (update TeX annex entropie)
 1D0             | vitesse advection (si pb = advection)
-Sym          | condition au bord (period, Sym, Solid)
+period          | condition au bord (period, Sym, Solid)
