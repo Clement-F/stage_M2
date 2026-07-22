@@ -199,8 +199,9 @@ CONTAINS
         read(numfile_param,  *) monolithique
         read(numfile_param,  *) max_rule
         read(numfile_param,  *) positivity
-        read(numfile_param,  *) coeff_smooth
+        read(numfile_param,  *) entropie_rule
         read(numfile_param,  *) smooth_extrema
+        read(numfile_param,  *) coeff_smooth
         read(numfile_param,  *) nb_subcell
         read(numfile_param,  *) subcell_repartition
 

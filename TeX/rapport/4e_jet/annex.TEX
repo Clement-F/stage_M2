@@ -1,3 +1,35 @@
 \section{Annexes}
-\subsection{opérateur de reconstruction comme moindre carré  {\color{red} nom à changer} }
-On peut montrer que la 
+\subsection{opérateur de reconstruction comme moindre carré}
+\subsection{isomorphisme par variable entropique {\color{red} Voir si l'on rajoute des détails }}
+
+Cette partie est basé sur une démonstration de {\color{red} Godlewski 2021} [Introduction : entropy solution]
+\paragraph{Theorème de Godunov-Mock}
+soit $\eta :\Omega \mapsto \R$, une fonction strictement convexe, il y a équivalence entre :
+\begin{enumerate}
+    \item $\eta$ est une entropie du système
+    \item $H\eta(u)\cdot J_f (u)$ est symétrique
+\end{enumerate}
+\subsubsection{existence et unicité des variables entropiques}
+une conséquence du théorème ci-dessus est que si $\eta$ est une entropie strictement convexe, alors le système est symétrisable.
+On a donc le théorème suivant : 
+
+\paragraph{Theorème}
+$\exists \eta :\Omega \mapsto \R$, une entropie strictement convexe si et seulement si : $\exists \nu : \Omega \mapsto \Omega$ tel que le changement de variable : $u = u(\nu)$ rends le système symétrique.
+
+On note que le changement de variable nous donne le système suivant : 
+$$u'(\nu) \partial_t \nu + J_f(u(\nu)) u'(\nu) \partial_x(\nu) = 0 $$
+
+Supposons que le système soit symétrique, alors par def : $u'(\nu) = (\frac{\partial u_i}{\partial \nu_j})_{1\leq i,j \leq M} $  est symétrique et défini positif.\\
+On en déduit l'existence de $q(\nu)$ telle que : $\nabla_\nu q(\nu) = u(\nu)$, \\
+de la même manière, $\exists p(\nu)$ telle que : $\nabla_\nu p(\nu) = f(u(\nu))$.\\
+On a alors que $\nabla_\nu u(\nu)$ défini positif est équivalent à $q(\nu)$ strictement convexe.\\
+
+En combinant toutes ces informations, on a que la fonction $\nu \mapsto \nabla_\nu q(\nu) = u(\nu)$ est bijective. Il est alors possible d'écrire $\eta$ comme fonction de $u$\\
+Il est possible de montrer que $\eta(u) = \nu(u) \, u - q(\nu(u))$ est une entropie strictement convexe associée à fonction d'entropie $\phi = \nu(u) f(u) - p(\nu(u))$, voir {\color{red} Godlewski 2021}\\
+
+Mais le résultat intéressant est que l'on puisse faire un passage de l'entropie $\eta(u)$ à $\eta^*(\nu)$ en posant : 
+\begin{align}
+    q(\nu) = \eta^*(\nu) &:= \nu \, u(\nu)   - \eta(u(\nu))\\
+    p(\nu) = \phi^*(\nu) &:=\nu \, f(u(\nu)) - \phi(u(\nu))
+\end{align} 
+et $\eta^{*'}(\nu) = u(\nu)$ 
