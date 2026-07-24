@@ -1,5 +1,6 @@
 MODULE mod_RKDG 
    use mod_Monolith
+   use mod_SolIni
    use mod_Divers
   IMPLICIT NONE
 
