@@ -1,15 +1,15 @@
----------------------------------------------------
+=================================================
     Paramètres du domaine (temps x espace)
----------------------------------------------------
-80              | noeuds du maillage 
+=================================================
+5              | noeuds du maillage 
 -10D-1             | xd
 10D-1              | xf
-40D-2            | T
----------------------------------------------------
+200D-2            | T
+=================================================
     Paramètres Monolithique // (DG/FV)
---------------------------------------------------
+=================================================
 1               | flux numérique    : Lax Friedrich Global (0), Local(1) 
-1               | Entropie numérique: carré (0), Kruzkov (1)
+0               | Entropie numérique: (SCL) carré (0), Kruzkov (1)
 --------------------------------------------------
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
@@ -21,31 +21,31 @@ True            | Monolithique      (True, False)
 0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 2               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
-5               | nb subcellules du sous maillage
-Lobatto            | repartition des noeuds(Unif, Lobatto)
---------------------------------------------------
+9               | nb subcellules du sous maillage
+Lobatto         | repartition des noeuds(Unif, Lobatto)
+=================================================
     Paramètres DG
---------------------------------------------------
-4               | ordre espace
+=================================================
+9               | ordre espace
 3               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
---------------------------------------------------
+=================================================
     Paramètres de Sauvegarde
---------------------------------------------------
-0.5             | cfl
+=================================================
+0.9             | cfl
 False           | Convergence   (True, False)
 False           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-20              | print rule
+50              | print rule
 solSub          | nom file_sol
----------------------------------------------------
+=================================================
     Paramètres du problème
----------------------------------------------------
-creneau    | solution initiale :
+=================================================
+sinus    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
-Buckley           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+advection           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
 period          | condition au bord (period, Sym, Solid)

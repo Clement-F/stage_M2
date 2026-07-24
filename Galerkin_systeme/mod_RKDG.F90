@@ -335,7 +335,7 @@ CONTAINS
     INTEGER :: i,j,k
     REAL(prec), DIMENSION(nb_var) :: out, out_ex
     REAL(prec) :: xi
-    REAL(prec) :: err1 , err2, errLi
+    REAL(prec) :: err1 , err2, errLi, entropy
     LOGICAL, optional :: switch
     LOGICAL :: force
     Character(len=63) :: save_format
@@ -382,7 +382,14 @@ CONTAINS
 
 
           END DO 
+          
+          DO j=1,size_base
+            xi = Ref_to_loc(i,x_quad(j))
 
+            out = sol(i)%val_quad(j,:)
+          IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
+
+          END DO
         ELSE
           
           DO j=1,size_base
@@ -415,6 +422,8 @@ CONTAINS
             err1 = err1 + (abs(out(1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + (((out(1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
+            IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
+
             ! IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
             ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
@@ -439,9 +448,14 @@ CONTAINS
       END IF
 
       IF(monolithique) THEN
-      write(*, fmt ='("avg theta = ", f12.6)')  Sum(subcells_(:,:)%theta)/REAL((nb_cell)*(nb_subcell+1),prec)
+      write(*, fmt ='("avg theta = ", f12.6)')  Sum(subcells_(:,:)%theta)/REAL((nb_cell)*(nb_subcell),prec)
       write(*, fmt ='("max theta = ", f12.6)')  maxval(subcells_(:,:)%theta)
       write(*, fmt ='("min theta = ", f12.6)')  minval(subcells_(:,:)%theta)
+
+      IF(entropie_rule .GT. 0) THEN 
+      write(*, fmt ='("entropy = ", f12.6)')  entropy
+      END IF
+
       END IF
       err_L1 = max(err1, err_L1); err_L2 = max(err2, err_L2); err_Li = max(errLi, err_Li)
 
