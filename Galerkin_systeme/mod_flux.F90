@@ -83,7 +83,7 @@ CONTAINS
     
     SELECT CASE (TRIM(flux_name))
     CASE("advection")
-      gamma_calc = abs(abs(vit_adv))
+      gamma_calc = abs(vit_adv)
     CASE("burgers") 
       gamma_calc = max(abs(u(1)), abs(v(1)))
     CASE("burgers_SCL") 
@@ -146,10 +146,66 @@ CONTAINS
     IMPLICIT NONE
     REAL(prec) :: entropie_numerique
     REAL(prec), DIMENSION(nb_var) :: u
-    entropie_numerique = 0.5_prec * DOT_PRODUCT(u,u)
+    REAL(prec) :: ke = -0.00001_prec
+    REAL(prec) :: epsi = 0.25_prec
+
+    entropie_numerique = 0._prec
+
+    IF(nb_var == 1) THEN
+      IF(entropie_num == 0) entropie_numerique = 0.5_prec * DOT_PRODUCT(u,u)
+      IF(entropie_num == 1) entropie_numerique = (abs(u(1)-ke)**(1+epsi) )/(1+epsi)
+      RETURN
+    END IF
   END FUNCTION entropie_numerique
 
+  FUNCTION Flux_entrop(u)
+    IMPLICIT NONE
+    REAL(prec) :: Flux_entrop
+    REAL(prec), DIMENSION(nb_var) :: u
+    REAL(prec) :: ke = -0.00001_prec
+    REAL(prec) :: epsi = 0.25_prec
 
+    Flux_entrop = 0._prec
+
+    IF(nb_var == 1) THEN
+      IF(flux_name == "advection" .AND. entropie_num == 0) Flux_entrop = vit_adv * u(1)
+
+      IF(flux_name == "advection" .AND. entropie_num == 1) THEN
+        IF(u(1) .GT. ke) Flux_entrop =  vit_adv * abs(u(1)-ke)**epsi
+        IF(u(1) .LT. ke) Flux_entrop = -vit_adv * abs(u(1)-ke)**epsi
+      END IF
+
+      RETURN
+    END IF
+  END FUNCTION Flux_entrop
   
+  FUNCTION Var_entrop(u)
+    IMPLICIT NONE
+    REAL(prec), DIMENSION(nb_var) :: Var_entrop
+    REAL(prec), DIMENSION(nb_var) :: u
+    REAL(prec) :: ke = -0.00001_prec
+    REAL(prec) :: epsi = 0.25_prec
 
+    Var_entrop = 0._prec
+
+    IF(nb_var == 1) THEN
+      IF(entropie_num == 0) Var_entrop = u
+      
+      IF(entropie_num == 1) THEN
+        IF(u(1) .GT. ke) Var_entrop = abs( u(1)-ke)**epsi
+        IF(u(1) .LT. ke) Var_entrop =-abs( u(1)-ke)**epsi
+      END IF
+
+      RETURN
+    END IF
+  END FUNCTION Var_entrop
+
+  FUNCTION entrop_pot_flux(u)
+    IMPLICIT NONE
+    REAL(prec) :: entrop_pot_flux
+    REAL(prec),DIMENSION(nb_var) ::u
+    
+    entrop_pot_flux = DOT_PRODUCT(Var_entrop(u),Flux(u)) - Flux_entrop(u)
+
+  END FUNCTION entrop_pot_flux
 END MODULE mod_flux

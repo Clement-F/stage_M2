@@ -223,7 +223,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, DIMENSION(2) :: voi_L,voi_R
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
+    REAL(prec), DIMENSION(nb_var) :: ug,ud, vg,vd, u_Riemann
     REAL(prec), DIMENSION(nb_var) :: DF
     REAL(prec) :: gamma_mp, param
     REAL(prec) :: alpha,beta 
@@ -348,15 +348,39 @@ CONTAINS
         IF(.not. extrema .AND. entropie_rule .GT. 0) THEN 
 
           IF(entropie_rule == 1) THEN 
-            DO ii=1,nb_var
-            IF((ud(ii)-ug(ii))*DF(ii) .GT. eps0 ) theta_temp(1) = min(1._prec, (max_dflux-gamma_mp)*((ud(ii)-ug(ii))/(2._prec *DF(ii))))
-            END DO
-          ELSEIF(entropie_rule==2) THEN 
+
+            IF(DOT_PRODUCT(ud-ug, DF) .GT. eps0) theta_temp = min(1._prec, (max_dflux-gamma_mp)* minval((ud-ug)/(2._prec *DF)) )
             
+            ent = theta_temp(1)
+
+          ELSEIF(entropie_rule==2) THEN 
+
+            vg = Var_entrop(ug); vd = Var_entrop(ud)
+            ! IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) theta_temp = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - &
+            !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) / &
+            !                                                 & (DOT_PRODUCT((vd-vg), DF))
+
+            IF(DOT_PRODUCT(vd-vg, DF) .GT. eps0) theta_temp =& 
+                & ( (entrop_pot_flux(ud)-entrop_pot_flux(ug))     &
+                & -(flux_h(ni)%flux_vf(jj,:)*(vd-vg))) &
+                & /((vd-vg) * DF)
+
+              ! print *,"------------------------"
+            ! write(*,fmt='(f10.6, f10.6, f10.6, f10.6)') vg, vd, vd-vg, DF
+            ! write(*,fmt='(f10.6, f10.6, f10.6)')(entrop_pot_flux(ud)-entrop_pot_flux(ug)), -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)),(DOT_PRODUCT((vd-vg), DF))
+            ! write(*,fmt='(f10.6)')(DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) 
+            ! ! write(*,fmt='(f10.6)') ( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))
+            ! ! write(*,fmt='(f10.6)')( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg))) / (DOT_PRODUCT((vd-vg), DF))
+            ! write(*,fmt='(f10.6)') theta_temp
+
+            theta_temp = max(min(1._prec,theta_temp),0._prec)
+            ent  =min(1._prec,theta_temp(1)) 
+            ! print *,((entrop_pot_flux(ud)-entrop_pot_flux(ug))-DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))/(DOT_PRODUCT((vd-vg), DF))
+
           END IF
-          theta_(ni,jj) = min(theta_(ni,jj),theta_temp(1))
+          theta_(ni,jj) = min(theta_(ni,jj),minval(theta_temp))
         END IF
-          ent = theta_temp(1)
+          
 
         theta_(ni,jj) = max(theta_(ni,jj),0._prec)
         

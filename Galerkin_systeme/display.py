@@ -104,7 +104,7 @@ for k in range(0,sm,1):
 
 
 
-if(True):
+if(False):   
     with open('sol_ex/buckley.dat') as f:
         lines = f.readlines()
         
