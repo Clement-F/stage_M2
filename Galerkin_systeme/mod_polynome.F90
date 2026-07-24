@@ -7,188 +7,6 @@ MODULE mod_polynome
 CONTAINS
 
 
-    FUNCTION sinus(x,ni)
-        IMPLICIT NONE
-        REAL(prec), INTENT(in) :: x
-        INTEGER,    INTENT(in) :: ni
-        REAL(prec) :: sinus 
-        sinus = sin(2._prec*pi*x)
-    END FUNCTION sinus
-    
-    FUNCTION creneau(x,ni)
-        IMPLICIT NONE
-        REAL(prec), INTENT(in) :: x
-        INTEGER,    INTENT(in) :: ni
-        REAL(prec) :: creneau 
-        creneau = eps0
-        if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
-    END FUNCTION creneau
-
-    FUNCTION composite(x,ni) result(res)
-        IMPLICIT NONE
-        REAL(prec), INTENT(in) :: x
-        INTEGER,    INTENT(in) :: ni
-        REAL(prec) :: res 
-
-        REAL(prec), parameter :: delta =0.005_prec, alpha = 10._prec ,z=-0.7_prec,a=0.5_prec
-        REAL(prec), parameter :: beta =LOG(2._prec)/(36._prec*delta**2)
-
-        res = eps0
-        
-            IF((-0.8_prec .LT. x )  .AND. (x .LT. -0.6_prec) ) THEN
-        res = 1._prec/6._prec *(G(x,beta,z-delta) +G(x,beta,z+delta)+4*G(x,beta,z))
-        
-        ELSEIF((-0.4_prec .LT. x )  .AND. (x .LT. -0.2_prec) ) THEN
-        res = 1._prec
-        
-        ELSEIF((  0._prec .LT. x )  .AND. (x .LT.  0.2_prec) ) THEN
-        res = 1-abs(10*(x-0.1_prec))
-        
-        ELSEIF(( 0.4_prec .LT. x )  .AND. (x .LT.  0.6_prec) ) THEN
-        res = 1._prec/6._prec *(F(x,alpha,a-delta) +F(x,alpha,a+delta)+4*F(x,alpha,a))
-
-        END IF
-
-        CONTAINS
-        FUNCTION F(x,alpha,a)
-            IMPLICIT NONE
-            REAL(prec), INTENT(IN) :: x,alpha,a
-            REAL(prec) :: F
-            F = sqrt(max(1-alpha**2 *(x-a)**2, 0._prec))
-        END FUNCTION
-
-        FUNCTION G(x,beta,z)
-            IMPLICIT NONE
-            REAL(prec), INTENT(IN) :: x,beta,z
-            REAL(prec) :: G
-            G = exp(-beta* (x-z)**2)
-        END FUNCTION
-
-    END FUNCTION composite
-
-
-    FUNCTION sod_tube(x,ni,nvar)
-        IMPLICIT NONE
-        REAL(prec), INTENT(IN):: x
-        INTEGER, INTENT(IN) :: ni,nvar
-        REAL(prec) :: sod_tube 
-
-        sod_tube = eps0
-        IF(x .LT. 0.3_prec) THEN
-            IF(nvar==1) sod_tube = 1._prec
-            IF(nvar==2) sod_tube = 0.75_prec
-            IF(nvar==3) sod_tube = 1._prec/(gamma_iso-1._prec) + 0.5_prec* (0.75_prec)**2 
-        ELSE
-            
-            IF(nvar==1) sod_tube = 0.125_prec
-            IF(nvar==2) sod_tube = eps0
-            IF(nvar==3) sod_tube = 0.1_prec/(gamma_iso-1._prec) 
-        END IF
-
-    END FUNCTION sod_tube
-
-    FUNCTION smooth_isentropique(x,ni,nvar)
-        IMPLICIT NONE
-        REAL(prec), INTENT(IN):: x
-        INTEGER, INTENT(IN) :: ni,nvar
-        REAL(prec) :: smooth_isentropique 
-
-        smooth_isentropique = eps0
-
-        if(nvar ==1) smooth_isentropique = 1._prec  +  0.9999999_prec* sin(pi*x)
-        if(nvar ==3) smooth_isentropique = ((1._prec  +  0.999999_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
-
-        if(abs(smooth_isentropique) .LT. eps0) smooth_isentropique = eps0
-
-    END FUNCTION smooth_isentropique
-
-
-    FUNCTION acoustic_wave(x,ni,nvar) result(res)
-        IMPLICIT NONE
-        REAL(prec), INTENT(IN):: x
-        INTEGER, INTENT(IN) :: ni,nvar
-        REAL(prec) :: res 
-
-        res = eps0
-        IF(x .LT. -4._prec) THEN
-            IF(nvar==1) res = 3.857143_prec
-            IF(nvar==2) res = 2.629369_prec *  3.857143_prec
-            IF(nvar==3) res = 10.333333_prec/(gamma_iso-1._prec)  + 0.5_prec* (2.629369_prec)**2 *  3.857143_prec
-        ELSE
-            
-            IF(nvar==1) res = 1._prec + 0.2_prec* sin(5._prec*x)
-            IF(nvar==2) res = eps0
-            IF(nvar==3) res = 1._prec/(gamma_iso-1._prec)
-        END IF
-
-    END FUNCTION acoustic_wave
-
-
-    FUNCTION Blast(x,ni,nvar) result(res)
-        IMPLICIT NONE
-        REAL(prec), INTENT(IN):: x
-        INTEGER, INTENT(IN) :: ni,nvar
-        REAL(prec) :: res 
-
-        res = eps0
-
-        IF(nvar==1) res = 1._prec
-        IF(nvar==2) res = eps0
-        IF(nvar.ne.3) return
-        
-        IF(x .LT. 0.1_prec)                      res = Real(1D3 ,prec)/(gamma_iso-1._prec) 
-        IF(0.1_prec .LT. x .AND. x .LT. 0.9_prec)res = Real(1D-2,prec)/(gamma_iso-1._prec)  
-        IF(0.9_prec .LT. x .AND. x .LT. 1._prec) res = Real(1D2 ,prec)/(gamma_iso-1._prec) 
-
-    END FUNCTION Blast
-
-
-    FUNCTION Q_init(x,ni,nvar)
-        IMPLICIT NONE
-        REAL(prec), INTENT(IN) :: x
-        INTEGER,    INTENT(IN) :: ni,nvar
-        REAL(prec) :: Q_init
-
-        SELECT CASE(TRIM(sol_ini_name))
-        CASE("sinus")
-        Q_init = sinus(x,ni)
-
-        CASE("unit")
-            Q_init = unit(x,ni)
-
-        CASE("Riemann")
-            Q_init = 0._prec
-            if(x<0._prec) Q_init =1._prec
-
-        CASE("creneau")
-            Q_init = creneau(x,ni)
-
-        CASE("composite")
-            Q_init = composite(x,ni)
-
-        CASE("Burgers_choc")
-            Q_init = 0._prec
-            if(0.3_prec<x .and. x<0.7_prec) Q_init = -1._prec
-            if(x>0.7_prec) Q_init = 0.5_prec
-
-        CASE("Sod")
-            Q_init = sod_tube(x,ni,nvar)
-
-        CASE("isentropique")
-            Q_init = smooth_isentropique(x,ni,nvar)
-
-        CASE("acoustic_wave")
-            Q_init = acoustic_wave(x,ni,nvar)
-        CASE("Blast")
-            Q_init = Blast(x,ni,nvar)
-
-        CASE DEFAULT
-        WRITE(*,*) "Sol initiale non reconnue"
-        STOP
-        END SELECT
-
-    END FUNCTION Q_init
-
 ! ---------------------------------------------------------------
 
     FUNCTION eval_poly(YY,ni, base_poly, kk, LOC)
@@ -217,47 +35,47 @@ CONTAINS
 
     END FUNCTION eval_poly
 
-    FUNCTION eval_sol(YY, nvar ,ni, kk, LOC)
+    FUNCTION eval_sol(YY ,ni, kk, LOC)
         IMPLICIT NONE
-        INTEGER, INTENT(in) :: ni,nvar
+        INTEGER, INTENT(in) :: ni
         INTEGER, INTENT(in), optional :: kk
         CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
-        REAL(prec) :: eval_sol 
+        REAL(prec), DIMENSION(nb_var) :: eval_sol 
         INTEGER :: ii
         eval_sol= 0._prec
 
         IF(.not. present(kk)) THEN
             counter1 = counter1 +1
             DO ii = 1,size_base
-                eval_sol = eval_sol + sol(ni)%base_poly(ii,nvar) * DG_base(YY,ii,LOC,ni)
+                eval_sol = eval_sol + sol(ni)%base_poly(ii,:) * DG_base(YY,ii,LOC,ni)
             END DO
         ELSE 
             counter2 = counter2 +1
             DO ii = 1,size_base
-                eval_sol = eval_sol + sol(ni)%base_poly(ii,nvar) * sig_quad(ii,kk)
+                eval_sol = eval_sol + sol(ni)%base_poly(ii,:) * sig_quad(ii,kk)
             END DO
         END IF
 
     END FUNCTION eval_sol
     
-    FUNCTION eval_step(YY,nvar,ni,kk, LOC)
+    FUNCTION eval_step(YY,ni,kk, LOC)
         IMPLICIT NONE
-        INTEGER, INTENT(in) :: ni,nvar
+        INTEGER, INTENT(in) :: ni
         INTEGER, INTENT(in), optional :: kk
         CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
-        REAL(prec) :: eval_step 
+        REAL(prec), DIMENSION(nb_var) :: eval_step 
         INTEGER :: ii
         eval_step= 0._prec
         
         IF(.not. present(kk)) THEN
             DO ii = 1,size_base
-                eval_step = eval_step + sol_step(ni)%base_poly(ii,nvar) * DG_base(YY,ii, LOC,ni)
+                eval_step = eval_step + sol_step(ni)%base_poly(ii,:) * DG_base(YY,ii, LOC,ni)
             END DO
         ELSE 
             DO ii = 1,size_base
-                eval_step  = eval_step + sol_step(ni)%base_poly(ii,nvar) * sig_quad(ii,kk)
+                eval_step  = eval_step + sol_step(ni)%base_poly(ii,:) * sig_quad(ii,kk)
             END DO
         END IF
 
@@ -852,6 +670,52 @@ CONTAINS
 
     END SUBROUTINE Projection_Pk
 
+    SUBROUTINE Projection_Soli(soli, sol ,LOC ,ni ,sol_val)
+        IMPLICIT NONE
+
+        INTEGER, INTENT(IN) :: ni
+        REAL(prec), DIMENSION(size_base, nb_var), INTENT(OUT) :: sol
+        REAL(prec), DIMENSION(nb_nodes , nb_var), INTENT(IN), optional :: sol_val
+        REAL(prec), DIMENSION(size_base, nb_var) :: solh
+
+        CHARACTER (len=8),  INTENT(IN) :: LOC
+        REAL(prec) :: YY
+        INTEGER :: jj, kk
+
+            INTERFACE
+            FUNCTION soli(YY,ni,nb_var)
+                USE precis
+                IMPLICIT NONE
+                INTEGER,    INTENT(IN) :: ni,nb_var
+                REAL(prec), INTENT(IN) :: YY
+                REAL(prec), DIMENSION(nb_var) :: soli
+            END FUNCTION soli
+            END INTERFACE
+
+        solh =  0._prec
+        IF(.not. present(sol_val)) THEN
+        DO jj =size_base,1,-1
+            DO kk =1,nb_nodes
+
+                IF(TRIM(LOC) == "Loc") YY = Ref_to_loc(ni,x_quad(kk))
+                IF(TRIM(LOC) == "Ref") YY = x_quad(kk)
+
+                solh(jj,:) = solh(jj,:) + soli(YY,ni,nb_var)*sig_quad(jj,kk)*w_quad(kk)
+            END DO
+        END DO
+
+        ELSEIF(  present(sol_val)) THEN
+        DO jj =size_base,1,-1
+            DO kk =1,nb_nodes
+                solh(jj,:) = solh(jj,:) + sol_val(kk,:)*sig_quad(jj,kk)*w_quad(kk)
+            END DO
+        END DO
+        END IF
+
+        sol = MATMUL(Masse_inv,solh)
+
+    END SUBROUTINE Projection_Soli
+
     SUBROUTINE Matrice_Masse_init
         IMPLICIT NONE
 
@@ -1296,7 +1160,6 @@ CONTAINS
        END DO
 
     END DO
-
   END SUBROUTINE decomp_LU
 
 END MODULE mod_polynome

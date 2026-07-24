@@ -36,6 +36,32 @@ CONTAINS
     END SELECT
   END FUNCTION flux
 
+
+    SUBROUTINE Projection_Flux
+      IMPLICIT NONE
+      INTEGER :: ni,jj,kk,ii
+      REAL(prec), DIMENSION(nb_var) :: f_loc
+      REAL(prec), DIMENSION(nb_var)            :: u_loc
+      REAL(prec), DIMENSION(size_base, nb_var) :: fh_loc
+      DO ni= 1,nb_cell
+
+        fh_loc = 0._prec
+
+        DO kk =1,nb_nodes
+          u_loc = sol_step(ni)%val_quad(kk,:)
+          f_loc = flux(u_loc)
+        DO jj =size_base,1,-1
+                fh_loc(jj,:) = fh_loc(jj,:) + f_loc*sig_quad(jj,kk)*w_quad(kk)
+        END DO
+        END DO
+
+        flux_h(ni)%flux_DG = MATMUL(Masse_inv,  fh_loc)
+
+      END DO
+
+    END SUBROUTINE Projection_Flux
+
+
   FUNCTION pression(u) result(p)
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(in) :: u
@@ -45,22 +71,6 @@ CONTAINS
 
   END FUNCTION pression
 
-  FUNCTION flux_uh(x,ni, nvar)
-    IMPLICIT NONE
-    INTEGER, INTENT(IN) :: ni,nvar
-    REAL(prec), INTENT(IN) :: x
-    REAL(prec) :: flux_uh
-    REAL(prec), DIMENSION(nb_var) :: U, flux_temp
-    INTEGER :: i
-
-    DO i=1,nb_var
-      U(i) = eval_step(x,nvar=i,ni=ni, LOC=LLoc)
-    END DO
-
-    flux_temp = flux(U)
-    flux_uh = flux_temp(nvar)
-
-  END FUNCTION flux_uh
 
   FUNCTION Flux_FV(u,v)
     IMPLICIT NONE

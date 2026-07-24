@@ -1,5 +1,6 @@
 MODULE mod_RKDG 
    use mod_Monolith
+   use mod_SolIni
    use mod_Divers
   IMPLICIT NONE
 
@@ -9,8 +10,7 @@ CONTAINS
   SUBROUTINE flux_numerique
     IMPLICIT NONE
     INTEGER :: ni,ii,jj
-    REAL(prec), DIMENSION(nb_nodes, nb_var) :: flux_uh_val
-    REAL(prec), DIMENSION(nb_var) :: ug,ud,u_temp, DF
+    REAL(prec), DIMENSION(nb_var) :: ug,ud, DF
 
     REAL(prec) :: x_s
     REAL(prec) :: fh_L, fh_R, gamma_mp, theta_mp
@@ -56,19 +56,12 @@ CONTAINS
 
 
     END DO
-    DO ni = 1,nb_cell
-      DO ii=1,nb_nodes
-        u_temp = sol_step(ni)%val_quad(ii,:)
-        flux_uh_val(ii,:) = flux(u_temp)
-      END DO
-
-      DO ii = 1,nb_var
-        CALL Projection_Pk(flux_uh,flux_h(ni)%flux_DG(:,ii),LOC= LLoc,ni =ni, nvar =ii, fct_val= flux_uh_val(:,ii))
-      END DO
-    END DO
+    
+    CALL Projection_Flux
     
     IF(subcell_use) THEN
       
+    ! TO CHANGE
     DO ni = 1,nb_cell; DO ii = 1,nb_var
       ! F(uh(x)) .ne. Fh(x)
       fh_L = eval_poly(-1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
@@ -76,7 +69,6 @@ CONTAINS
 
       DO jj =1,nb_subcell+1
         x_s = x_subcell(jj)
-
         flux_h(ni)%flux_subcells(jj,ii) = eval_poly(x_s,ni=ni, base_poly=flux_h(ni)%flux_DG(:,ii),LOC= LRef) &
                                         & - C_m(jj)*(fh_L-g(ni  ,ii)) &
                                         & - C_p(jj)*(fh_R-g(ni+1,ii))
@@ -122,7 +114,7 @@ CONTAINS
     INTEGER :: ni, tni
 
     INTEGER :: ii,jj
-    REAL(prec), DIMENSION(size_base) :: V_B, S_B, BB,L_step
+    REAL(prec), DIMENSION(size_base,nb_var) :: V_B, S_B, BB,L_step
 
 
     DO ni=1,nb_cell
@@ -137,52 +129,54 @@ CONTAINS
       
       CALL flux_numerique
       ! print *,"========================="
+      ! TO CHANGE
+      DO ni =1,nb_cell;     
 
-      DO ni =1,nb_cell;     DO jj=1,nb_var
+        V_B = MATMUL(Rigid,flux_h(ni)%flux_DG(:,:))
+        DO jj=1,nb_var
+        S_B(:,jj) = -(g(ni+1,jj)*sig_2 - g(ni,jj)*sig_1)
+        END DO
 
-        V_B = MATMUL(Rigid,flux_h(ni)%flux_DG(:,jj))
-        S_B = -(g(ni+1,jj)*sig_2 - g(ni,jj)*sig_1)
         BB  = (V_B + S_B)
-        ! write(*,fmt='(  3( 2(f10.6) ) )')V_B,S_B,BB
-        
+                
         L_step = MATMUL(Masse_inv, BB)*(2._prec/(cell_size(ni))) 
 
-        sol_step(ni)%base_poly(:,jj) = RK_alpha(tni,1) * sol(ni)%base_poly(:,jj)& 
-                                    &+ RK_alpha(tni,2) * sol_step(ni)%base_poly(:,jj) &
+        sol_step(ni)%base_poly(:,:) = RK_alpha(tni,1) * sol(ni)%base_poly(:,:)& 
+                                    &+ RK_alpha(tni,2) * sol_step(ni)%base_poly(:,:) &
                                     &+ RK_beta(tni)    * dt * L_step
                           
         DO ii=1,nb_nodes          
-          sol_step(ni)%val_quad(ii,jj)  = eval_step(x_quad(ii),nvar= jj,ni=ni,kk= ii,LOC= LRef )
+          sol_step(ni)%val_quad(ii,:)  = eval_step(x_quad(ii),ni=ni,kk= ii,LOC= LRef )
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,jj)      = sol_step(ni)%val_quad(1,jj)
-          sol_step(ni)%inter(2,jj)      = sol_step(ni)%val_quad(nb_nodes,jj)
+          sol_step(ni)%inter(1,:)      = sol_step(ni)%val_quad(1,jj)
+          sol_step(ni)%inter(2,:)      = sol_step(ni)%val_quad(nb_nodes,jj)
         ELSE 
-          sol_step(ni)%inter(1,jj)      = eval_step(x_cell(ni),  ni=ni, LOC= LLoc, nvar=jj)
-          sol_step(ni)%inter(2,jj)      = eval_step(x_cell(ni+1),ni=ni, LOC= LLoc, nvar=jj)
+          sol_step(ni)%inter(1,:)      = eval_step(x_cell(ni),  ni=ni, LOC= LLoc)
+          sol_step(ni)%inter(2,:)      = eval_step(x_cell(ni+1),ni=ni, LOC= LLoc)
         END IF
 
-      END DO; END DO
+      END DO
     END DO
 
     ! print *,"---------------------"
 
-    DO ni=1,nb_cell; DO jj=1,nb_var
+    DO ni=1,nb_cell
         sol(ni)%base_poly  = sol_step(ni)%base_poly
 
         DO ii=1,nb_nodes          
-          sol(ni)%val_quad(ii,jj)  = eval_sol(x_quad(ii),nvar= jj,ni=ni,kk= ii,LOC= LRef )
+          sol(ni)%val_quad(ii,:)  = eval_sol(x_quad(ii),ni=ni,kk= ii,LOC= LRef )
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol(ni)%inter(1,jj)      = sol(ni)%val_quad(1,jj)
-          sol(ni)%inter(2,jj)      = sol(ni)%val_quad(nb_nodes,jj)
+          sol(ni)%inter(1,:)      = sol(ni)%val_quad(1,jj)
+          sol(ni)%inter(2,:)      = sol(ni)%val_quad(nb_nodes,jj)
         ELSE 
-          sol(ni)%inter(1,jj)      = eval_sol(x_cell(ni),  ni=ni,LOC=LLoc,nvar=jj)
-          sol(ni)%inter(2,jj)      = eval_sol(x_cell(ni+1),ni=ni,LOC=LLoc,nvar=jj)
+          sol(ni)%inter(1,:)      = eval_sol(x_cell(ni),  ni=ni,LOC=LLoc)
+          sol(ni)%inter(2,:)      = eval_sol(x_cell(ni+1),ni=ni,LOC=LLoc)
         END IF
-    END DO; END DO
+    END DO
 
 
   END SUBROUTINE Time_step
@@ -192,7 +186,7 @@ CONTAINS
     INTEGER :: ni
 
     INTEGER :: ii,jj,kk
-    REAL(prec) :: L
+    REAL(prec), DIMENSION(nb_var) :: L
 
     outed_mesh = 0
 
@@ -206,40 +200,38 @@ CONTAINS
     DO ii=1,order_t
       CALL flux_numerique
       
-      DO ni = 1,nb_cell;  DO kk=1,nb_var 
+      DO ni = 1,nb_cell;
 
         DO jj =1,nb_subcell
           
-          L = (flux_h(ni)%flux_subcells(jj+1,kk)- flux_h(ni)%flux_subcells(jj,kk))
+          L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
 
-          sol_step(ni)%val_subcells(jj,kk)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,kk) &
-                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,kk) &
+          sol_step(ni)%val_subcells(jj,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,:) &
+                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
                                         &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
                                                                       
-        END DO; END DO
+        END DO
       END DO
 
-      DO ni = 1,nb_cell; DO kk=1,nb_var 
+      DO ni = 1,nb_cell;
 
-        DO jj=1,size_base
-          sol_step(ni)%base_poly(jj,kk) = DOT_PRODUCT(Projection_VF_inv(jj,:), sol_step(ni)%val_subcells(:,kk))
-        END DO
+        sol_step(ni)%base_poly(:,:) = MATMUL(Projection_VF_inv(:,:), sol_step(ni)%val_subcells(:,:))
 
         DO jj=1,nb_nodes
-          sol_step(ni)%val_quad(jj,kk)  = eval_step(x_quad(jj),nvar=kk,ni=ni, kk=jj, LOC= LRef)
+          sol_step(ni)%val_quad(jj,:)  = eval_step(x_quad(jj),ni=ni, kk=jj, LOC= LRef)
         END DO
         
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,kk)      = sol_step(ni)%val_quad(1       ,kk)
-          sol_step(ni)%inter(2,kk)      = sol_step(ni)%val_quad(nb_nodes,kk)
+          sol_step(ni)%inter(1,:)      = sol_step(ni)%val_quad(1       ,:)
+          sol_step(ni)%inter(2,:)      = sol_step(ni)%val_quad(nb_nodes,:)
         ELSE 
-          sol_step(ni)%inter(1,kk)      = eval_step(x_cell(ni),   nvar=kk,ni=ni,LOC= LLoc)
-          sol_step(ni)%inter(2,kk)      = eval_step(x_cell(ni+1), nvar=kk,ni=ni,LOC= LLoc)
+          sol_step(ni)%inter(1,:)      = eval_step(x_cell(ni),   ni=ni,LOC= LLoc)
+          sol_step(ni)%inter(2,:)      = eval_step(x_cell(ni+1), ni=ni,LOC= LLoc)
         END IF
 
-      END DO; END DO
+      END DO
 
-      IF(max_check .GT. 0) CALL Error_check
+      ! IF(max_check .GT. 0) CALL Error_check
 
     END DO
 
@@ -361,9 +353,7 @@ CONTAINS
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
             IF(TRIM(flux_name) == "advection") THEN       
-              DO k=1,nb_var        
-              out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)
-              END DO
+              out_ex =Q_init(xi - time*vit_adv,0,nb_var)
 
             ELSE IF(nb_var ==1) THEN
               call pied_charact(xi,time,out_ex)
@@ -397,10 +387,8 @@ CONTAINS
 
             out = sol(i)%val_quad(j,:)
 
-            IF(TRIM(flux_name) == "advection") THEN       
-              DO k=1,nb_var        
-              out_ex(k) =Q_init(xi - time*vit_adv,0,nvar=k)
-              END DO
+            IF(TRIM(flux_name) == "advection") THEN     
+              out_ex =Q_init(xi - time*vit_adv,0,nb_var)
 
             ELSE IF(nb_var ==1) THEN
               call pied_charact(xi,time,out_ex)
@@ -470,10 +458,11 @@ CONTAINS
     END IF
   END SUBROUTINE writout
   
-  subroutine pied_charact(x,t,sol)
+  SUBROUTINE pied_charact(x,t,sol)
 
     REAL(prec), INTENT(IN) :: x,t
     REAL(prec), DIMENSION(nb_var) , intent(out):: sol
+    REAL(prec), DIMENSION(nb_var) :: Up, Um
     REAL(prec) :: w_p,w_m
     REAL(prec) :: xd,xf, x_m,x_p, c,u
 
@@ -487,13 +476,14 @@ CONTAINS
       xd = xL-eps0; xf = xR+eps0
     END IF
 
-    IF(nb_var ==1)    sol = Q_init(dicho(h,xd,xf),0,1)
+    IF(nb_var ==1)    sol = Q_init(dicho(h,xd,xf),0,nb_var)
 
     IF(sol_ini_name == "isentropique") THEN
-      x_m = dicho(Burg_Wm,xd,xf);    x_p = dicho(Burg_Wp,xd,xf)
+      x_m = dicho(Burg_Wm,xd,xf);   x_p = dicho(Burg_Wp,xd,xf)
+      Um  = Q_init(x_m,0,nb_var);   Up  =Q_init(x_p,0,nb_var)
 
-      w_m = Q_init(x_m,0,2)/Q_init(x_m,0,1) - 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_m,0,1) 
-      w_p = Q_init(x_p,0,2)/Q_init(x_p,0,1) + 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_p,0,1) 
+      w_m = Um(2)/Um(1) - 2/(gamma_iso-1)*sqrt(gamma_iso) *Um(1) 
+      w_p = Up(2)/Up(1) + 2/(gamma_iso-1)*sqrt(gamma_iso) *Up(1) 
 
       c = (gamma_iso-1._prec)/4._prec * (w_p-w_m) 
       u = (w_m+w_p)/2._prec
@@ -509,16 +499,19 @@ CONTAINS
         use precis
         REAL(prec),INTENT(IN) :: x_
         REAL(prec)  :: h
-        h = flux_d(Q_init(x_,0,1))*t + x_ -x
+        REAL(prec),DIMENSION(nb_var) :: Um
+        Um  =Q_init(x_,0,nb_var)
+        h = flux_d(Um(1))*t + x_ -x
         return 
     END FUNCTION h
 
     FUNCTION Burg_Wm(x_)
         use precis
         REAL(prec),INTENT(IN) :: x_
+        REAL(prec),DIMENSION(nb_var) :: Um
         REAL(prec)  :: Burg_Wm, W_m
-
-        W_m = Q_init(x_,0,2)/Q_init(x_,0,1) - 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_,0,1) 
+        Um  =Q_init(x_,0,nb_var)
+        W_m = Um(2)/Um(1)- 2/(gamma_iso-1)*sqrt(gamma_iso) * Um(1)
         Burg_Wm = W_m*t + x_ -x
 
         return 
@@ -527,15 +520,16 @@ CONTAINS
     FUNCTION Burg_Wp(x_)
         use precis
         REAL(prec),INTENT(IN) :: x_
+        REAL(prec),DIMENSION(nb_var) :: Up
         REAL(prec)  :: Burg_Wp, W_p
-
-        W_p = Q_init(x_,0,2)/Q_init(x_,0,1) + 2/(gamma_iso-1)*sqrt(gamma_iso) * Q_init(x_,0,1) 
+        Up  =Q_init(x_,0,nb_var)
+        W_p = Up(2)/Up(1)+ 2/(gamma_iso-1)*sqrt(gamma_iso) * Up(1)
         Burg_Wp = W_p*t + x_ -x
 
         return 
     END FUNCTION Burg_Wp
 
-  END subroutine pied_charact
+  END SUBROUTINE pied_charact
 
 
   SUBROUTINE Out_The_Mesh(ti)
@@ -599,8 +593,6 @@ CONTAINS
     ! print *,"error check"
     ! minmax rule
     DO i=1,nb_cell;       DO k=1,nb_var
-
-
       min_ = minmax_loc((/i,0/),'min',k)
       max_ = minmax_loc((/i,0/),'max',k)
 

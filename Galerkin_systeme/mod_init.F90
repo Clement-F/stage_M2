@@ -1,5 +1,6 @@
 MODULE mod_init
     USE mod_polynome
+    USE mod_SolIni
     IMPLICIT NONE
     
 CONTAINS
@@ -17,14 +18,14 @@ CONTAINS
     
         IF( TRIM(nomfile_sol) == " ") nomfile_sol = "file_sol"
 
-        nomfile_solex = TRIM(nomfile_sol)//"ex.txt"
-        nomfile_sol = TRIM(nomfile_sol)//".txt"
+        nomfile_solex   = TRIM(nomfile_sol)//"ex.txt"
+        nomfile_sol     = TRIM(nomfile_sol)//".txt"
 
         IF((DG_meth)=="Lobatto")  size_base = order_x 
         IF((DG_meth)=="Legendre") size_base = order_x 
 
-        if((quad_meth)=="Lobatto") nb_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
-        if((quad_meth)=="Legendre")nb_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
+        IF((quad_meth)=="Lobatto") nb_nodes = size_base+1        !CEILING((2*(size_base-1)+3 )/2.) 
+        IF((quad_meth)=="Legendre")nb_nodes = size_base          !CEILING((2*(size_base-1)+1 )/2.) 
 
         SELECT Case(trim(flux_name))
         Case("advection")  
@@ -92,48 +93,41 @@ CONTAINS
 
         CALL Coeff_RK_init(order_t)
         CALL Matrice_Masse_init
-
-
         CALL Matrice_Rigid_init
-
         IF(subcell_use) CALL sub_cells_init
 
-
         DO ni=1,nb_cell
-            
             IF(subcell_use) THEN
-                DO ii=1,nb_var
                 DO j =1,nb_subcell; DO kk =1,nb_nodes
                     YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
-                    sol(ni)%val_subcells(j,ii) = sol(ni)%val_subcells(j,ii) + Q_init(YY,ni=ni,nvar=ii)*w_quad(kk)/2._prec
+                    sol(ni)%val_subcells(j,:) = sol(ni)%val_subcells(j,:) + Q_init(YY,ni,nb_var)*w_quad(kk)/2._prec
                 END DO; END DO
             
                 DO j=1,size_base
-                    sol(ni)%base_poly(j,ii) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
+                DO ii=1,nb_var
+                    sol(ni)%base_poly(j,:) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
                 END DO
-
                 END DO
-
             ELSE 
                 DO ii=1,nb_var
-                    CALL Projection_Pk(Q_init,sol(ni)%base_poly(:,ii), LOC=LLoc, ni= ni, nvar = ii)
+                    CALL Projection_Soli(Q_init,sol(ni)%base_poly(:,ii), LOC=LLoc, ni= ni)
                 END DO
             END IF
 
 
-            DO jj=1,nb_var; DO ii=1,nb_nodes
+            DO ii=1,nb_nodes
                 
-                sol(ni)%val_quad(ii,jj)  = eval_sol(x_quad(ii),ni= ni,nvar=jj, kk=ii, LOC= LRef)
+                sol(ni)%val_quad(ii,:)  = eval_sol(x_quad(ii),ni= ni,kk=ii, LOC= LRef)
                         
                 IF((quad_meth)=="Lobatto") THEN
-                sol(ni)%inter(1,jj)      = sol(ni)%val_quad(1,jj)
-                sol(ni)%inter(2,jj)      = sol(ni)%val_quad(nb_nodes,jj)
+                sol(ni)%inter(1,:)      = sol(ni)%val_quad(1,:)
+                sol(ni)%inter(2,:)      = sol(ni)%val_quad(nb_nodes,:)
                 ELSE 
-                sol(ni)%inter(1,jj)      = eval_sol(x_cell(ni),ni= ni,nvar=jj  ,LOC=LLoc)
-                sol(ni)%inter(2,jj)      = eval_sol(x_cell(ni+1),ni= ni,nvar=jj,LOC=LLoc)
+                sol(ni)%inter(1,:)      = eval_sol(x_cell(ni),ni= ni  ,LOC=LLoc)
+                sol(ni)%inter(2,:)      = eval_sol(x_cell(ni+1),ni= ni,LOC=LLoc)
                 END IF
             
-            END DO; END DO
+            END DO
 
         END DO
 
