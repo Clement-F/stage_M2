@@ -226,7 +226,8 @@ CONTAINS
         read(numfile_param,  *) error_calc; 
         read(numfile_param,  *) mesh_out; 
         read(numfile_param,  *) max_check; 
-        read(numfile_param,  *) print_rule;     
+        read(numfile_param,  *) print_rule;   
+        read(numfile_param,  *) exact_time;     
         read(numfile_param,  *) nomfile_sol;     
 
         CALL Skip_lines(numfile_param,3)

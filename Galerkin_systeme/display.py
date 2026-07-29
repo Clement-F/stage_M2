@@ -39,7 +39,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,1):
+for k in range(0,sm,5):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][10:27]
@@ -86,7 +86,7 @@ for k in range(0,sm,1):
         #plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
-    plt.plot(X,P_[k,:],'k-x')
+    #plt.plot(X,P_[k,:],'k-.')
     #m=-.2; M=1.2
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)

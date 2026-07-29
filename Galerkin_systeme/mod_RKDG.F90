@@ -61,7 +61,6 @@ CONTAINS
     
     IF(subcell_use) THEN
       
-    ! TO CHANGE
     DO ni = 1,nb_cell; DO ii = 1,nb_var
       ! F(uh(x)) .ne. Fh(x)
       fh_L = eval_poly(-1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
@@ -133,10 +132,8 @@ CONTAINS
       DO ni =1,nb_cell;     
 
         V_B = MATMUL(Rigid,flux_h(ni)%flux_DG(:,:))
-        DO jj=1,nb_var
-        S_B(:,jj) = -(g(ni+1,jj)*sig_2 - g(ni,jj)*sig_1)
-        END DO
 
+        DO jj=1,nb_var;   S_B(:,jj) = -(g(ni+1,jj)*sig_2 - g(ni,jj)*sig_1);   END DO
         BB  = (V_B + S_B)
                 
         L_step = MATMUL(Masse_inv, BB)*(2._prec/(cell_size(ni))) 
@@ -258,19 +255,11 @@ CONTAINS
       max_dflux = abs(vit_adv)
     ELSE 
       max_dflux = 0._prec
-        DO i=1,nb_cell;
-        nxt_ = Voisin_quad(i,nb_nodes,'R')
-
-        u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)
-        gamma_temp = gamma_calc(u_, v_)
-                  
-        max_dflux = max(max_dflux, gamma_temp)
-      END DO
 
       IF(flux_num ==1 ) THEN;
 
         IF(monolithique) THEN
-        gamma_bf =eps0; dt_loc = 2._prec
+          gamma_bf =eps0; dt_loc = 2._prec
 
           DO i=1,nb_cell;    DO j=1,nb_subcell
             nxt_ = Voisin_Face(i,j,'R')
@@ -291,21 +280,43 @@ CONTAINS
             gamma_bf = gamma_temp
           END DO;END DO 
 
+        ELSE 
+
+          DO i=1,nb_cell;
+            nxt_ = Voisin_quad(i,nb_nodes,'R')
+
+            u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)
+            gamma_temp = gamma_calc(u_, v_)
+                      
+            max_dflux = max(max_dflux, gamma_temp)
+          END DO
         END IF
 
       ELSE IF(flux_num == 0) THEN; 
         ! print *, max_dflux
+        DO i=1,nb_cell;
+          nxt_ = Voisin_quad(i,nb_nodes,'R')
+
+          u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)
+          gamma_temp = gamma_calc(u_, v_)
+                    
+          max_dflux = max(max_dflux, gamma_temp)
+        END DO
         dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))       
       END IF
 
     END IF
 
     if(.not. monolithique) dt_loc =  2._prec
-    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux),Time_stemp(n_imp+1)-time, dt_loc)
+    
+    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux), tmax-time, dt_loc)
+    IF(exact_time) dt = min(dt, Time_stemp(n_imp+1)-time)
 
     IF((order_x .GT. order_t).AND. convergence ) THEN
-      IF(      monolithique) dt = min(Time_stemp(n_imp+1)-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)), dt_loc**(Real(order_x,prec)/Real(order_t,prec)))
-      IF(.not. monolithique) dt = min(Time_stemp(n_imp+1)-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)))
+      IF(      monolithique) dt = min(tmax-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)), dt_loc**(Real(order_x,prec)/Real(order_t,prec)))
+      IF(.not. monolithique) dt = min(tmax-time  +10._prec**(-10),CFL*(dx/(REAL(2*order_x-1,prec)*max_dflux))**(Real(order_x,prec)/Real(order_t,prec)))
+
+      IF(exact_time) dt = min(dt, Time_stemp(n_imp+1)-time  +10._prec**(-10))
     END IF 
 
     IF(dt .LT. 10._prec**(-20) .AND. (time+dt .LT.Time_stemp(n_imp+1))) THEN
@@ -324,12 +335,14 @@ CONTAINS
   SUBROUTINE writout(switch)
     IMPLICIT NONE
 
-    INTEGER :: i,j,k
+    INTEGER :: i,j
     REAL(prec), DIMENSION(nb_var) :: out, out_ex
     REAL(prec) :: xi
     REAL(prec) :: err1 , err2, errLi, entropy
+
     LOGICAL, optional :: switch
     LOGICAL :: force
+    
     Character(len=63) :: save_format
 
     IF(present(switch)) THEN; force = switch

@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-20              | noeuds du maillage 
--10D-1             | xd
-10D-1              | xf
-10D-2            | T
+50              | noeuds du maillage 
+-50D-1             | xd
+50D-1              | xf
+180D-2            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -19,14 +19,14 @@ True            | Monolithique      (True, False)
 0               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
 --------------------------------------------------
 2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-0               | coefficient smoothening : Null(0), min(1), mean(2)
+1               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
-7               | nb subcellules du sous maillage
+9               | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
 =================================================
     Paramètres DG
 =================================================
-6               | ordre espace
+8               | ordre espace
 3               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
@@ -36,16 +36,17 @@ Lobatto        | quadrature (Legendre,Lobatto)
 0.7             | cfl
 False           | Convergence   (True, False)
 False           | Error calc    (True, False)
-True            | Mesh out      (True, False)
+False            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-10              | print rule
+20              | print rule
+False            | exact time
 solSub          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-isentropique    | solution initiale :
+acoustic_wave    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
 Euler           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-period          | condition au bord (period, Sym, Solid)
+Sym          | condition au bord (period, Sym, Solid)

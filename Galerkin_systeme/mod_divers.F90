@@ -322,4 +322,25 @@ CONTAINS
 
   END SUBROUTINE display_time
     
+  SUBROUTINE Knapsack_greedy(item_pr,item_volume,volume_cstr,item_cstr,nb_item)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: nb_item
+    REAL(prec), DIMENSION(nb_item), INTENT(OUT) :: item_pr
+    REAL(prec), DIMENSION(nb_item), INTENT(IN) :: item_volume
+    REAL(prec), DIMENSION(nb_item), INTENT(IN) :: item_cstr
+    REAL(prec), INTENT(IN) :: volume_cstr
+
+    REAL(prec), DIMENSION(nb_item) :: item_in
+    INTEGER :: i_maxloc
+    item_in = item_cstr
+    DO WHILE(DOT_PRODUCT(item_in, item_volume) .GT. volume_cstr)
+        i_maxloc = MAXLOC(item_volume,DIM =nb_item)
+        item_in(i_maxloc) = 0._prec
+        IF(DOT_PRODUCT(item_in, item_volume) .LT. volume_cstr) THEN 
+            item_in(i_maxloc) = (volume_cstr-DOT_PRODUCT(item_in, item_volume))/item_volume(i_maxloc)
+        END IF
+    END DO
+    item_pr = item_in
+  END SUBROUTINE Knapsack_greedy
+
 END MODULE mod_Divers

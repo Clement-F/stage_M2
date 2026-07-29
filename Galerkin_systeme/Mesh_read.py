@@ -37,7 +37,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-0.; xR=1.
+xL=-1.; xR=1.
     
 plt.pcolormesh(X, T, theta_, shading='auto', cmap='viridis')
 plt.xlim(xL,xR)

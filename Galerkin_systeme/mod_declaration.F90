@@ -55,9 +55,9 @@ MODULE mod_declaration
 
   REAL(prec) :: min_glob, max_glob
 
-  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, convergence, mesh_out
-  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema,  &
-              &flux_num, entropie_rule, entropie_num, positivity
+  LOGICAL*1 :: subcell_use, convex_flux, monolithique, error_calc, convergence, mesh_out, exact_time
+  INTEGER   :: max_rule, coeff_smooth, max_check, smooth_extrema  
+  INTEGER   :: flux_num, entropie_rule, entropie_num, positivity
   INTEGER :: nb_prd_ini,nb_prd_max,nb_prd_sec
 
 
