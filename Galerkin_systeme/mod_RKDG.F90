@@ -10,10 +10,10 @@ CONTAINS
   SUBROUTINE flux_numerique
     IMPLICIT NONE
     INTEGER :: ni,ii,jj
-    REAL(prec), DIMENSION(nb_var) :: ug,ud, DF
+    REAL(prec), DIMENSION(nb_var) :: ug,ud, DF,theta_mp
 
     REAL(prec) :: x_s
-    REAL(prec) :: fh_L, fh_R, gamma_mp, theta_mp
+    REAL(prec) :: fh_L, fh_R, gamma_mp
     INTEGER, DIMENSION(2) :: voi_L,voi_R
 
     DO ni = 1,nb_cell+1
@@ -95,9 +95,9 @@ CONTAINS
 
       DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
 
-      IF(coeff_smooth == 0)theta_mp =     theta_(ni,jj)
-      IF(coeff_smooth == 1)theta_mp = Min(theta_(ni,jj), 0.5_prec*(subcells_(voi_L(1),voi_L(2))%theta + subcells_(voi_R(1),voi_R(2))%theta)  )
-      IF(coeff_smooth == 2)theta_mp = Min(theta_(ni,jj), Min(      subcells_(voi_L(1),voi_L(2))%theta,  subcells_(voi_R(1),voi_R(2))%theta)  )
+      IF(coeff_smooth == 0)theta_mp =     theta_(ni,jj,:)
+      IF(coeff_smooth == 1)theta_mp = Min(theta_(ni,jj,:), 0.5_prec*(subcells_(voi_L(1),voi_L(2))%theta + subcells_(voi_R(1),voi_R(2))%theta)  )
+      IF(coeff_smooth == 2)theta_mp = Min(theta_(ni,jj,:), Min(      subcells_(voi_L(1),voi_L(2))%theta,  subcells_(voi_R(1),voi_R(2))%theta)  )
 
       flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) +theta_mp*DF
     END DO; END DO
@@ -163,7 +163,7 @@ CONTAINS
         sol(ni)%base_poly  = sol_step(ni)%base_poly
 
         DO ii=1,nb_nodes          
-          sol(ni)%val_quad(ii,:)  = eval_sol(x_quad(ii),ni=ni,kk= ii,LOC= LRef )
+          sol(ni)%val_quad(ii,:)  = eval_sol(x_quad(ii),ni=ni,kquad= ii,LOC= LRef )
         END DO
 
         IF(TRIM(quad_meth)=="Lobatto") THEN
@@ -195,11 +195,10 @@ CONTAINS
     END DO
 
     DO ii=1,order_t
+      ! print *,"------------------"
       CALL flux_numerique
       
-      DO ni = 1,nb_cell;
-
-        DO jj =1,nb_subcell
+      DO ni = 1,nb_cell;DO jj =1,nb_subcell
           
           L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
 
@@ -207,8 +206,7 @@ CONTAINS
                                         &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
                                         &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
                                                                       
-        END DO
-      END DO
+      END DO; END DO
 
       DO ni = 1,nb_cell;
 
@@ -449,9 +447,9 @@ CONTAINS
       END IF
 
       IF(monolithique) THEN
-      write(*, fmt ='("avg theta = ", f12.6)')  Sum(subcells_(:,:)%theta)/REAL((nb_cell)*(nb_subcell),prec)
-      write(*, fmt ='("max theta = ", f12.6)')  maxval(subcells_(:,:)%theta)
-      write(*, fmt ='("min theta = ", f12.6)')  minval(subcells_(:,:)%theta)
+      write(*, fmt ='("avg theta = ", f10.6, f10.6, f10.6)')  Sum(subcells_(:,:)%theta(1))/REAL((nb_cell)*(nb_subcell),prec), Sum(subcells_(:,:)%theta(2))/REAL((nb_cell)*(nb_subcell),prec), Sum(subcells_(:,:)%theta(3))/REAL((nb_cell)*(nb_subcell),prec)
+      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)')  maxval(subcells_(:,:)%theta(1)), maxval(subcells_(:,:)%theta(2)), maxval(subcells_(:,:)%theta(3))
+      write(*, fmt ='("min theta = ", f10.6, f10.6, f10.6)')  minval(subcells_(:,:)%theta(1)), minval(subcells_(:,:)%theta(2)), minval(subcells_(:,:)%theta(3))
 
       IF(entropie_rule .GT. 0) THEN 
       write(*, fmt ='("entropy = ", f12.6)')  entropy
@@ -545,20 +543,20 @@ CONTAINS
   END SUBROUTINE pied_charact
 
 
-  SUBROUTINE Out_The_Mesh(ti)
-    IMPLICIT NONE
-    REAL(prec), INTENT(IN) :: ti
-    INTEGER :: ni,n_sub
-    REAL(prec) :: xi, out1
+  ! SUBROUTINE Out_The_Mesh(ti)
+  !   IMPLICIT NONE
+  !   REAL(prec), INTENT(IN) :: ti
+  !   INTEGER :: ni,n_sub
+  !   REAL(prec) :: xi, out1
 
-    write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) ti
-    DO ni =1,nb_cell;    DO n_sub=1,nb_subcell
-      xi = Ref_to_loc(ni,x_subcell(n_sub))
-      out1 = subcells_(ni,n_sub)%theta
-      write(unit=numfile_meshout,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1
-    END DO; END DO
+  !   write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) ti
+  !   DO ni =1,nb_cell;    DO n_sub=1,nb_subcell
+  !     xi = Ref_to_loc(ni,x_subcell(n_sub))
+  !     out1 = subcells_(ni,n_sub)%theta
+  !     write(unit=numfile_meshout,  fmt='(f10.6, f16.6, f16.6, 2x, l1)') xi,out1
+  !   END DO; END DO
 
-  END SUBROUTINE Out_The_Mesh
+  ! END SUBROUTINE Out_The_Mesh
 
   SUBROUTINE Emergency_stop
     INTEGER :: i

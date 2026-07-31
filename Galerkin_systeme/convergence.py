@@ -45,9 +45,9 @@ plt.loglog(nx,ord1,linestyle ='-.', color='lightgray')
 plt.loglog(nx,ord2,linestyle ='-.', color='lightgray')
 plt.loglog(nx,ord3,linestyle ='-.', color='lightgray')
 plt.loglog(nx,ord4,linestyle ='-.', color='lightgray')
-plt.loglog(nx,err_L1, label="err_L1")
-plt.loglog(nx,err_L2, label="err_L2")
-plt.loglog(nx,err_Li, label="err_Linf")
+plt.loglog(nx,err_L1,linestyle ='-',marker='x', label="err_L1")
+plt.loglog(nx,err_L2,linestyle ='-',marker='x', label="err_L2")
+plt.loglog(nx,err_Li,linestyle ='-',marker='x', label="err_Linf")
 
 title = "convergence de la méthode DG avec P^"+str(orderx-1)+" et RK SSP d'ordre "+str(ordert)
 

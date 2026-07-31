@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-p = lambda U:  0.4*(U[2] - 0.5*(U[1])**2 /U[0] )
+p = lambda U:  2.*(U[2] - 0.5*(U[1])**2 /U[0] )
     
 with open('file_data.txt') as f:
     lines = f.readlines()
@@ -22,9 +22,13 @@ for k in range(6,6+sm):
 
 #   solDG   SolSub   file_sol    
 
-with open('solSub.txt') as f:
+with open('Solprod.txt') as f:
     lines1 = f.readlines()   
-with open('solSub'+'ex'+'.txt') as f:
+    
+# with open('Solprod.txt') as f:
+#     lines2 = f.readlines()   
+    
+with open('Solprod'+'ex'+'.txt') as f:
     lines2 = f.readlines()   
 
 
@@ -39,7 +43,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,5):
+for k in range(0,sm,1):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][10:27]
@@ -54,7 +58,7 @@ for k in range(0,sm,5):
         #     X_midcell[int(i/nb_sub)] = (X_cell[int(i/nb_sub)]+X_cell[int(i/nb_sub)+1])/2
             
     
-        #U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
+        # U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
         # if(nb_var >1) : 
         #      U_ex[k][i][1]   = lines2[k*(nx+1) +i][28:43]
         # if(nb_var >2) :
@@ -62,6 +66,7 @@ for k in range(0,sm,5):
             
         
         P_[k,i] = p(U_t[k,i,:])
+        P2_[k,i]= p(U_ex[k,i,:])
     #U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
                   
     for i in range(0,nb_cell+1): 
@@ -69,24 +74,25 @@ for k in range(0,sm,5):
         #plt.plot([X_cell[i],X_cell[i]],[-1,2],linestyle='--', color='gray')
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
     #plt.plot(X,U_t[0,:,0],'g-')
-    plt.plot(X,U_t[k,:,0],'b', marker='.')
+    plt.plot(X,U_t[k,:,0] ,'b-')
     plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
     print(sum(U_t[k,:,0]))
     if(nb_var>1):
         1+1
-        #plt.plot(X,U_ex[k,:,1],'k-')
-        #plt.plot(X,U_t[k,:,1],'r-', marker='.')
+        plt.plot(X,U_ex[k,:,1],'k-')
+        plt.plot(X,U_t[k,:,1],'r-', marker='.')
         #plt.plot(X,abs(U_t[k,:,1]-U_ex[k,:,1]),'k-')
         #plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
     if(nb_var>2):
         1+1
-        #plt.plot(X,U_ex[k,:,2],'k-')
-        #plt.plot(X,U_t[k,:,2],'g-', marker='.')
+        plt.plot(X,U_ex[k,:,2],'k-')
+        plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
     #plt.plot(X,P_[k,:],'k-.')
+    #plt.plot(X,P2_[k,:],'g-.')
     #m=-.2; M=1.2
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)

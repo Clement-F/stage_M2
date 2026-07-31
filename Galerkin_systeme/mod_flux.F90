@@ -68,6 +68,7 @@ CONTAINS
     REAL(prec) :: p
 
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
+    if(p .LT. eps0) p = eps0
 
   END FUNCTION pression
 
@@ -109,7 +110,10 @@ CONTAINS
       ELSE 
         gamma_calc = max(abs(u(2)/u(1)) + sqrt(gamma_iso* pression(u)/u(1)) , abs(v(2)/v(1))+ sqrt(gamma_iso* pression(v)/v(1)))
       END IF
+      ! print*, pression(u)
+      ! print *,"gamma",gamma_calc
       IF(ISNAN(gamma_calc)) gamma_calc = eps0
+      gamma_calc = 1.5_prec* gamma_calc
 
     CASE("Buckley")
       u_step = (max(u(1),v(1))-min(u(1),v(1)))/10._prec

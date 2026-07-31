@@ -76,7 +76,7 @@ CONTAINS
         Time_stemp(print_rule+2) = Time_stemp(print_rule+1) 
 
         dt = 10._prec**(-8)
-        theta_(:,:) = 1._prec
+        theta_ = 1._prec
 
 
 
@@ -104,9 +104,7 @@ CONTAINS
                 END DO; END DO
             
                 DO j=1,size_base
-                DO ii=1,nb_var
-                    sol(ni)%base_poly(j,:) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
-                END DO
+                sol(ni)%base_poly(j,:) = MATMUL(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,:))
                 END DO
             ELSE 
                 DO ii=1,nb_var
@@ -117,7 +115,7 @@ CONTAINS
 
             DO ii=1,nb_nodes
                 
-                sol(ni)%val_quad(ii,:)  = eval_sol(x_quad(ii),ni= ni,kk=ii, LOC= LRef)
+                sol(ni)%val_quad(ii,:)  = eval_sol(x_quad(ii),ni= ni,kquad=ii, LOC= LRef)
                         
                 IF((quad_meth)=="Lobatto") THEN
                 sol(ni)%inter(1,:)      = sol(ni)%val_quad(1,:)

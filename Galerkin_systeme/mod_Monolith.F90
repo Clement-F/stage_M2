@@ -51,7 +51,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
     REAL(prec) :: gamma_mp
 
-    REAL(prec) :: theta
+    REAL(prec), DIMENSION(nb_var) :: theta
     
     theta = 1._prec
     
@@ -67,18 +67,18 @@ CONTAINS
 
     theta = min(1._prec, THETA_pos(u_Riemann,gamma_mp,DF),THETA_max(mc,pv, u_Riemann,gamma_mp,DF), THETA_ent(ug,ud,DF,gamma_mp))
     theta = max(theta, 0._prec)
-    IF(ISNAN(theta)) THEN; print *,"theta nan"; STOP; END IF
+    IF(ISNAN(theta(1))) THEN; print *,"theta nan"; STOP; END IF
 
   END FUNCTION
 
   FUNCTION THETA_pos(u_Riemann,gamma_mp,DF)
     IMPLICIT NONE
-    REAL(prec) :: THETA_pos
+    REAL(prec), DIMENSION(nb_var) :: THETA_pos
     REAL(prec), INTENT(IN) :: gamma_mp
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec) :: A,B,M
+    REAL(prec) :: A,B,C,M
 
     THETA_pos = 1._prec
     theta_temp = 1._prec
@@ -93,10 +93,10 @@ CONTAINS
         B = 1._prec/(gamma_mp)   *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1)*theta_temp(1))
         M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
 
+        ! IF(M .LT. -eps0) print *,"bug"
+
         theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
 
-        ! if(theta_temp(2) .LT. theta_temp(1) .AND. minval(theta_temp) .LT. 1-eps0) print *, "here", minval(theta_temp)
-        ! positivité des deux 
         THETA_pos = theta_temp(1)* theta_temp(2) 
 
       ELSE IF(positivity == 2) THEN  
@@ -104,11 +104,29 @@ CONTAINS
         B = theta_temp(1)/(gamma_mp)        *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1))
         M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
 
+        ! IF(M .LT. -eps0) print *,"bug"
+
         theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
 
-        ! if(theta_temp(2) .LT. theta_temp(1) .AND. minval(theta_temp) .LT. 1-eps0) print *, "here", minval(theta_temp)
-        ! positivité des deux 
         THETA_pos = min(theta_temp(1), theta_temp(2)) 
+
+      ELSE IF(positivity == 3) THEN 
+        IF(DF(1) .LT. 0) theta_temp(1) = 0._prec
+        THETA_pos(1) = theta_temp(1)
+        ! print *, theta_temp(1)
+        A = theta_temp(1)*DF(1)*u_Riemann(3)/gamma_mp
+        B = (DF(2)**2 /(2._prec* gamma_mp**2 ))- DF(2)*u_Riemann(2)/gamma_mp
+        C = DF(3)*u_Riemann(1)/gamma_mp - theta_temp(1)*sign(1._prec,DF(1))*u_Riemann(1)*DF(3)/gamma_mp 
+        
+        M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2 - max(A,eps0)
+        ! print *, M
+        ! IF(M .LT. eps0) STOP
+
+        CALL Knapsack_greedy(THETA_pos(2:3),(/B,C /),M,(/1._prec,1._prec/),2)
+
+        ! THETA_pos(2:3) = theta_temp(2:3)
+        ! THETA_pos(1) = min(THETA_pos(1), theta_temp(1)) 
+        
       END IF
     END IF
   END FUNCTION THETA_pos
@@ -275,25 +293,27 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, DIMENSION(2) :: voi_L,voi_R
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec), DIMENSION(nb_var) :: ug,ud, vg,vd, u_Riemann
-    REAL(prec), DIMENSION(nb_var) :: DF
-    REAL(prec) :: gamma_mp, param
-    REAL(prec) :: alpha,beta 
-    REAL(prec) :: xi,out1, pos, LMP, ent
+    REAL(prec), DIMENSION(nb_var) :: ug,ud,u_Riemann
+    REAL(prec), DIMENSION(nb_var) :: DF,pos, LMP, ent,out1
+    REAL(prec) :: gamma_mp
+    REAL(prec) :: xi
+    Character(len=64) theta_outstring
 
     LOGICAL :: extrema
     INTEGER :: ni, jj
 
     extrema = .FALSE. 
-    subcells_(:,:)%theta = 1._prec 
-    theta_(:,:) = 1._prec;  
+    theta_ = 1._prec;  
     
     
     IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
       write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) time
+      theta_outstring = '(f7.4,1x,3(f5.3,1x),1x,3(f5.3,1x),1x,3(f5.3,1x),1x,l1)'
     END IF
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell
+
+      subcells_(ni,jj)%theta(:) = 1._prec 
       pos = 1._prec; LMP = 1._prec; ent =1._prec
 
       theta_temp = 1._prec
@@ -305,6 +325,7 @@ CONTAINS
         IF(ni ==nb_cell .AND. jj ==nb_subcell+1)  ud(2) = -ud(2)
       END IF
 
+      ! write(*,fmt="(3(f10.6),1x, 3(f10.6))") ug,ud
       IF(flux_num == 0) gamma_mp = max_dflux
       IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
 
@@ -315,48 +336,54 @@ CONTAINS
       IF(ISNAN(DF(1)))  DF = 0._prec
 
       IF(.not. mesh_out) THEN
-      theta_(ni,jj) = theta(voi_L,voi_R, DF)
+      theta_(ni,jj,:) = theta(voi_L,voi_R, DF)
       ELSE 
-        IF(minval(abs(DF)) < eps0) THEN; theta_(ni,jj) = 1._prec;  ! check le besoin du calcul qui suit
+        
+        IF(smooth_extrema .GT. 0) extrema = subcells_(voi_L(1),voi_L(2))%extrema .AND.  subcells_(voi_R(1),voi_R(2))%extrema 
+
+        IF(minval(abs(DF)) < eps0) THEN; theta_(ni,jj,:) = 1._prec;  ! check le besoin du calcul qui suit
         ELSE 
-                
+          ! print *,"--------------",ni,jj,"----------"
+          ! print *, gamma_mp
+          ! print *, ug,ud
           u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
+
 
           ! positivité pour le pb  d'Euler
           pos = THETA_pos(u_Riemann,gamma_mp,DF)
-          theta_(ni,jj) = min(theta_(ni,jj), pos)
+          theta_(ni,jj,:) = min(theta_(ni,jj,:), pos)
           
           ! check si l'interface se trouve entre deux sous-cellules qui captent un extrema
           LMP = THETA_max(voi_L,voi_R, u_Riemann,gamma_mp,DF)
-          theta_(ni,jj) = min(theta_(ni,jj), LMP)
+          theta_(ni,jj,:) = min(theta_(ni,jj,:), LMP)
 
           ! Entropie 
           ent = THETA_ent(ug,ud,DF,gamma_mp)
-          theta_(ni,jj) = min(theta_(ni,jj), ent)
+          IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
             
 
-          theta_(ni,jj) = max(theta_(ni,jj),0._prec)
+          theta_(ni,jj,:) = min(max(theta_(ni,jj,:),0._prec),1._prec)
           
-          IF(ISNAN(theta_(ni,jj))) THEN; print *,"theta nan"; STOP; END IF
+          IF(ISNAN(theta_(ni,jj,1))) THEN; print *,"theta nan"; STOP; END IF
 
           END IF
       END IF
 
       IF(coeff_smooth == 1) THEN 
-      subcells_(voi_L(1),voi_L(2))%theta = min(theta_(ni,jj), subcells_(voi_L(1),voi_L(2))%theta)
-      subcells_(voi_R(1),voi_R(2))%theta = min(theta_(ni,jj), subcells_(voi_R(1),voi_R(2))%theta)
+      subcells_(voi_L(1),voi_L(2))%theta = min(theta_(ni,jj,:), subcells_(voi_L(1),voi_L(2))%theta)
+      subcells_(voi_R(1),voi_R(2))%theta = min(theta_(ni,jj,:), subcells_(voi_R(1),voi_R(2))%theta)
       ELSE IF(coeff_smooth == 2) THEN 
-      subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj)/2._prec + subcells_(voi_L(1),voi_L(2))%theta
-      subcells_(voi_R(1),voi_R(2))%theta = theta_(ni,jj)/2._prec + subcells_(voi_R(1),voi_R(2))%theta
+      subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj,:)/2._prec + subcells_(voi_L(1),voi_L(2))%theta
+      subcells_(voi_R(1),voi_R(2))%theta = theta_(ni,jj,:)/2._prec + subcells_(voi_R(1),voi_R(2))%theta
       ELSE IF(coeff_smooth == 0) THEN 
-      subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj)
+      subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj,:)
       END IF
 
 
       IF((mesh_out.AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0) THEN 
         xi = Ref_to_loc(voi_L(1),x_subcell(voi_L(2)))
-        out1 = theta_(ni,jj)
-        write(unit=numfile_meshout,  fmt='(f10.6, f9.6, 1x, f9.6,  f9.6,1x,f9.6,1x, l1)') xi,out1, pos,LMP,ent,extrema
+        out1 = theta_(ni,jj,:)
+        write(unit=numfile_meshout,  fmt=theta_outstring) xi,out1, pos,LMP,extrema
       END IF
       
     END DO; END DO

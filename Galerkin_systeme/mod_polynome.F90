@@ -35,17 +35,17 @@ CONTAINS
 
     END FUNCTION eval_poly
 
-    FUNCTION eval_sol(YY ,ni, kk, LOC)
+    FUNCTION eval_sol(YY ,ni, kquad, LOC)
         IMPLICIT NONE
         INTEGER, INTENT(in) :: ni
-        INTEGER, INTENT(in), optional :: kk
+        INTEGER, INTENT(in), optional :: kquad
         CHARACTER (len=8), INTENT(IN) :: LOC
         REAL(prec)   , INTENT(in) :: YY
         REAL(prec), DIMENSION(nb_var) :: eval_sol 
         INTEGER :: ii
         eval_sol= 0._prec
 
-        IF(.not. present(kk)) THEN
+        IF(.not. present(kquad)) THEN
             counter1 = counter1 +1
             DO ii = 1,size_base
                 eval_sol = eval_sol + sol(ni)%base_poly(ii,:) * DG_base(YY,ii,LOC,ni)
@@ -53,7 +53,7 @@ CONTAINS
         ELSE 
             counter2 = counter2 +1
             DO ii = 1,size_base
-                eval_sol = eval_sol + sol(ni)%base_poly(ii,:) * sig_quad(ii,kk)
+                eval_sol = eval_sol + sol(ni)%base_poly(ii,:) * sig_quad(ii,kquad)
             END DO
         END IF
 

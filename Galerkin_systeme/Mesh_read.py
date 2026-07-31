@@ -13,55 +13,62 @@ sm = int(lines[5][5:11]) -2
 with open('mesh_out.txt') as f:
     lines = f.readlines()
     
-theta_ = np.zeros((sm,nx))
-pos = np.zeros((sm,nx)); LMP = np.zeros((sm,nx)); ent = np.zeros((sm,nx))
+theta_ = np.zeros((sm,nx,3))
+pos = np.zeros((sm,nx,3)); LMP = np.zeros((sm,nx,3))
 ext= np.zeros((sm,nx))
 X   = np.zeros(nx)
 T   = np.zeros(sm)
-
+line =[]
 
 for k in range(0,sm):
-    print(k,k*(nx+1) )
-    print (lines[k*(nx+1)])
-    print (lines[k*(nx+1)+0+1][49])
+    # print(k,k*(nx+1) )
+    # print (lines[k*(nx+1)])
+    print (lines[k*(nx+1)+0+1][65])
     T[k] = lines[k*(nx+1)][9:19]
     for i in range(0,(nx)):
-        X[i] = lines[k*(nx+1)+i+1][0:10]
-        theta_[k,i] = lines[k*(nx+1) +i+1][10:20]
-        pos[k,i] = lines[k*(nx+1) +i+1][20:30]
-        LMP[k,i] = lines[k*(nx+1) +i+1][29:39]
-        ent[k,i] = float(lines[k*(nx+1) +i+1][39:49])
-        if(lines[k*(nx+1)+i+1][49] == "T") : ext[k,i] =1
+        line = lines[k*(nx+1) +i+1]
+        X[i] = lines[k*(nx+1)+i+1][0:8]
+        theta_[k,i,0] = float(line[8:14])
+        theta_[k,i,1] = float(line[14:20])
+        theta_[k,i,2] = float(line[20:26])
+        
+        if(line[27:33] != "***** ") :pos[k,i,0] = float(line[27:33])
+        pos[k,i,1] = float(line[33:39])
+        pos[k,i,2] = float(line[39:45])
+        
+        LMP[k,i,0] = float(line[46:52])
+        LMP[k,i,1] = float(line[52:58])
+        LMP[k,i,2] = float(line[58:64])
+        
+        if(lines[k*(nx+1)+i+1][65] == "T") : ext[k,i] =1
         
     
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
 xL=-1.; xR=1.
+
+for i in range(0,3):
+    plt.pcolormesh(X, T, theta_[:,:,i], shading='auto', cmap='viridis')
+    plt.xlim(xL,xR)
+    plt.colorbar()
+    plt.show()
+
     
-plt.pcolormesh(X, T, theta_, shading='auto', cmap='viridis')
-plt.xlim(xL,xR)
-plt.colorbar()
-plt.show()
 
-plt.pcolormesh(X, T, pos, shading='auto', cmap='viridis')
-plt.xlim(xL,xR)
-plt.colorbar()
-plt.show()
-
-plt.pcolormesh(X, T, LMP, shading='auto', cmap='viridis')
-plt.xlim(xL,xR)
-plt.colorbar()
-plt.show()
-
-plt.pcolormesh(X, T, ent, shading='auto', cmap='viridis')
-plt.xlim(xL,xR)
-plt.colorbar()
-plt.show()
-
-plt.pcolormesh(X, T, ext, shading='auto', cmap='viridis')
-plt.xlim(xL,xR)
-plt.colorbar()
-plt.show()
+    plt.pcolormesh(X, T, pos[:,:,i], shading='auto', cmap='viridis')
+    plt.xlim(xL,xR)
+    plt.colorbar()
+    plt.show()
+    
+    plt.pcolormesh(X, T, LMP[:,:,i], shading='auto', cmap='viridis')
+    plt.xlim(xL,xR)
+    plt.colorbar()
+    plt.show()
+    
+    plt.pcolormesh(X, T, ext, shading='auto', cmap='viridis')
+    plt.xlim(xL,xR)
+    plt.colorbar()
+    plt.show()
 #plt.savefig("mesh_out.png")
 #plt.show()

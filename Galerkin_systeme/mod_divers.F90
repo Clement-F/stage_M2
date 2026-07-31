@@ -330,17 +330,28 @@ CONTAINS
     REAL(prec), DIMENSION(nb_item), INTENT(IN) :: item_cstr
     REAL(prec), INTENT(IN) :: volume_cstr
 
-    REAL(prec), DIMENSION(nb_item) :: item_in
+    REAL(prec), DIMENSION(nb_item) :: item_in,item_vol
     INTEGER :: i_maxloc
-    item_in = item_cstr
-    DO WHILE(DOT_PRODUCT(item_in, item_volume) .GT. volume_cstr)
-        i_maxloc = MAXLOC(item_volume,DIM =nb_item)
-        item_in(i_maxloc) = 0._prec
-        IF(DOT_PRODUCT(item_in, item_volume) .LT. volume_cstr) THEN 
-            item_in(i_maxloc) = (volume_cstr-DOT_PRODUCT(item_in, item_volume))/item_volume(i_maxloc)
+
+    item_in = item_cstr; item_vol = item_volume
+
+    IF(volume_cstr .LT. -eps0) THEN; print *,"Knapsack : constraint error"; STOP; ENDIF;
+
+    DO WHILE(DOT_PRODUCT(item_in, item_vol) .GT. volume_cstr-eps0)
+        i_maxloc = MAXLOC(item_vol,DIM =nb_item)
+        item_vol(i_maxloc) = 0._prec 
+
+        IF(DOT_PRODUCT(item_in, item_vol) .LT. volume_cstr-eps0 &
+        & .AND. DOT_PRODUCT(item_in, item_vol) .GT. eps0) THEN 
+            item_in(i_maxloc) = (volume_cstr-DOT_PRODUCT(item_in, item_vol))/item_volume(i_maxloc)
+        ELSE;   
+            item_in(i_maxloc) = 0._prec
         END IF
+        
+        ! print *,DOT_PRODUCT(item_in, item_vol),volume_cstr
     END DO
     item_pr = item_in
+    ! write(*, fmt ='("theta = ", f10.6, f10.6, f10.6)') item_pr
   END SUBROUTINE Knapsack_greedy
 
 END MODULE mod_Divers

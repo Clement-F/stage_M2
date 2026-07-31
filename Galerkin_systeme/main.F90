@@ -28,7 +28,7 @@ PROGRAM MAIN
         write(unit= numfile_data, fmt='("nb_subcell = ",i5)') nb_subcell
     ELSE
         write(unit= numfile_data, fmt='("nb_cell = ",i5)') nb_cell
-        write(unit= numfile_data, fmt='("blablab = 00000000 ")') 
+        write(unit= numfile_data, fmt='("no subcells")') 
     END IF
 
     close(unit=numfile_data)

@@ -90,8 +90,8 @@ CONTAINS
 
         smooth_isentropique = eps0
 
-        smooth_isentropique(1) = 1._prec  +  0.999999999_prec* sin(pi*x)
-        smooth_isentropique(3) = ((1._prec  +  0.99999999_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
+        smooth_isentropique(1) =   1._prec  +  0.999999999_prec* sin(pi*x)
+        smooth_isentropique(3) = ((1._prec  +  0.999999999_prec* sin(pi*x))**(gamma_iso))/(gamma_iso-1._prec)
 
     END FUNCTION smooth_isentropique
 
