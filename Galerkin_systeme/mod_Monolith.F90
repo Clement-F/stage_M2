@@ -67,7 +67,7 @@ CONTAINS
 
     theta = min(1._prec, THETA_pos(u_Riemann,gamma_mp,DF),THETA_max(mc,pv, u_Riemann,gamma_mp,DF), THETA_ent(ug,ud,DF,gamma_mp))
     theta = max(theta, 0._prec)
-    IF(ISNAN(theta)) THEN; print *,"theta nan"; STOP; END IF
+    IF(ISNAN(theta))  STOP "theta nan"
 
   END FUNCTION
 
@@ -148,7 +148,25 @@ CONTAINS
 
         param = min(beta - u_Riemann(1), u_Riemann(1)- alpha)
         
-        THETA_max =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec);       
+        THETA_max =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec); 
+        
+        IF(max_rule == 3) THEN 
+          IF((abs(DF(3))) < eps0) return
+
+          IF(DF(3) .LT. -eps0) THEN
+            beta = minmax_loc(mc,"max",nvar=3)
+            alpha= minmax_loc(pv,"min",nvar=3)
+
+          ELSE IF(DF(3) .GT. eps0) THEN
+            beta = minmax_loc(pv,"max",nvar=3)
+            alpha= minmax_loc(mc,"min",nvar=3)
+          END IF
+          param = min(beta - u_Riemann(3), u_Riemann(3)- alpha)
+          
+          THETA_max =min(THETA_max, max(min(1._prec, abs(gamma_mp/DF(3)) * param),0._prec)); 
+          ! print *,"aaa"
+
+        END IF
     END IF
 
   END FUNCTION THETA_max
@@ -275,10 +293,9 @@ CONTAINS
     IMPLICIT NONE
     INTEGER, DIMENSION(2) :: voi_L,voi_R
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec), DIMENSION(nb_var) :: ug,ud, vg,vd, u_Riemann
+    REAL(prec), DIMENSION(nb_var) :: ug,ud, u_Riemann
     REAL(prec), DIMENSION(nb_var) :: DF
-    REAL(prec) :: gamma_mp, param
-    REAL(prec) :: alpha,beta 
+    REAL(prec) :: gamma_mp
     REAL(prec) :: xi,out1, pos, LMP, ent
 
     LOGICAL :: extrema
@@ -337,7 +354,7 @@ CONTAINS
 
           theta_(ni,jj) = max(theta_(ni,jj),0._prec)
           
-          IF(ISNAN(theta_(ni,jj))) THEN; print *,"theta nan"; STOP; END IF
+          IF(ISNAN(theta_(ni,jj))) STOP 'theta nan'
 
           END IF
       END IF

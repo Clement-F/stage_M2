@@ -26,18 +26,19 @@ for k in range(0,sm):
     print (lines[k*(nx+1)+0+1][49])
     T[k] = lines[k*(nx+1)][9:19]
     for i in range(0,(nx)):
-        X[i] = lines[k*(nx+1)+i+1][0:10]
-        theta_[k,i] = lines[k*(nx+1) +i+1][10:20]
-        pos[k,i] = lines[k*(nx+1) +i+1][20:30]
-        LMP[k,i] = lines[k*(nx+1) +i+1][29:39]
-        ent[k,i] = float(lines[k*(nx+1) +i+1][39:49])
-        if(lines[k*(nx+1)+i+1][49] == "T") : ext[k,i] =1
+        line = lines[k*(nx+1)+i+1]
+        X[i] = line[0:10]
+        theta_[k,i] = line[10:20]
+        pos[k,i] = line[20:30]
+        LMP[k,i] = line[29:39]
+        ent[k,i] = float(line[39:49])
+        if(line[49] == "T") : ext[k,i] =1
         
     
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-1.; xR=1.
+xL=-0.; xR=1.
     
 plt.pcolormesh(X, T, theta_, shading='auto', cmap='viridis')
 plt.xlim(xL,xR)

@@ -32,14 +32,14 @@ CONTAINS
     CASE DEFAULT
       WRITE(*,*) "flux non reconnu _flux",flux_name
       flux = 0._prec
-      STOP
+      STOP "flux"
     END SELECT
   END FUNCTION flux
 
 
     SUBROUTINE Projection_Flux
       IMPLICIT NONE
-      INTEGER :: ni,jj,kk,ii
+      INTEGER :: ni,jj,kk
       REAL(prec), DIMENSION(nb_var) :: f_loc
       REAL(prec), DIMENSION(nb_var)            :: u_loc
       REAL(prec), DIMENSION(size_base, nb_var) :: fh_loc
@@ -68,6 +68,8 @@ CONTAINS
     REAL(prec) :: p
 
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
+
+    ! IF(p .LT. 0) STOP "negative pressure"
 
   END FUNCTION pression
 
@@ -121,7 +123,7 @@ CONTAINS
     CASE DEFAULT
       WRITE(*,*) "flux non reconnu _gamma ",flux_name
       gamma_calc = 0._prec
-      STOP
+      STOP "gamma calc"
     END SELECT
 
   END FUNCTION gamma_calc
@@ -147,7 +149,7 @@ CONTAINS
     CASE DEFAULT
       WRITE(*,*) "flux_d non reconnu  _dflux",flux_name
       flux_d = 0._prec
-      STOP
+      STOP "flux_d"
     END SELECT
 
   END FUNCTION flux_d

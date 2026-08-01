@@ -182,7 +182,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: ni
 
-    INTEGER :: ii,jj,kk
+    INTEGER :: ii,jj
     REAL(prec), DIMENSION(nb_var) :: L
 
     outed_mesh = 0
@@ -194,9 +194,10 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
 
+    print *,"==========="
     DO ii=1,order_t
       CALL flux_numerique
-      
+      print *,"----------"
       DO ni = 1,nb_cell;
 
         DO jj =1,nb_subcell
@@ -251,6 +252,8 @@ CONTAINS
     REAL(prec) :: gamma_temp, dt_loc, gamma_bf
     REAL(prec), DIMENSION(nb_var) :: u_,v_
 
+    write (*,*) "dt calc"
+
     IF(TRIM(flux_name) == "advection" .AND. (.NOT. monolithique)) THEN
       max_dflux = abs(vit_adv)
     ELSE 
@@ -262,13 +265,14 @@ CONTAINS
           gamma_bf =eps0; dt_loc = 2._prec
 
           DO i=1,nb_cell;    DO j=1,nb_subcell
+            print *,i,j
             nxt_ = Voisin_Face(i,j,'R')
 
             u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
 
             IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
-            gamma_temp = 2.4_prec
-            dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
+              gamma_temp = 2.4_prec
+              dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
             ELSE; 
             gamma_temp = max(gamma_calc(u_, v_),eps0)
             dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
@@ -296,8 +300,12 @@ CONTAINS
         ! print *, max_dflux
         DO i=1,nb_cell;
           nxt_ = Voisin_quad(i,nb_nodes,'R')
-
+          ! IF(i == 1) THEN
+          ! u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)  
+          ! u_(2) = -u_(2)        
+          ! ELSE
           u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)
+          ! END IF
           gamma_temp = gamma_calc(u_, v_)
                     
           max_dflux = max(max_dflux, gamma_temp)
@@ -380,9 +388,17 @@ CONTAINS
             END IF
 
             save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
-            write(unit=numfile_sol,    fmt=save_format) xi,out, Ref_to_loc(i,x_subcell(j))
+            write(unit=numfile_sol,    fmt=save_format, advance="no") xi,out !, Ref_to_loc(i,x_subcell(j))
             IF(error_calc)write(unit=numfile_solex,  fmt=save_format) xi,out_ex
 
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
+            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(1x,f12.6)') pression(out)
+            ELSE;
+               write(unit=numfile_sol,   fmt= '(1x)')
+               write(unit=numfile_solex, fmt= '(1x)')
+            END IF
 
           END DO 
           
@@ -592,9 +608,7 @@ CONTAINS
 
     CALL DEALLOCATE_all
 
-
-    print *, "EMERGENCY STOP"
-    STOP
+    STOP "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
 
 
