@@ -66,10 +66,10 @@ CONTAINS
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(in) :: u
     REAL(prec) :: p
-
+    ! print *,u
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
 
-    ! IF(p .LT. 0) STOP "negative pressure"
+    ! IF(p .LT. -eps0) STOP "negative pressure"
 
   END FUNCTION pression
 

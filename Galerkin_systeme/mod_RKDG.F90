@@ -194,10 +194,10 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
 
-    print *,"==========="
+    ! print *,"==========="
     DO ii=1,order_t
       CALL flux_numerique
-      print *,"----------"
+      ! print *,"----------"
       DO ni = 1,nb_cell;
 
         DO jj =1,nb_subcell
@@ -235,11 +235,10 @@ CONTAINS
 
     DO ni=1,nb_cell
       sol(ni)%base_poly    = sol_step(ni)%base_poly
-      sol(ni)%val_quad    = sol_step(ni)%val_quad
+      sol(ni)%val_quad     = sol_step(ni)%val_quad
       sol(ni)%val_subcells = sol_step(ni)%val_subcells
       sol(ni)%inter        = sol_step(ni)%inter
     END DO
-
 
 
 
@@ -252,7 +251,7 @@ CONTAINS
     REAL(prec) :: gamma_temp, dt_loc, gamma_bf
     REAL(prec), DIMENSION(nb_var) :: u_,v_
 
-    write (*,*) "dt calc"
+    ! write (*,*) "dt calc"
 
     IF(TRIM(flux_name) == "advection" .AND. (.NOT. monolithique)) THEN
       max_dflux = abs(vit_adv)
@@ -265,7 +264,7 @@ CONTAINS
           gamma_bf =eps0; dt_loc = 2._prec
 
           DO i=1,nb_cell;    DO j=1,nb_subcell
-            print *,i,j
+            ! print *,i,j
             nxt_ = Voisin_Face(i,j,'R')
 
             u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
@@ -356,7 +355,8 @@ CONTAINS
     IF(present(switch)) THEN; force = switch
     ELSE; force = .FALSE.
     END IF
-
+ 
+    print *,"writout"
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 

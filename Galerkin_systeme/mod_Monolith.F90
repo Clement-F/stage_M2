@@ -123,11 +123,14 @@ CONTAINS
     REAL(prec) :: alpha,beta, param
     LOGICAL :: extrema
 
+    INTEGER :: ii 
+
     THETA_max = 1._prec
 
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
+      DO ii =1,1
         IF(max_rule==1) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
           beta = 0.99_prec*(max_glob-eps0);
@@ -167,6 +170,7 @@ CONTAINS
           ! print *,"aaa"
 
         END IF
+      END DO
     END IF
 
   END FUNCTION THETA_max
@@ -310,7 +314,7 @@ CONTAINS
       write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) time
     END IF
 
-    DO ni=1,nb_cell; DO jj=1,nb_subcell
+    DO ni=1,nb_cell; DO jj=1,nb_subcell+1
       pos = 1._prec; LMP = 1._prec; ent =1._prec
 
       theta_temp = 1._prec
