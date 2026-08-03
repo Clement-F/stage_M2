@@ -2,18 +2,18 @@
     Paramètres du domaine (temps x espace)
 ---------------------------------------------------
 40              | noeuds du maillage 
--2D-1             | xd
+-10D-1             | xd
 10D-1              | xf
-2D-1            | T
+40D-2            | T
 ---------------------------------------------------
 0               | flux numérique (0/1 : Lax Friedrich Global / Local)
 ---------------------------------------------------
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
-2               | Max global(2), local(1), Null(0)
+1               | Max global(2), local(1), Null(0)
 0               | coefficient smoothening, mean(2), min(1), Null(0)
-2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-7               | nb subcellules du sous maillage
+0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
+5               | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
 ---------------------------------------------------
     Paramètres de Sauvegarde
@@ -22,19 +22,19 @@ Lobatto         | repartition des noeuds(Unif, Lobatto)
 False           | Convergence 
 False           | Error calc    (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-10              | print rule
+500              | print rule
 solSub          | nom file_sol
 ---------------------------------------------------
     Paramètres de quadrature / polynomes
 --------------------------------------------------
-7               | ordre espace
+4               | ordre espace
 3               | ordre temps
 Lobatto        | polynomes  (Legendre,Lobatto)
 Lobatto         | quadrature (Legendre,Lobatto)
 ---------------------------------------------------
     Paramètres du problème
 ---------------------------------------------------
-Sod             | solution initiale (sinus, unit, Riemann, creneau, composite, Burgers_choc, Sod, isentropique)
-Euler       | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+creneau             | solution initiale (sinus, unit, Riemann, creneau, composite, Burgers_choc, Sod, isentropique)
+Buckley       | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
 Sym          | condition au bord (period, Sym)

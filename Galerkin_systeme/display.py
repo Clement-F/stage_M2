@@ -39,7 +39,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm):
+for k in range(0,sm,5):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][11:27]
@@ -74,6 +74,7 @@ for k in range(0,sm):
     #plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
+    print(min(U_t[k]), max(U_t[k]))
     if(nb_var>1):
         1+1
         #plt.plot(X,U_ex[k,:,1],'k-')
@@ -90,17 +91,17 @@ for k in range(0,sm):
     m=-.2; M=1.2
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
-    plt.ylim(m,M);plt.xlim(-0.,1.)
+    #plt.ylim(m,M);plt.xlim(-0.,1.)
     #plt.xlim(-3.8, 3.8)
     plt.show()    
     #plt.savefig("save_"+str(T[k])+".png")    
     #plt.cla() 
     
 plt.plot(X,U_t[k,:,0],'b', marker='.')
-plt.ylim(m,M);plt.xlim(-0.,1.)
-plt.savefig("save_"+str(T[k])+".png")    
+#plt.ylim(m,M);plt.xlim(-0.,1.)
+#plt.savefig("save_"+str(T[k])+".png")    
     
-if(False):
+if(True):
     with open('buckley.dat') as f:
         lines = f.readlines()
         

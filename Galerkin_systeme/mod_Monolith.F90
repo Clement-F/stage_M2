@@ -98,15 +98,15 @@ CONTAINS
         IF(max_rule ==1) THEN
           IF((abs(DF(ii))) < eps0) THEN; theta = 1._prec; return; END IF
           IF(DF(ii) .LT. -eps0) THEN
-            beta = minmax_loc(mc,"max",nvar=ii)
+            beta = minmax_loc(mc,"max",nvar=ii) 
             alpha= minmax_loc(pv,"min",nvar=ii)
 
           ELSE IF(DF(ii) .GT. eps0) THEN
-            beta = minmax_loc(pv,"max",nvar=ii)
+            beta = minmax_loc(pv,"max",nvar=ii) 
             alpha= minmax_loc(mc,"min",nvar=ii)
           END IF
 
-        ELSE IF(max_rule==2) THEN; alpha= 1.1_prec*(min_glob+eps0); beta = 0.99_prec*(max_glob-eps0)
+        ELSE IF(max_rule==2) THEN; alpha= (min_glob+eps0); beta = (max_glob-eps0)
         END IF
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)

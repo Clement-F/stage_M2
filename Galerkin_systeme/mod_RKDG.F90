@@ -274,6 +274,7 @@ CONTAINS
             IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
             gamma_temp = 2.4_prec
             dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
+            exit
             ELSE; 
             gamma_temp = max(gamma_calc(u_, v_),eps0)
             dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)

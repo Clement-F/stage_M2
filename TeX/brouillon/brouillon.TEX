@@ -1,0 +1,60 @@
+\documentclass[16pt]{article}%Documentation de la class
+\usepackage{geometry}
+\geometry{left=2.cm,right=2.cm,top=2.cm,bottom=2.cm}
+\input{macro}
+
+\begin{document}
+Pour ne pas s'encombrer de notations, On pose $F = F^* + \theta \, \Delta F$ où $\theta = \text{diag}(\theta_\rho, \theta_{\rho v}, \theta_{\rho e})$  \\
+Et $(\rho, \rho v, \rho e) =  (\rho^*, \rho v^*, \rho e^*)- \theta \frac{\Delta F}{\gamma} $ 
+
+On rappel le critère de positivité de $\rho$ : 
+\begin{equation}
+\theta^{\rho>0}_{\rho} \leq \frac{\gamma}{|\Delta F^{\rho}|} \rho^*
+\end{equation}
+
+on cherche $\theta_\rho, \theta_{\rho v}, \theta_{\rho e}$ telle que $p = C (\rho e - \frac{\rho \left\|v\right\|^2}{2}) \geq 0$. \\
+pour se faire, on regardera si $\rho p \geq 0$, on pose donc $\theta_{\rho} = \theta^{\rho >0}_{\rho} \cdot \theta^{p>0}_{\rho}$. \\
+
+en développant les calcules, on se retrouve avec : 
+\begin{align*}
+(\rho^* - \theta_{\rho}\frac{\Delta F^{\rho}}{\gamma})(\rho e^* - \theta_{\rho e}\frac{\Delta F^{\rho e}}{\gamma}) -  \frac{\left\|(\rho v^* - \theta_{\rho v}\frac{\Delta F^{\rho v}}{\gamma})\right\|^2}{2} \geq 0  \\
+(\rho^* \rho e^* - \frac{\left\|\rho v^*\right\|^2}{2}) \geq
+  \frac{\theta_{\rho  }}{\gamma} \rho e^* \Delta F^{\rho} 
++ \frac{\theta_{\rho e}}{\gamma} \rho^* \Delta F^{\rho e}
+- \frac{\theta_{\rho} \theta_{\rho e}}{\gamma^2} \Delta F^{\rho} \Delta F^{\rho e}
+- \frac{\theta_{\rho v}}{\gamma} \rho v^* \cdot \Delta F^{\rho v}
++(\frac{\theta_{\rho v}}{\gamma})^2 \frac{\left\|\Delta F^{\rho v}\right\|^2}{2} 
+\end{align*}
+En utilisant l'inégalité sur $\theta^{\rho >0}_{\rho}$, on obtient alors : 
+$- \frac{\theta_{\rho} \theta_{\rho e}}{\gamma^2} \Delta F^{\rho} \Delta F^{\rho e} \geq 
+ - \frac{\theta_{\rho}^{p>0} \theta_{\rho e}}{\gamma^2} \frac{\gamma \Delta F^{\rho} \Delta F^{\rho e}}{|\Delta F^\rho |} \rho^* = - \text{sgn}(\Delta F^{\rho}) \frac{\theta_{\rho e} \theta^{p>0}_{\rho}}{\gamma} \Delta F^{\rho e} \rho^* $
+Et donc
+\begin{equation}
+    (\rho^* \rho e^* - \frac{\left\|\rho v^*\right\|^2}{2}) \geq
+  \frac{\theta_{\rho  }}{\gamma} \rho e^* \Delta F^{\rho} 
++ \frac{\theta_{\rho e}}{\gamma} \rho^* \Delta F^{\rho e}
+- \frac{\theta_{\rho e}}{\gamma} \text{sgn}(\Delta F^{\rho}) \theta^{p>0}_{\rho} \Delta F^{\rho e} \rho^*
+- \frac{\theta_{\rho v}}{\gamma} \rho v^* \cdot \Delta F^{\rho v}
++(\frac{\theta_{\rho v}}{\gamma})^2 \frac{\left\|\Delta F^{\rho v}\right\|^2}{2} 
+\end{equation}
+Que l'on peut alors reformuler comme : 
+
+\begin{equation}
+    (\rho^* \rho e^* - \frac{\left\|\rho v^*\right\|^2}{2}) \geq
+  \frac{\theta_{\rho  }}{\gamma} \left[\rho e^* \Delta F^{\rho} \right]
++ \frac{\theta_{\rho e}}{\gamma} \left[\rho^* \Delta F^{\rho e} \left( 1- \text{sgn}(\Delta F^{\rho}) \theta^{p>0}_{\rho} \right)\right]
+- \frac{\theta_{\rho v}}{\gamma} \left[\rho v^* \cdot \Delta F^{\rho v}\right]
++(\frac{\theta_{\rho v}}{\gamma})^2 \left[\frac{\left\|\Delta F^{\rho v}\right\|^2}{2} \right]
+\end{equation}
+
+En se souvenant que $\theta_{\rho v} \in [0,1]$ alors $\theta_{\rho v}>\theta_{\rho v}^2$, on se retrouve avec ce problème : 
+
+\begin{equation}
+    \left[\rho^* \rho e^* - \frac{\left\|\rho v^*\right\|^2}{2}\right] \geq
+  \frac{\theta_{\rho  }}{\gamma} \left[\rho e^* \Delta F^{\rho} \right]
++ \frac{\theta_{\rho e}}{\gamma} \left[\rho^*   \Delta F^{\rho e} \left( 1- \text{sgn}(\Delta F^{\rho}) \theta^{p>0}_{\rho} \right) \right]
++ \frac{\theta_{\rho v}}{\gamma} \left[\frac{\left\|\Delta F^{\rho v}\right\|^2}{2 \gamma} - \rho v^* \cdot \Delta F^{\rho v}\right] 
+\end{equation}
+
+
+\end{document}
