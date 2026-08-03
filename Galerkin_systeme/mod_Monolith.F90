@@ -141,32 +141,36 @@ CONTAINS
     REAL(prec) :: alpha,beta, param
     LOGICAL :: extrema
 
+    INTEGER :: ii
+
     THETA_max = 1._prec
 
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
+      DO ii = 1,1
         IF(max_rule==1) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
           beta = 0.99_prec*(max_glob-eps0);
 
         ELSEIF(max_rule ==2) THEN
-          IF((abs(DF(1))) < eps0) THEN; THETA_max = 1._prec; return; END IF
+          IF((abs(DF(ii))) < eps0) THEN; THETA_max = 1._prec; return; END IF
 
-          IF(DF(1) .LT. -eps0) THEN
-            beta = minmax_loc(mc,"max",nvar=1)
-            alpha= minmax_loc(pv,"min",nvar=1)
+          IF(DF(ii) .LT. -eps0) THEN
+            beta = minmax_loc(mc,"max",nvar=ii)
+            alpha= minmax_loc(pv,"min",nvar=ii)
 
-          ELSE IF(DF(1) .GT. eps0) THEN
-            beta = minmax_loc(pv,"max",nvar=1)
-            alpha= minmax_loc(mc,"min",nvar=1)
+          ELSE IF(DF(ii) .GT. eps0) THEN
+            beta = minmax_loc(pv,"max",nvar=ii)
+            alpha= minmax_loc(mc,"min",nvar=ii)
           END IF
 
         END IF
 
-        param = min(beta - u_Riemann(1), u_Riemann(1)- alpha)
+        param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
         
-        THETA_max =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec);       
+        THETA_max =max(min(THETA_max, abs(gamma_mp/DF(ii)) * param),0._prec);       
+      END DO
     END IF
 
   END FUNCTION THETA_max
@@ -257,7 +261,7 @@ CONTAINS
       END DO;
     ELSE 
 
-      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; 
+      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell+1; 
         face_L = .FALSE.; face_R = .FALSE.
         nL = Voisin_cell(ni,n_sub, 'L') 
         nR = Voisin_cell(ni,n_sub, 'R') 

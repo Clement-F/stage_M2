@@ -43,7 +43,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,1):
+for k in range(0,sm,5):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][10:27]
@@ -82,13 +82,13 @@ for k in range(0,sm,1):
     if(nb_var>1):
         1+1
         plt.plot(X,U_ex[k,:,1],'k-')
-        plt.plot(X,U_t[k,:,1],'r-', marker='.')
+        #plt.plot(X,U_t[k,:,1],'r-', marker='.')
         #plt.plot(X,abs(U_t[k,:,1]-U_ex[k,:,1]),'k-')
         #plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
     if(nb_var>2):
         1+1
         plt.plot(X,U_ex[k,:,2],'k-')
-        plt.plot(X,U_t[k,:,2],'g-', marker='.')
+        #plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
     #plt.plot(X,P_[k,:],'k-.')
@@ -162,10 +162,10 @@ if(False):
         
     plt.plot(X,U_t[k,:,0],'b', marker='.')
     plt.plot(X_ex,rho_ex,'b')
-    plt.plot(Xvel_ex,vel_ex,'r')
-    plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r', marker='.')
-    plt.plot(X_ex,pre_ex,'k')
-    plt.plot(X,P_[k,:],'k', marker='.')
+    # plt.plot(Xvel_ex,vel_ex,'r')
+    # plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r', marker='.')
+    # plt.plot(X_ex,pre_ex,'k')
+    # plt.plot(X,P_[k,:],'k', marker='.')
     
     plt.savefig("endfig_save.png")    
 

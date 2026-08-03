@@ -23,7 +23,7 @@ line =[]
 for k in range(0,sm):
     # print(k,k*(nx+1) )
     # print (lines[k*(nx+1)])
-    print (lines[k*(nx+1)+0+1][65])
+    #print (lines[k*(nx+1)+0+1][65])
     T[k] = lines[k*(nx+1)][9:19]
     for i in range(0,(nx)):
         line = lines[k*(nx+1) +i+1]
