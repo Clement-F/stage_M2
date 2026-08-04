@@ -11,7 +11,7 @@ nb_var = int(lines[0][10:16])
 orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
-nx = nb_cell *orderx
+nx = nb_cell *nb_sub
 
 sm = int(lines[5][5:11])
 
@@ -54,7 +54,7 @@ for k in range(0,sm,5):
         #     X_midcell[int(i/nb_sub)] = (X_cell[int(i/nb_sub)]+X_cell[int(i/nb_sub)+1])/2
             
     
-        U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
+        #U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
         # if(nb_var >1) : 
         #      U_ex[k][i][1]   = lines2[k*(nx+1) +i][28:43]
         # if(nb_var >2) :
@@ -62,11 +62,7 @@ for k in range(0,sm,5):
             
         
         #P_[k,i] = p(U_t[k,i,:])
-<<<<<<< HEAD
-        U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
-    #    P_[k,i] = p(U_t[k,i,:])
-=======
->>>>>>> 67c1716 (update TeX annex entropie)
+        #U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
     #U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
                   
     for i in range(0,nb_cell+1): 
@@ -108,7 +104,7 @@ for k in range(0,sm,5):
 
 
 
-if(False):
+if(True):
     with open('sol_ex/buckley.dat') as f:
         lines = f.readlines()
         

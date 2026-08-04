@@ -73,7 +73,7 @@ CONTAINS
 
     IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
       ! positivité de rho
-      theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*u_Riemann(1))
+      theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*(u_Riemann(1)-eps0))
 
       ! positivité de E//P
       IF(positivity == 1) THEN 
@@ -114,11 +114,11 @@ CONTAINS
           IF((abs(DF(ii))) < eps0) THEN; theta = 1._prec; return; END IF
 
           IF(DF(ii) .LT. -eps0) THEN
-            beta = minmax_loc(mc,"max",nvar=ii) 
+            beta = minmax_loc(mc,"max",nvar=ii)
             alpha= minmax_loc(pv,"min",nvar=ii)
 
           ELSE IF(DF(ii) .GT. eps0) THEN
-            beta = minmax_loc(pv,"max",nvar=ii) 
+            beta = minmax_loc(pv,"max",nvar=ii)
             alpha= minmax_loc(mc,"min",nvar=ii)
           END IF
 
@@ -192,8 +192,10 @@ CONTAINS
         nL = Voisin_cell(ni,n_sub, 'L') 
         nR = Voisin_cell(ni,n_sub, 'R') 
 
-        du     = DOT_PRODUCT(sol_step(ni   )%deriv(:,n_var), Projection_VF(n_sub,:))/( cell_size(ni)*0.5_prec)
+        IF(n_sub ==1) THEN
         du_L   = DOT_PRODUCT(sol_step(nL(1))%deriv(:,n_var), Projection_VF(nL(2),:))/( cell_size(ni)*0.5_prec)
+        du     = DOT_PRODUCT(sol_step(ni   )%deriv(:,n_var), Projection_VF(n_sub,:))/( cell_size(ni)*0.5_prec)
+        END IF
         du_R   = DOT_PRODUCT(sol_step(nR(1))%deriv(:,n_var), Projection_VF(nR(2),:))/( cell_size(ni)*0.5_prec)
 
         ddu  = (4._prec/(subcell_size(n_sub) * cell_size(ni)**2))*&
@@ -232,16 +234,18 @@ CONTAINS
     INTEGER :: ni, jj,ii
 
   extrema = .FALSE. 
-  subcells_(:,:)%theta = 1._prec 
+  subcells_(:,:)%theta = 0._prec 
   theta_(:,:) = 1._prec;  
-  pos = 1._prec; LMP = 1._prec;
    
   
   IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
     write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) time
   END IF
 
-  DO ni=1,nb_cell; DO jj=1,nb_subcell
+  DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+    pos = 1._prec; LMP = 1._prec; ent =1._prec
+
+    theta_temp = 1._prec
     ! print *,"------------------------------"
     ! print *, ni,jj
     IF(jj==1) THEN
@@ -343,11 +347,16 @@ CONTAINS
         ! Entropie 
         IF(.not. extrema .AND. entropie_rule .GT. 0) THEN 
 
-          IF(entropie_rule == 1) theta_temp(1) = max(min(1._prec, (gamma_calc(ug,ud)-max_dflux)* minval(ud-ug/(2._prec *DF))),0._prec)
-
+          IF(entropie_rule == 1) THEN 
+            DO ii=1,nb_var
+            IF((ud(ii)-ug(ii))*DF(ii) .GT. eps0 ) theta_temp(1) = min(1._prec, (max_dflux-gamma_mp)*((ud(ii)-ug(ii))/(2._prec *DF(ii))))
+            END DO
+          ELSEIF(entropie_rule==2) THEN 
+            
+          END IF
           theta_(ni,jj) = min(theta_(ni,jj),theta_temp(1))
         END IF
-        ent = theta_temp(1)
+          ent = theta_temp(1)
 
         theta_(ni,jj) = max(theta_(ni,jj),0._prec)
         
