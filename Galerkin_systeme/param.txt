@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-60              | noeuds du maillage 
--10D-1             | xd
+30              | noeuds du maillage 
+-0D-1             | xd
 10D-1              | xf
-10D-2            | T
+40D-3            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -38,15 +38,15 @@ False           | Convergence   (True, False)
 False           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-100              | print rule
+10              | print rule
 False            | exact time
 solSub          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-isentropique    | solution initiale :
+Blast    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
 Euler           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-period          | condition au bord (period, Sym, Solid)
+Solid          | condition au bord (period, Sym, Solid)

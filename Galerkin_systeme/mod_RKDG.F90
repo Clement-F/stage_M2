@@ -356,7 +356,7 @@ CONTAINS
     ELSE; force = .FALSE.
     END IF
  
-    print *,"writout"
+    ! print *,"writout"
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 

@@ -105,7 +105,7 @@ CONTAINS
             
                 DO j=1,size_base
                 DO ii=1,nb_var
-                    sol(ni)%base_poly(j,:) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
+                    sol(ni)%base_poly(j,ii) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
                 END DO
                 END DO
             ELSE 
