@@ -49,11 +49,13 @@ CONTAINS
 
         DO kk =1,nb_nodes
           u_loc = sol_step(ni)%val_quad(kk,:)
+
+          ! write(*,advance='no',fmt="(i3,i2,3x)")ni,kk
+          ! write(*,fmt="(3(e12.6,1x))") u_loc
           f_loc = flux(u_loc)
-        DO jj =size_base,1,-1
+          DO jj =size_base,1,-1
                 fh_loc(jj,:) = fh_loc(jj,:) + f_loc*sig_quad(jj,kk)*w_quad(kk)
-        END DO
-        END DO
+        END DO; END DO
 
         flux_h(ni)%flux_DG = MATMUL(Masse_inv,  fh_loc)
 
@@ -69,7 +71,9 @@ CONTAINS
     ! print *,u
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
 
+    ! IF(p .LT. eps0) p = 0._prec
     ! IF(p .LT. -eps0) STOP "negative pressure"
+    ! IF(p .LT. -eps0) print *,"negative pressure",p
 
   END FUNCTION pression
 

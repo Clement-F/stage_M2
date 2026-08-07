@@ -56,8 +56,10 @@ CONTAINS
 
 
     END DO
-    
+    ! print *,"proj"
+
     CALL Projection_Flux
+    ! print *,"projected"
     
     IF(subcell_use) THEN
       
@@ -336,6 +338,7 @@ CONTAINS
       CALL Emergency_stop
     END IF
 
+    ! write(*,*) "dt calculated"
 
   END SUBROUTINE dt_calc
 
@@ -373,6 +376,22 @@ CONTAINS
           DO j=1,nb_subcell; 
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
+
+            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
+            write(unit=numfile_sol,    fmt=save_format, advance="no") xi,out !, Ref_to_loc(i,x_subcell(j))
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
+            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(1x,e12.6)') pression(out)
+            ELSE;
+               write(unit=numfile_sol,   fmt= '(1x)')
+               write(unit=numfile_solex, fmt= '(1x)')
+            END IF
+
+          END DO
+          IF(error_calc) THEN;          DO j=1,nb_nodes
+            xi = Ref_to_loc(i,x_quad(j))
+
             IF(TRIM(flux_name) == "advection") THEN       
               out_ex =Q_init(xi - time*vit_adv,0,nb_var)
 
@@ -387,20 +406,14 @@ CONTAINS
 
             END IF
 
-            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
-            write(unit=numfile_sol,    fmt=save_format, advance="no") xi,out !, Ref_to_loc(i,x_subcell(j))
-            IF(error_calc)write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+            errLi = max(errLi , (abs(sol(i)%val_quad(j,1)-out_ex(1))))
+            err1 = err1 + (abs(sol(i)%val_quad(j,1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
+            err2 = err2 + (((sol(i)%val_quad(j,1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
-            IF(TRIM(flux_name)== "Euler" ) THEN
-            ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
-            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
-            write(unit=numfile_sol, fmt= '(1x,f12.6)') pression(out)
-            ELSE;
-               write(unit=numfile_sol,   fmt= '(1x)')
-               write(unit=numfile_solex, fmt= '(1x)')
-            END IF
+            write(unit=numfile_solex,  fmt=save_format) xi,out_ex
 
-          END DO 
+
+          END DO; END IF
           
           DO j=1,size_base
             xi = Ref_to_loc(i,x_quad(j))

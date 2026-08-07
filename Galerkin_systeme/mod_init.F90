@@ -98,16 +98,20 @@ CONTAINS
 
         DO ni=1,nb_cell
             IF(subcell_use) THEN
-                DO j =1,nb_subcell; DO kk =1,nb_nodes
+
+                ! DO ii=1,nb_var
+                ! CALL Projection_Soli(Q_init,sol(ni)%base_poly(:,:), LOC=LLoc, ni= ni)
+                ! END DO
+                ! print *,sol(ni)%base_poly(1,:)
+
+                ! sol(ni)%val_subcells(:,:) = MATMUL(Projection_VF(:,:), sol(ni)%base_poly(:,:))
+
+                DO j =1,nb_subcell; DO kk =nb_nodes,1,-1
                     YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
                     sol(ni)%val_subcells(j,:) = sol(ni)%val_subcells(j,:) + Q_init(YY,ni,nb_var)*w_quad(kk)/2._prec
                 END DO; END DO
             
-                DO j=1,size_base
-                DO ii=1,nb_var
-                    sol(ni)%base_poly(j,ii) = DOT_PRODUCT(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,ii))
-                END DO
-                END DO
+                sol(ni)%base_poly(:,:) = MATMUL(Projection_VF_inv(:,:), sol(ni)%val_subcells(:,:))
             ELSE 
                 DO ii=1,nb_var
                     CALL Projection_Soli(Q_init,sol(ni)%base_poly(:,ii), LOC=LLoc, ni= ni)

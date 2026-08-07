@@ -162,6 +162,7 @@ CONTAINS
 
         CASE("Sod")
             Q_init = sod_tube(x,ni)
+            print *, Q_init
 
         CASE("isentropique")
             Q_init = smooth_isentropique(x,ni)

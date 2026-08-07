@@ -21,9 +21,9 @@ T   = np.zeros(sm)
 
 
 for k in range(0,sm):
-    print(k,k*(nx+1) )
-    print (lines[k*(nx+1)])
-    print (lines[k*(nx+1)+1][49])
+    # print(k,k*(nx+1) )
+    # print (lines[k*(nx+1)])
+    # print (lines[k*(nx+1)+1][49])
     T[k] = lines[k*(nx+1)][9:19]
     for i in range(0,(nx)):
         line = lines[k*(nx+1)+i+1]
@@ -38,7 +38,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-1.; xR=1.
+xL=-0.; xR=1.
     
 plt.pcolormesh(X, T, theta_, shading='auto', cmap='viridis')
 plt.xlim(xL,xR)
@@ -48,6 +48,8 @@ plt.show()
 plt.pcolormesh(X, T, pos, shading='auto', cmap='viridis')
 plt.xlim(xL,xR)
 plt.colorbar()
+#plt.show()
+plt.savefig("mesh_out.png")
 plt.show()
 
 plt.pcolormesh(X, T, LMP, shading='auto', cmap='viridis')
@@ -64,5 +66,3 @@ plt.pcolormesh(X, T, ext, shading='auto', cmap='viridis')
 plt.xlim(xL,xR)
 plt.colorbar()
 plt.show()
-#plt.savefig("mesh_out.png")
-#plt.show()
