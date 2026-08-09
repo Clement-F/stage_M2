@@ -21,6 +21,20 @@ CONTAINS
         if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
     END FUNCTION creneau
 
+    FUNCTION Riemann_Buckley(x,ni) result(s)
+        IMPLICIT NONE
+        REAL(prec), INTENT(in) :: x
+        INTEGER,    INTENT(in) :: ni
+        REAL(prec) :: s 
+        s = eps0
+        IF(x<0._prec) THEN 
+            s = -3._prec
+        ELSE 
+            s = 3._prec
+        END IF
+    END FUNCTION Riemann_Buckley
+
+
     FUNCTION composite(x,ni) result(res)
         IMPLICIT NONE
         REAL(prec), INTENT(in) :: x
@@ -151,6 +165,9 @@ CONTAINS
 
         CASE("creneau")
             Q_init = creneau(x,ni)
+
+        CASE("Riemann_Buckley")
+            Q_init = Riemann_Buckley(x,ni)
 
         CASE("composite")
             Q_init = composite(x,ni)

@@ -32,8 +32,6 @@ CONTAINS
             max_dflux = abs(vit_adv)
             nb_var=1
         Case("burgers") 
-            nb_var=2
-        Case("burgers_SCL") 
             nb_var=1
         Case("Buckley") 
             nb_var=1
@@ -142,6 +140,8 @@ CONTAINS
             min_glob =  eps0; max_glob = 1._prec
         CASE("composite")
             min_glob = eps0; max_glob = 1.1_prec
+        CASE("Riemann_Buckley")
+            min_glob = -3._prec; max_glob = 3._prec
         CASE("Burgers_choc")
             min_glob = -1._prec; max_glob = 0.5_prec
         CASE("Sod")

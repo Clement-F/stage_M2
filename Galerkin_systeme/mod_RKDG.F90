@@ -100,7 +100,16 @@ CONTAINS
       IF(coeff_smooth == 2)theta_mp = Min(theta_(ni,jj), Min(      subcells_(voi_L(1),voi_L(2))%theta,  subcells_(voi_R(1),voi_R(2))%theta)  )
 
       flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) +theta_mp*DF
-    END DO; END DO
+
+      ! print *,"-------------"
+      ! print *,ni,jj
+      ! print *,voi_L,voi_R
+
+    END DO;
+    ! print *,"=========="
+    ! print *,flux_h(voi_L(1))%flux_subcells(voi_L(2),:)
+    ! print *,flux_h(voi_R(1))%flux_subcells(voi_R(2),:)
+    END DO
 
     END IF
     END IF
@@ -115,14 +124,11 @@ CONTAINS
     INTEGER :: ii,jj
     REAL(prec), DIMENSION(size_base,nb_var) :: V_B, S_B, BB,L_step
 
-
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
       sol_step(ni)%val_quad  = sol(ni)%val_quad
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
-      
-    ! print *,"-----------------"
 
     DO tni =1,order_t
       
@@ -157,8 +163,6 @@ CONTAINS
       END DO
     END DO
 
-    ! print *,"---------------------"
-
     DO ni=1,nb_cell
         sol(ni)%base_poly  = sol_step(ni)%base_poly
 
@@ -174,7 +178,6 @@ CONTAINS
           sol(ni)%inter(2,:)      = eval_sol(x_cell(ni+1),ni=ni,LOC=LLoc)
         END IF
     END DO
-
 
   END SUBROUTINE Time_step
 
@@ -194,10 +197,8 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
 
-    ! print *,"==========="
     DO ii=1,order_t
       CALL flux_numerique
-      ! print *,"----------"
       DO ni = 1,nb_cell;
 
         DO jj =1,nb_subcell
@@ -239,8 +240,6 @@ CONTAINS
       sol(ni)%val_subcells = sol_step(ni)%val_subcells
       sol(ni)%inter        = sol_step(ni)%inter
     END DO
-
-
 
   END SUBROUTINE Time_step_subcell
 
@@ -343,6 +342,7 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER :: i,j
+    INTEGER, DIMENSION(2) :: i_maxloc
     REAL(prec), DIMENSION(nb_var) :: out, out_ex
     REAL(prec) :: xi
     REAL(prec) :: err1 , err2, errLi, entropy
@@ -357,7 +357,7 @@ CONTAINS
     END IF
  
     ! print *,"writout"
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec; entropy = 0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
@@ -402,13 +402,13 @@ CONTAINS
 
           END DO 
           
-          DO j=1,size_base
+          IF(entropie_rule .GT. 0) THEN ;DO j=1,size_base
             xi = Ref_to_loc(i,x_quad(j))
 
             out = sol(i)%val_quad(j,:)
-          IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
+            entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
 
-          END DO
+          END DO; END IF
         ELSE
           
           DO j=1,size_base
@@ -468,6 +468,9 @@ CONTAINS
       write(*, fmt ='("avg theta = ", f12.6)')  Sum(subcells_(:,:)%theta)/REAL((nb_cell)*(nb_subcell),prec)
       write(*, fmt ='("max theta = ", f12.6)')  maxval(subcells_(:,:)%theta)
       write(*, fmt ='("min theta = ", f12.6)')  minval(subcells_(:,:)%theta)
+
+      ! i_maxloc = MAXLOC(subcells_(:,:)%theta)
+      ! print *,i_maxloc, subcells_(i_maxloc,:)%theta
 
       IF(entropie_rule .GT. 0) THEN 
       write(*, fmt ='("entropy = ", f12.6)')  entropy
@@ -560,7 +563,6 @@ CONTAINS
 
   END SUBROUTINE pied_charact
 
-
   SUBROUTINE Out_The_Mesh(ti)
     IMPLICIT NONE
     REAL(prec), INTENT(IN) :: ti
@@ -610,7 +612,6 @@ CONTAINS
 
     STOP "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
-
 
   SUBROUTINE Error_check
     IMPLICIT NONE

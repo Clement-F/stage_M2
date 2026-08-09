@@ -3,6 +3,10 @@
 \geometry{left=2.cm,right=2.cm,top=2.cm,bottom=2.cm}
 \input{../macro}
 
+\usepackage[backend=biber,style=numeric,sortcites,sorting=nty,backref,natbib,hyperref]{biblatex}
+
+\addbibresource{../ref.bib}
+
 \title{  Mémoire \\
   \large sur un schéma monolithique DG/FV}
 \author{clement fontan}
@@ -15,6 +19,12 @@
 \input{sec1_methDG.TEX}
 \input{sec2_Monolith.TEX}
 \input{annex.TEX}
+\newpage
+\printbibliography[
+heading=bibintoc,
+title={Bibliography}
+] %Prints the entire used bibliography with the title "Whole bibliography"
+
 
 
 

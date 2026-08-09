@@ -17,15 +17,16 @@ CONTAINS
     ! print *, mc
 
     IF(mc(2) .ne. 0) THEN 
-    sol_mc = sol_step(mc   (1))%val_subcells(mc   (2),nvar)
-    voi_L = subcells_(mc(1),mc(2))%L
-    voi_R = subcells_(mc(1),mc(2))%R
+      sol_mc = sol_step(mc   (1))%val_subcells(mc   (2),nvar)
+      voi_L = subcells_(mc(1),mc(2))%L
+      voi_R = subcells_(mc(1),mc(2))%R
     ELSE 
-    IF(TRIM(minmax) == "min") sol_mc = minval(sol_step(mc   (1))%val_subcells(:,nvar))
-    IF(TRIM(minmax) == "max") sol_mc = maxval(sol_step(mc   (1))%val_subcells(:,nvar))
-    voi_L = subcells_(mc(1),1)%L
-    voi_R = subcells_(mc(1),nb_subcell)%R
+      IF(TRIM(minmax) == "min") sol_mc = minval(sol_step(mc   (1))%val_subcells(:,nvar))
+      IF(TRIM(minmax) == "max") sol_mc = maxval(sol_step(mc   (1))%val_subcells(:,nvar))
+      voi_L = subcells_(mc(1),1)%L
+      voi_R = subcells_(mc(1),nb_subcell)%R
     END IF 
+
     IF(TRIM(minmax) == "min") THEN
     IF(max_rule == 2)   minmax_loc= min( sol_mc, &
                                         &sol_step(voi_L(1))%val_subcells(voi_L(2),nvar), &
@@ -180,7 +181,7 @@ CONTAINS
     REAL(prec) :: THETA_ent
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: ug,ud,DF
     REAL(prec), INTENT(IN) :: gamma_mp
-    REAL(prec), DIMENSION(nb_var) :: vg, vd
+    REAL(prec), DIMENSION(nb_var) :: vg, vd, f_fv
     LOGICAL :: extrema
 
     THETA_ent = 1._prec
@@ -195,9 +196,12 @@ CONTAINS
       ELSEIF(entropie_rule==2) THEN 
 
         vg = Var_entrop(ug); vd = Var_entrop(ud)
-        IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - &
-                                                        & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) / &
-                                                        & (DOT_PRODUCT((vd-vg), DF))
+        ! IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - &
+        !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) / &
+        !                                                 & (DOT_PRODUCT((vd-vg), DF))
+        f_fv = (flux(ug) + flux(ud) - gamma_mp*(ud-ug))*0.5_prec 
+
+        IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0)  THETA_ent  = ((entrop_pot_flux(ud)-entrop_pot_flux(ug))/(vd(1)-vg(1)) - f_fv(1))/DF(1)
 
           ! print *,"------------------------"
         ! write(*,fmt='(f10.6, f10.6, f10.6, f10.6)') vg, vd, vd-vg, DF
@@ -306,7 +310,8 @@ CONTAINS
     INTEGER :: ni, jj
 
     extrema = .FALSE. 
-    subcells_(:,:)%theta = 1._prec 
+    IF(coeff_smooth ==0 .OR. coeff_smooth == 1)    subcells_(:,:)%theta = 1._prec 
+    IF(coeff_smooth ==2)                           subcells_(:,:)%theta = 0._prec 
     theta_(:,:) = 1._prec;  
     
     

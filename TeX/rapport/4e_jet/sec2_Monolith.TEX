@@ -126,9 +126,70 @@ il est toujours possible de trouver $\theta_{mp}$ pour que $\overline{\mathbf{U}
 \subsection{choix du paramètre d'hybridation {\color{red} nom à changer}}
 
 \paragraph{Global Maximal Principle (GMP)}
-La première propriété que nous allons étudier et qui nous servira d'exemple pour la suite est comment imposer un principe du maximum global dans le cas scalaire $\Omega \subset \R$, $M=1$ : 
+La première propriété que nous allons étudier et qui nous servira d'exemple pour la suite est comment imposer un principe du maximum global dans le cas scalaire $\Omega \subset \R^M$, $M=1$ : 
 $$ \alpha \leq \overline{U}^{0} \leq \beta \implies \alpha \leq \overline{U}^{n} \leq \beta \quad \forall n$$
+Pour le cas $M>1$, on regardera plutôt le cas particulier de la positivité des variables, en particulier pour le problème de la dynamique des gaz.
+
+Si l'on souhaite obtenir une telle propriété, il nous suffit alors de trouver $\theta_{mp}$ pour avoir $\widetilde{\mathbf{u}}_{mp}^{\pm,n+1}\in \left[\alpha,\beta\right]$ et comme $\mathbf{u}_{mp}^{*,FV}\in \left[\alpha,\beta\right]$, on a la suite d'équivalence:
+\begin{align*}
+    &\widetilde{\mathbf{u}}_{mp}^{\pm}\in \left[\alpha,\beta\right] \\
+    &\mathbf{u}_{mp}^{*,FV} \pm \theta_{mp} \frac{\Delta F}{\gamma}\in \left[\alpha,\beta\right] \\
+    &\theta_{mp} \frac{\pm \Delta F}{\gamma} \in  \left[\alpha-\mathbf{u}_{mp}^{*,FV},\beta-\mathbf{u}_{mp}^{*,FV}\right] \\
+    &\theta_{mp} \in \left[\frac{-\gamma}{|\Delta F|} \left(\mathbf{u}_{mp}^{*,FV} - \alpha \right), \frac{\gamma}{|\Delta F|}\left(\beta-\mathbf{u}_{mp}^{*,FV}     \right) \right] \bigcap 
+                     \left[\frac{-\gamma}{|\Delta F|} \left(\beta-\mathbf{u}_{mp}^{*,FV}    \right), \frac{\gamma}{|\Delta F|}\left(\mathbf{u}_{mp}^{*,FV} - \alpha  \right) \right]
+\end{align*}
+En remarquant que $\frac{-\gamma}{|\Delta F|} \left(\mathbf{u}_{mp}^{*,FV} - \alpha \right),\frac{-\gamma}{|\Delta F|}\left(\beta-\mathbf{u}_{mp}^{*,FV}\right)  \leq 0 $ et que par définition $\theta_{mp} \leq 1$.
+On trouve la condition suffisante pour obtenir un schéma GMP : 
+\begin{equation}
+\theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|} \min \left(\beta-\mathbf{u}_{mp}^{*,FV},\mathbf{u}_{mp}^{*,FV} - \alpha  \right) \right) 
+\end{equation}
 
 \paragraph{Local  Maximal Principle (LMP)}
-\paragraph{positivité d'un schéma sur le problème de la dynamique des gaz}
+On sait que la solution entropique d'un problème scalaire suit le principe du maximum local i.e : 
+\begin{equation}
+    \beta_i^n := \max_{j\in\{i-1,i+1\}} u_j^n \geq u_i^{n+1} \geq \min_{j\in\{i-1,i+1\}} u_j^n =: \alpha_i^n
+\end{equation}
+Il est possible d'imposer ce critère sur chaque sous-cellules d'une manière similaire qu'on a imposer le principe du maximum global,
+la différence principale est qu'il est ici important de regarder $\widetilde{\mathbf{u}}_{mp}^{-}$ et $\widetilde{\mathbf{u}}_{mp}^{+}$ de manière différentes car :
+$\widetilde{\mathbf{u}}_{mp}^{-} \in \left[\alpha_m^n, \beta_m^n \right]$ tandis que $\widetilde{\mathbf{u}}_{mp}^{+} \in \left[\alpha_p^n, \beta_p^n \right]$
+en suivant un raisonnement similaire à la preuve du schéma GMP, et en pretant attention au signe de $\Delta F$, on obtient la condition suffisante : 
+\begin{equation}
+\theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|}  \left\{
+    \begin{aligned}
+    \min\left( \beta_{p}^n-\mathbf{u}_{mp}^{*,FV},\mathbf{u}_{mp}^{*,FV} - \alpha_{m}^n \right), &\text{ si }\Delta F >0  \\
+    \min\left( \beta_{m}^n-\mathbf{u}_{mp}^{*,FV},\mathbf{u}_{mp}^{*,FV} - \alpha_{p}^n \right), &\text{ si }\Delta F <0  
+    \end{aligned}\right.
+    \right)
+\end{equation}
+
+\paragraph{positivité d'un schéma sur le problème de la dynamique des gaz \\}
+On donne $\Omega \subset R^3$ l'espace des phases d'un gaz comme : 
+\begin{equation}
+    \Omega = \{(\rho,\rho v,\rho e)\quad | \quad \rho >0, \quad \epsilon= \rho e - \rho \frac{|v|^2}{2} >0\}
+\end{equation}
+Là où il est facile de vérifier $\rho >0$ en reprenant la condition du maximum global. Il est moins facile d'obtenir une condition pour la positivité de $\epsilon$. 
+Il n'est cependant pas impossible d'imposer un tel critère, en suivant une preuve de \red{FV 2024,et source}, en supposant $\rho >0$, on cherche un critère pour obtenir $\rho \,\rho e - \frac{|\rho v|^2}{2} >0$.\\
+En transposant cela dans l'écriture du schéma hybride, on cherche $\theta_{mp}$ tel que : $\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2} >0$
+\begin{align*}
+    &\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2}  \geq 0 \\
+    &\left( \rho^*   \pm \theta_{mp}\frac{\Delta F^{\rho  } }{\gamma} \right) \, \left(\rho e^* \pm \theta_{mp}\frac{\Delta F^{\rho e} }{\gamma} \right) - 
+     \frac{|\rho v^* \pm \theta_{mp}\frac{\Delta F^{\rho v} }{\gamma}|^2}{2}  \geq 0 \\
+    &\rho^* \, \rho e^* - \frac{|\rho v|^2}{2}
+    +\theta_{mp}\left(\frac{\pm\Delta F^{\rho  } }{\gamma}\rho e^*  \right)
+    +\theta_{mp}\left(\frac{\pm\Delta F^{\rho e} }{\gamma}\rho^*    \right)
+    -\theta_{mp}\left(\frac{\pm\Delta F^{\rho v} }{\gamma}\rho v^*    \right)
+    +\theta_{mp}^2\left(\frac{\Delta F^{\rho e}\Delta F^{\rho}}{\gamma^2} \right)
+    -\theta_{mp}^2\left(\frac{|\Delta F^{\rho v}|^2}{2\gamma^2} \right) \geq 0 \\
+    &\rho^* \, \rho e^* - \frac{|\rho v|^2}{2} \geq 
+    \mp \theta_{mp} \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]
+    + \theta_{mp}^2 \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]
+\end{align*}
+comme $\theta \in [0,1]$, on sait que $\theta^2 \leq \theta$ et que la condition s'écrit alors : 
+\begin{equation}
+\theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|} \min \left(\beta-\mathbf{u}_{mp}^{*,FV},\mathbf{u}_{mp}^{*,FV} - \alpha  \right)
+, \frac{M}{|B|+ min(A,0) } \right) 
+\end{equation}
+où $M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2}$, 
+$B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
+$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$ et 
 \paragraph{Détections d'extrema locaux}

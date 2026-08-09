@@ -39,10 +39,10 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,5):
+for k in range(0,sm,1):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
-        U_t[k][i][0]   = lines1[k*(nx+1) +i][10:27]
+        U_t[k][i][0]         = lines1[k*(nx+1) +i][10:27]
         if(nb_var >1) : 
             U_t[k][i][1]   = lines1[k*(nx+1) +i][28:43]
         if(nb_var >2) :
@@ -54,14 +54,14 @@ for k in range(0,sm,5):
         #     X_midcell[int(i/nb_sub)] = (X_cell[int(i/nb_sub)]+X_cell[int(i/nb_sub)+1])/2
             
     
-        #U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
+        # U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
         # if(nb_var >1) : 
         #      U_ex[k][i][1]   = lines2[k*(nx+1) +i][28:43]
         # if(nb_var >2) :
         #     U_ex[k][i][2]   = lines2[k*(nx+1) +i][44:58]
             
         
-        P_[k,i] = p(U_t[k,i,:])
+        #P_[k,i] = p(U_t[k,i,:])
     #U_cell[k][-1][0] = sum(U_t[k,-nb_sub-1:-1,0])/nb_sub
                   
     for i in range(0,nb_cell+1): 
@@ -73,7 +73,8 @@ for k in range(0,sm,5):
     plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
-    print(sum(U_t[k,:,0]))
+    #print(sum(U_t[k,:,0]))
+    print(min(P_[k,:]))
     if(nb_var>1):
         1+1
         plt.plot(X,U_ex[k,:,1],'k-')
@@ -93,9 +94,9 @@ for k in range(0,sm,5):
    # plt.ylim(m,M);plt.xlim(-0.,1.)
     #plt.ylim(-.2, 7.2)
     plt.title("plot at time "+str([T[k]]))
-    plt.show()    
-    #plt.savefig("save_"+str(T[k])+".png")    
-    #plt.cla() 
+    #plt.show()    
+    plt.savefig("save_"+str(T[k])+".png")    
+    plt.cla() 
     
 # plt.plot(X,U_t[k,:,0],'b', marker='.')
 # plt.ylim(3.,4.8);plt.xlim(0.5,2.3)
