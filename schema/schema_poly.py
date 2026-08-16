@@ -37,7 +37,7 @@ X_cell = np.zeros(nb_cell+1);       U_cell=  np.zeros((sm,nb_cell,nb_var))
 X_midcell = np.zeros(nb_cell)
 dec = 0
 
-X_cell[-1]=1.
+X_cell[-1]=2.
 
 
 for k in range(0,sm,):
@@ -74,7 +74,7 @@ for k in range(0,sm,):
            
     for i in range(0,nb_cell+1): 
         1+1
-        plt.plot([X_cell[i],X_cell[i]],[-2,2],linestyle='--', color='gray')
+        plt.plot([X_cell[i],X_cell[i]],[-1,1],linestyle='--', color='gray')
         
     for i in range(0,nb_cell): 
         J=i*space
@@ -109,8 +109,8 @@ for k in range(0,sm,):
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
    # plt.ylim(m,M);plt.xlim(-0.,1.)
-    plt.ylim(-1.5, 1.5)
-    #plt.title("plot at time "+str([T[k]]))
+    #plt.ylim(-.2, 7.2)
+    plt.title("plot at time "+str([T[k]]))
     plt.legend()
     plt.show()    
     #plt.savefig("save_"+str(T[k])+".png")    

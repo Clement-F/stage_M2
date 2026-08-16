@@ -1,14 +1,14 @@
 \newpage
 \section{Annexes}
 \subsection{opérateur de reconstruction comme moindre carré}
-\subsection{isomorphisme par variable entropique {\color{red} Voir si l'on rajoute des détails }}
+\subsection{isomorphisme par variable entropique {\color{red} Voir si l'on rajoute des détails } \label{entropie_Annexes}}
 
 Cette partie est basé sur une démonstration de \cite{godlewski2021numerical} [Introduction : entropy solution]
 \paragraph{Theorème de Godunov-Mock}
 soit $\eta :\Omega \mapsto \R$, une fonction strictement convexe, il y a équivalence entre :
 \begin{enumerate}
     \item $\eta$ est une entropie du système
-    \item $H\eta(u)\cdot J_f (u)$ est symétrique
+    \item $H\eta(u)\cdot A(u)$ est symétrique
 \end{enumerate}
 \subsubsection{existence et unicité des variables entropiques}
 une conséquence du théorème ci-dessus est que si $\eta$ est une entropie strictement convexe, alors le système est symétrisable.
@@ -18,7 +18,7 @@ On a donc le théorème suivant :
 $\exists \eta :\Omega \mapsto \R$, une entropie strictement convexe si et seulement si : $\exists \nu : \Omega \mapsto \Omega$ tel que le changement de variable : $u = u(\nu)$ rends le système symétrique.
 
 On note que le changement de variable nous donne le système suivant : 
-$$u'(\nu) \partial_t \nu + J_f(u(\nu)) u'(\nu) \partial_x(\nu) = 0 $$
+$$u'(\nu) \partial_t \nu + A(u(\nu)) u'(\nu) \partial_x(\nu) = 0 $$
 
 Supposons que le système soit symétrique, alors par def : $u'(\nu) = (\frac{\partial u_i}{\partial \nu_j})_{1\leq i,j \leq M} $  est symétrique et défini positif.\\
 On en déduit l'existence de $q(\nu)$ telle que : $\nabla_\nu q(\nu) = u(\nu)$, \\

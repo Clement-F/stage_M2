@@ -2,78 +2,83 @@
 \section{Schéma Monolithique (DG/FV)}
 La méthode se repose sur deux détails clés : une réécriture du schéma DG utilisant des sous-mailles et 
 un flux hybride entre le flux DG du schéma réécrit et un flux Volume Fini entre sous-mailles.
-\subsection{Réecriture du schéma DG}
+\subsection{Réecriture du schéma DG comme schéma sur sous-mailles.}
 \paragraph{sous-maillage \\}
 
-On dote chaque maille $\omega_i$ d'un sous-maillage : $\{S_m^i\}_m = ]\tilde{x}^i_{m-1/2}, \tilde{x}^i_{m+1/2}[$ vérifiant les mêmes propriétés que le maillage de $\mathbb{D}$ : \eqref{maillage1}-\eqref{maillage3}\\
-On cherchera à passer les degrées de libertés des polynomes de $ \sigma \in\mathbb{P}^k$, des moments sur la base polynomiale $ \left\{ \underline{\sigma}_p \right\}_p$ aux moyennes de ces polynomes sur le sous-mailles $\{S_m^i \}$ : $ \left\{\overline{\sigma}^m \right\}_m$ \\
+On dote chaque maille $\omega_i$ d'un sous-maillage : $\{S_m^i\}_m = ]\tilde{x}^i_{m-1/2}, \tilde{x}^i_{m+1/2}[$ vérifiant les mêmes propriétés qu'un maillage où $\bigcup_m S_m^i = \omega_i$ et $\tilde{x}_{1/2}^i = x_{i-1/2},\tilde{x}_{N_s^i + 1/2}^i = x_{i+1/2} $\\
+On cherchera à passer les degrées de libertés des polynomes de $ \sigma \in\mathbb{P}^k(\omega_i)$, des moments sur la base polynomiale $ \left\{ \underline{\sigma}_p \right\}_p$ aux moyennes de ces polynomes sur le sous-mailles $\{S_m^i \}$ : $ \left\{\overline{\sigma}^m \right\}_m$, $\overline{\sigma}^m = \int_{\omega_i} {\sigma}^m(x) dx$  \\
 \noindent Soit la matrice $$\mathcal{P}_{m,p} = \frac{1}{|S_m^i|} \int_{S_m^i} \sigma_p(x) dx$$ 
 On remarque que pour que le passage des moments polynomiaux $\left\{ \underline{\sigma}_p \right\}_p$ aux sous-volumes finis soit injectif, il nous faut : $N_s \geq N_k$. 
 De manière générale, on dit que le sous-maillage est admissible si et seulement si la matrice $\mathcal{P}^t\,\mathcal{P}$ est inversible.
 
-\paragraph{Remarque \\}
+\paragraph{Remarque \\}  
+\begin{wrapfigure}{r}{0.4\textwidth} 
+    \includegraphics[width =0.3\textwidth]{schema/projection_L2_svf.png}
+    \caption{Comparaison entre $\underline{U}$ et $\overline{U}$.}
+\end{wrapfigure}
 On note que pour avoir une équivalence au sens le plus strict possible, il nous faut $N_s = N_k$. 
-Dans le cas échéant ($N_s \geq N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  qui nous donnera les moments polynomiaux au sens des moindres carrés.
-\newline
-
-Il est alors simple de passer d'une représentation à une autre : 
-\begin{equation}
+Dans le cas échéant ($N_s \geq N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  qui nous donnera les moments polynomiaux au sens des moindres carrés. \\
+Il est alors simple de passer de la représentation polynomaile $\underline{U}$ à la représentation en sous-moyennes $\overline{U}$ ou inversement par ces relations: 
+\begin{equation}\label{passage_svf}
     \overline{U} = \mathcal{P}\underline{U} \qquad \underline{U} = \mathcal{R}\overline{U}
 \end{equation}
+On en profite pour introduire les fonctions $\{\phi_m^i\}_{1\leq m\leq N_s}$ les projections $\mathbb{P}^k(\omega_i)$ de $\mathbb{1}_{S^i_m}$ : 
+$$\int_{\omega_i} \phi_m^i \sigma dx = \int_{S_m^i} \sigma dx, \, \forall \sigma \in \mathbb{P}^k(\omega_i)$$
+les intégrales sur $S_m^i$ seront en pratique calculé par une méthode de quadrature sur $S_m^i$ et non sur $\omega_i$.
 
-On en profite pour introduire les fonctions $\{\phi_m^i\}_{1\leq m\leq N_s}$ les projections $\mathbb{P}^k$ de $\mathbb{1}_{S^i_m}$ : 
-$\int_{\omega_i} \phi_m \sigma dx = \int_{S_m^i} \sigma dx$, $\forall \sigma \in \mathbb{P}^k(\omega_i)$
-
+\paragraph{initialisation de $\overline{U}$}
+Il est important de noter que contrairement à la méthode DG "classique", il est nécessaire de changer la méthode d'initialisation.\\
+En effet, si l'on prend naivement les sous-moyennes des polynômes que l'on a calculé comme projection $\mathbb{L}^2$ de $u_0$, on pose le risque que $\overline{U} \notin \Omega$.
+Il est alors préférable d'initialiser $\overline{U}$ comme sous-moyennes de $U_0$ et de définir $\underline{U}$ à partir de $\overline{U}$ par la relation \eqref{passage_svf} 
 \paragraph{ Construction des flux reconstruit \\}
 
-En reprenant la formulation variationnelle \eqref{Formulation_Variationnelle}, si l'on projette $\mathbf{f}(\mathbf{u_h})$ sur $\mathbb{P}^k$ : $\mathbf{f_h}$, on obtient une formulation équivalente : 
-$$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx - \int_{\omega_i} \mathbf{f}_h^i \partial_x \sigma dx 
+En reprenant la formulation variationnelle \eqref{Formulation_Variationnelle}, si l'on projette $\mathbf{f}(\mathbf{u_h})$ sur $\mathbb{P}^k(\omega_i)$ : $\mathbf{F}_h$, on obtient une formulation équivalente : 
+$$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx - \int_{\omega_i} \mathbf{F}_h^i \partial_x \sigma dx 
 + \left[ \mathcal{F}\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
 Alors par le biais d'une intégration par partie, on obtient la forme forte des schéma DG :  
-$$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx = \int_{\omega_i} \partial_x \mathbf{f}_h^i  \sigma dx 
-- \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
+$$\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx = \int_{\omega_i} \partial_x \mathbf{F}_h^i  \sigma dx 
+- \left[ ( \mathbf{F}_h^i - \mathcal{F} )\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
 
-Comme cette équation est vrai pour tout polynôme de $\mathbb{P}^k(\omega_i)$, il est en particulier vrai pour $\phi_m$. Cela nous amène presque à un flux ne dépendant que de $S_m^i$ : 
+Comme cette équation est vrai pour tout polynôme de $\mathbb{P}^k(\omega_i)$, il est en particulier vrai pour $\phi_m^i$. Cela nous amène presque à un flux ne dépendant que de $S_m^i$ : 
 \begin{equation}
-    \int_{S_m^i} \partial_t \mathbf{u_h} dx = - \left(\int_{S_m^i}  \partial_x \mathbf{f}_h^i dx - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\right) \qquad \forall m\in \{ 1, \dots, N_s\}
+    \int_{S_m^i} \partial_t \mathbf{u_h} dx = - \left(\int_{S_m^i}  \partial_x \mathbf{F}_h^i dx - \left[ ( \mathbf{F}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\right) \qquad \forall m\in \{ 1, \dots, N_s\}
 \end{equation}
-Il est cependant possible d'obtenir un schéma volume fini sur les $\{\overline{u_h}^m\}$ en fabriquant un flux avec pour unique but de ressembler à un flux volume fini : \\
-Soit $\widehat{F^i}_{m+1/2}$ ces flux reconstruits posé telle que : 
+Il est cependant possible d'obtenir un schéma volume fini sur les $\{\overline{\mathbf{u}_h}^m\}$ en fabriquant un flux avec pour unique but de ressembler à un flux volume fini : \\
+Soit $\widehat{\mathbf{F}^i}_{m+1/2}$ ces flux reconstruits posé telle que : 
 
 \begin{align}
-&\widehat{F^i}_{m+1/2} - \widehat{F^i}_{m-1/2} =  -  \left[\mathbf{f}_h^i\right]_{\tilde{x}^i_{m-1/2}}^{\tilde{x}^i_{m+1/2}}  - \left[ ( \mathbf{f}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall m\in \{ 1, \dots, N_s\} \\
-& \text{où l'on impose : } \widehat{F^i}_{1/2} = \mathcal{F}_{i-1/2} \qquad \widehat{F^i}_{ N_s + 1/2} = \mathcal{F}_{i+1/2}
+&\widehat{\mathbf{F}^i}_{m+1/2} - \widehat{\mathbf{F}^i}_{m-1/2} =  -  \left[\mathbf{F}_h^i\right]_{\tilde{x}^i_{m-1/2}}^{\tilde{x}^i_{m+1/2}}  - \left[ ( \mathbf{F}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall m\in \{ 1, \dots, N_s\} \\
+& \text{où l'on impose : } \widehat{\mathbf{F}^i}_{1/2} = \mathcal{F}_{i-1/2} \qquad \widehat{\mathbf{F}^i}_{ N_s + 1/2} = \mathcal{F}_{i+1/2}
 \end{align}
 Il est possible d'obtenir une forme close de $\widehat{F^i}_{m+1/2}$: 
 \begin{align}
-    &\widehat{F^i}_{m+1/2} = \mathbf{f}_h^i(\tilde{x}^i_{m+1/2}) 
-    -C^{i-1/2}_{m+1/2} ( \mathbf{f}_h^i(x_{i-1/2}) - \mathcal{F}_{i-1/2}) 
-    -C^{i+1/2}_{m+1/2} ( \mathbf{f}_h^i(x_{i+1/2}) - \mathcal{F}_{i+1/2}) \\
-    & \text{où }  C^{i-1/2}_{m+1/2} = (1- \sum_{p=1}^{m}\phi_p(x_{i-1/2})) \, , \qquad
-        C^{i+1/2}_{m+1/2} =     \sum_{p=1}^{m}\phi_p(x_{i+1/2})
+    &\widehat{\mathbf{F}^i}_{m+1/2} = \mathbf{F}_h^i(\tilde{x}^i_{m+1/2}) 
+    -C^{i-1/2}_{m+1/2} ( \mathbf{F}_h^i(x_{i-1/2}) - \mathcal{F}_{i-1/2}) 
+    -C^{i+1/2}_{m+1/2} ( \mathbf{F}_h^i(x_{i+1/2}) - \mathcal{F}_{i+1/2}) \\
+    & \text{où }  C^{i-1/2}_{m+1/2} = (1- \sum_{p=1}^{m}\phi_p^i(x_{i-1/2})) \, , \qquad
+        C^{i+1/2}_{m+1/2} =     \sum_{p=1}^{m}\phi_p^i(x_{i+1/2})
 \end{align}
 
 Tout ceci nous permet d'écrire le schéma DG sous une forme Volumes Finis : 
  
 \begin{equation}\label{DG_as_FV}
-    \partial_t \overline{\mathbf{u}_m}^i = -\frac{1}{|S_m^i|}(\widehat{F^i}_{m+1/2} - \widehat{F^i}_{m-1/2})
+    \partial_t \overline{\mathbf{u}_m}^i = -\frac{1}{|S_m^i|}(\widehat{\mathbf{F}^i}_{m+1/2} - \widehat{\mathbf{F}^i}_{m-1/2})
 \end{equation}
 
 \paragraph{Remarque \\}
 \noindent Même si la forme de \eqref{DG_as_FV} laisse à penser que l'évolution de $\overline{\mathbf{u_h}}^m$ 
 ne dépend uniquement des sous-cellules voisines à $S_m^i$, 
-il faut se rappeler que $\widehat{F^i}_{m+1/2}$ dépend non seulement des sous-cellules voisines, 
+il faut se rappeler que $\widehat{\mathbf{F}^i}_{m+1/2}$ dépend non seulement des sous-cellules voisines, 
 mais aussi des cellules voisines $\omega_{i\pm1}$ par le biais du flux numérique évalué aux interfaces des cellules $x_{i\pm1/2}$ \\
-
-Les flux $\widehat{F^i}_{m+1/2}$ pouvant se trouver entre deux sous-cellules appartenant à la même maille ou de mailles différentes, 
-Par soucis de claireté, nous écrirons $\widehat{F_{mp}}$ le flux allant de la sous-cellule $S_m^i$ à la sous-cellule $S_p^j$, $j\in \{i-1,i,i+1\}$ 
+Les flux $\widehat{\mathbf{F}^i}_{m+1/2}$ pouvant se trouver entre deux sous-cellules appartenant à la même maille ou deux mailles différentes, 
+Par soucis de claireté, nous écrirons $\widehat{\mathbf{F}_{mp}}$ le flux allant de la sous-cellule $S_m^i$ à la sous-cellule $S_p^j$, $j\in \{i-1,i,i+1\}$ 
 
 \subsection{Flux hybride (DG/FV)}
-
-Maintenant que nous établie un schéma agissant sur les sous valeurs moyennes, 
+\noindent
+Maintenant que nous avons établie un schéma agissant sur les sous valeurs moyennes
 équivalent au schéma DG agissant sur les moments polynomiaux. 
-Il devient alors possible de combiner les flux DG $\widehat{F_{mp}}$ 
-avec des flux proprement volumes finis défini sur les sous-mailles $F^{\text{FV}}_{mp}$. 
+Il devient alors possible de combiner les flux DG reconstruit $\widehat{F_{mp}}$ 
+avec des flux proprement volumes finis défini sur les sous-mailles $F^{\text{FV}}_{mp}$ sous la forme d'un flux dit "hybride" $\widetilde{F_{mp}}$ comme combinaison convexe des deux flux.
 
 \begin{equation} 
 \begin{aligned}
@@ -81,10 +86,9 @@ avec des flux proprement volumes finis défini sur les sous-mailles $F^{\text{FV
                         &= F^{\text{FV}}_{mp} + \theta_{mp}\,\, \Delta F_{mp}
 \end{aligned}
 \end{equation}
-
-Le schéma dépend alors du choix de $\theta_{mp}$. 
-Si l'on pose $\theta_{mp} = 1$, alors nous obtiendrons un schéma DG qui pourra être d'ordre élevée.
-Si l'on pose $\theta_{mp} = 0$, alors nous obtiendrons un schéma Volumes Finis qui sera entropique et suivra le principe du maximum local. \\
+Le schéma dépend alors du choix de $\theta_{mp}$. \\
+Si l'on pose $\theta_{mp} = 1$, alors nous obtiendrons un schéma DG qui sera d'ordre élevée mais qui ne suivra pas des propriétés souhaité. \\
+Si l'on pose $\theta_{mp} = 0$, alors nous obtiendrons un schéma Volumes Finis qui sera entropique et suivra le principe du maximum local mais il sera d'ordre 1. \\
 Avant de s'attarder sur le choix des $\theta_mp$, regardons un minimum le schéma que nous avons obtenus : 
 
 \begin{equation}\label{DG_as_FV}
@@ -92,7 +96,7 @@ Avant de s'attarder sur le choix des $\theta_mp$, regardons un minimum le schém
 \end{equation}
 
 En se souvenant que toutes propriétés d'un schéma \textit{RK-SSP} d'ordre élevée est dérivée des propriétés du schéma d'Euler explicite, 
-il est possible de vois que $\overline{\mathbf{u}_m}^{i,n+1}$ peut se voir comme une combinaison convexe entre $\overline{\mathbf{u}_m}^{i,n}$ et ce que l'on définira comme des états de Riemann intermédiaires hybrides : 
+il est possible de voir que $\overline{\mathbf{u}_m}^{i,n+1}$ peut s'écrire comme une combinaison convexe entre $\overline{\mathbf{u}_m}^{i,n}$ et ce que l'on définira comme des états de Riemann intermédiaires hybrides : 
 $ \widetilde{\mathbf{u}}_{mp}^- = \overline{\mathbf{u}_m}^{i,n} - \frac{\widetilde{F_{mp}} -  F_h^i(\overline{\mathbf{u}_m}^{i,n})\cdot n_{mp} }{\gamma_{mp}}$
 
 \begin{align*}
@@ -163,12 +167,12 @@ en suivant un raisonnement similaire à la preuve du schéma GMP, et en pretant 
 \end{equation}
 
 \paragraph{positivité d'un schéma sur le problème de la dynamique des gaz \\}
-On donne $\Omega \subset R^3$ l'espace des phases d'un gaz comme : 
+On donne $\Omega \subset R^3$ l'espace des phases d'un gaz comme :  
 \begin{equation}
     \Omega = \{(\rho,\rho v,\rho e)\quad | \quad \rho >0, \quad \epsilon= \rho e - \rho \frac{|v|^2}{2} >0\}
 \end{equation}
 Là où il est facile de vérifier $\rho >0$ en reprenant la condition du maximum global. Il est moins facile d'obtenir une condition pour la positivité de $\epsilon$. 
-Il n'est cependant pas impossible d'imposer un tel critère, en suivant une preuve de \red{FV 2024,et source}, en supposant $\rho >0$, on cherche un critère pour obtenir $\rho \,\rho e - \frac{|\rho v|^2}{2} >0$.\\
+Il n'est cependant pas impossible d'imposer un tel critère, en suivant une preuve inspiré de  \cite{VILAR2025}  \cite{Rueda-Ramírez2024} \cite{Kuzmin2020}. En supposant $\rho >0$, on cherche un critère pour obtenir $\rho \,\rho e - \frac{|\rho v|^2}{2} >0$.\\
 En transposant cela dans l'écriture du schéma hybride, on cherche $\theta_{mp}$ tel que : $\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2} >0$
 \begin{align*}
     &\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2}  \geq 0 \\
@@ -192,4 +196,46 @@ comme $\theta \in [0,1]$, on sait que $\theta^2 \leq \theta$ et que la condition
 où $M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2}$, 
 $B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
 $A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$ et 
+
 \paragraph{Détections d'extrema locaux}
+Un problème de ce schéma est qu'il est très facile de se retrouver avec une convergence à l'ordre 1 
+car l'on applique des critères GMP/LMP sur des zones où la solution est régulière et qu'il serait donc judicieux de conserver cette régularité au plus possible. \\
+Il nous faut donc une méthode pour repérer les zones régulière de la solution. Nous allons utiliser une méthode basé sur une idée de Van Leer \cite{VANLEER1979101}, généraliser dans \cite{BURBEAU2001111} et appliqué à notre cadre dans \cite{VILAR2025}.
+Le détecteur regarde la régularité de la dérivée première en regardant si sa linérairisé se trouve entre la moyenne de ses voisins. \\
+\begin{wrapfigure}{r}{0.4\textwidth} 
+    \usebox{\detectextrema} 
+    \caption{visuel du détecteur}
+\end{wrapfigure}
+\begin{equation*}
+    v_i(x) = \partial_x \overline{\mathbf{u}_{i}} +(x-x_i) \partial_{xx} \overline{\mathbf{u}_i} \qquad
+\begin{aligned}
+    &v_{i-1/2}^M := \max(\overline{\mathbf{u}_{i-1}},\overline{\mathbf{u}_{i}}) \\
+    &v_{i-1/2}^m := \min(\overline{\mathbf{u}_{i-1}},\overline{\mathbf{u}_{i}})
+\end{aligned}
+\end{equation*}
+\begin{align}
+    &v_{i-1/2}^m \leq v_i(x_{i-1/2}) \leq v_{i-1/2}^M \\
+    &v_{i+1/2}^m \leq v_i(x_{i+1/2}) \leq v_{i+1/2}^M
+\end{align}
+Le critère ci-dessus tient pour les cellules, mais il est dans notre cas plus intéressant de l'utiliser sur des sous-cellules.
+En pratique, il est possible d'obtenir la dérivée de $u_h$ à partir de la matrice de masse et la matrice de rigidité. \\
+\noindent
+La première méthode consiste à comparer deux écriture de la dérivée d'un polynome dans la base polynomiale : 
+$$  \partial_xf_h(x) = \sum_p^{N_k} f_h  \partial_x \sigma_p(x) = \sum_p^{N_k} f_h' \sigma_p(x) $$
+Et en observant que l'on doit avoir une égalité par produit scalaire avec tout polynome de la base $\sigma_q$, on obtient une égalité de produit matrice vecteurs : 
+$$ F_h K = F_h' M$$
+Il est alors possible de récupérer les coordonées $F_h'$ en inversant la matrice de massse :$F_h' = M^{-1}F_h K$.\\
+à partir des coordonées de la dérivée du polynome, il est possible d'obtenir sa moyenne par un passage similaire à \eqref{passage_svf}.
+La deuxième méthode consiste à passer ces 2 étapes en une seul opération en calculant un opérateur de projection utilisant les dérivées des polynomes de base $\{\sigma_p'\}$: $\mathcal{P}'$ et $\mathcal{P}''$
+$$\partial_x \overline{f_h}^m = \frac{1}{|S_m^i|} \int_{S_m^i}\partial_x f_h =\frac{1}{|S_m^i|}\int_{S_m^i} \sum_p^{N_k} f_p \partial_x \sigma_p(x)dx = \sum_p^{N_k}f_p \frac{1}{|S_m^i|}\int_{S_m^i} \partial_x \sigma_p(x)dx   $$
+\begin{equation}
+    \partial_x \overline{f_h}^m = (\mathcal{P}'F_h)_m\qquad \mathcal{P}'_{mp} =  \frac{1}{|S_m^i|}\int_{S_m^i} \partial_x \sigma_p(x)dx = \frac{\sigma_p(\tilde{x}^i_{m+1/2}) - \sigma_p(\tilde{x}^i_{m-1/2})}{|S_m^i|}
+\end{equation}
+\begin{equation}
+    \partial_{xx} \overline{f_h}^m = (\mathcal{P}''F_h)_m\qquad \mathcal{P}''_{mp} =  \frac{1}{|S_m^i|}\int_{S_m^i} \partial_{xx} \sigma_p(x)dx = \frac{\partial_x \sigma_p(\tilde{x}^i_{m+1/2}) - \partial_x \sigma_p(\tilde{x}^i_{m-1/2})}{|S_m^i|}
+\end{equation}
+
+\subsubsection{conservation de l'entropie}
+\paragraph{critère d'ordre 1}
+\paragraph{critère d'ordre 2}
+\paragraph{critère d'ordre arbitraire}

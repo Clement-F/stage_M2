@@ -181,9 +181,8 @@ CONTAINS
       IF(entropie_num == 0) Flux_entrop = flux_d(u(1)) * u(1)
 
 
-      IF(flux_name == "advection" .AND. entropie_num == 1) THEN
-        IF(u(1) .GT. ke) Flux_entrop =  flux_d(u(1)) * abs(u(1)-ke)**epsi
-        IF(u(1) .LT. ke) Flux_entrop = -flux_d(u(1)) * abs(u(1)-ke)**epsi
+      IF(entropie_num == 1) THEN
+        Flux_entrop = sign(1._prec,u(1)-ke)* (flux_d(u(1))-flux_d(ke))
       END IF
 
       RETURN

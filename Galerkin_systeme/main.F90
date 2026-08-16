@@ -38,7 +38,7 @@ PROGRAM MAIN
     CALL eval_time(nb_prd_ini,nb_prd_max,nb_prd_sec,0)
     WRITE(*,*) " "
     
-    CALL writout
+    CALL writout_dense
 
     DO WHILE (tmax-time  .GT. eps0 )
         CALL dt_calc
@@ -50,10 +50,10 @@ PROGRAM MAIN
         time = time +dt
         n_time = n_time +1
         
-        CALL writout 
+        CALL writout_dense
     END DO
         
-    CALL writout 
+    CALL writout_dense
 
     open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='old',  position='append')
     write(unit= numfile_data, fmt='("nt = ",i5)') n_imp
