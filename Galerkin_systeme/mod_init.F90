@@ -33,8 +33,6 @@ CONTAINS
             nb_var=1
         Case("burgers") 
             nb_var=2
-        Case("burgers_SCL") 
-            nb_var=1
         Case("Buckley") 
             nb_var=1
 
@@ -152,6 +150,8 @@ CONTAINS
             min_glob = eps0; max_glob = 1000._prec
         CASE("isentropique")
             min_glob = eps0; max_glob = 1000._prec
+        CASE("Riemann_Buckley")
+            min_glob = -3._prec; max_glob = 3._prec
         CASE("acoustic_wave")
             min_glob = eps0; max_glob = 1000._prec
         CASE("Blast")

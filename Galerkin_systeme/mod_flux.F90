@@ -15,13 +15,10 @@ CONTAINS
     SELECT CASE (TRIM(flux_name))
     CASE("advection")
       flux = vit_adv*u
-    CASE("burgers_SCL")
+    CASE("burgers")
       flux = 0.5_prec * u**2 
     CASE("Buckley")
       flux = 4._prec*u**2/((4._prec*u**2)+ (1._prec-u)**2 )
-    CASE("burgers")
-      flux(1) = 0.5_prec * u(1)**2 
-      flux(2) = u(1)*u(2)
     CASE("Shallow")
       flux(1) = u(2)
       flux(2) = u(1)*u(2) + (u(1)**2)/2._prec
@@ -49,13 +46,11 @@ CONTAINS
 
         DO kk =1,nb_nodes
           u_loc = sol_step(ni)%val_quad(kk,:)
-
-          ! write(*,advance='no',fmt="(i3,i2,3x)")ni,kk
-          ! write(*,fmt="(3(e12.6,1x))") u_loc
           f_loc = flux(u_loc)
-          DO jj =size_base,1,-1
+        DO jj =size_base,1,-1
                 fh_loc(jj,:) = fh_loc(jj,:) + f_loc*sig_quad(jj,kk)*w_quad(kk)
-        END DO; END DO
+        END DO
+        END DO
 
         flux_h(ni)%flux_DG = MATMUL(Masse_inv,  fh_loc)
 
@@ -71,9 +66,7 @@ CONTAINS
     ! print *,u
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
 
-    ! IF(p .LT. eps0) p = 0._prec
     ! IF(p .LT. -eps0) STOP "negative pressure"
-    ! IF(p .LT. -eps0) print *,"negative pressure",p
 
   END FUNCTION pression
 
@@ -101,8 +94,6 @@ CONTAINS
     CASE("advection")
       gamma_calc = abs(vit_adv)
     CASE("burgers") 
-      gamma_calc = max(abs(u(1)), abs(v(1)))
-    CASE("burgers_SCL") 
       gamma_calc = max(abs(u(1)), abs(v(1)))
       
     CASE("Shallow") 
@@ -140,7 +131,7 @@ CONTAINS
     SELECT CASE (TRIM(flux_name))
     CASE("advection")
       flux_d = vit_adv
-    CASE("burgers_SCL")
+    CASE("burgers")
       flux_d = u  
     CASE("Buckley")
       IF((abs(u) .GT. eps0) .and. (abs(u-1._prec) .GT. eps0) )THEN
@@ -172,6 +163,9 @@ CONTAINS
       IF(entropie_num == 1) entropie_numerique = (abs(u(1)-ke)**(1+epsi) )/(1+epsi)
       RETURN
     END IF
+
+    ! print *,"entrop :",entropie_numerique
+
   END FUNCTION entropie_numerique
 
   FUNCTION Flux_entrop(u)
@@ -184,11 +178,12 @@ CONTAINS
     Flux_entrop = 0._prec
 
     IF(nb_var == 1) THEN
-      IF(flux_name == "advection" .AND. entropie_num == 0) Flux_entrop = vit_adv * u(1)
+      IF(entropie_num == 0) Flux_entrop = flux_d(u(1)) * u(1)
+
 
       IF(flux_name == "advection" .AND. entropie_num == 1) THEN
-        IF(u(1) .GT. ke) Flux_entrop =  vit_adv * abs(u(1)-ke)**epsi
-        IF(u(1) .LT. ke) Flux_entrop = -vit_adv * abs(u(1)-ke)**epsi
+        IF(u(1) .GT. ke) Flux_entrop =  flux_d(u(1)) * abs(u(1)-ke)**epsi
+        IF(u(1) .LT. ke) Flux_entrop = -flux_d(u(1)) * abs(u(1)-ke)**epsi
       END IF
 
       RETURN
@@ -222,6 +217,8 @@ CONTAINS
     REAL(prec),DIMENSION(nb_var) ::u
     
     entrop_pot_flux = DOT_PRODUCT(Var_entrop(u),Flux(u)) - Flux_entrop(u)
+
+    ! print *,entrop_pot_flux, vit_adv *u**2- vit_adv*u
 
   END FUNCTION entrop_pot_flux
 END MODULE mod_flux

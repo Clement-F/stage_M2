@@ -13,9 +13,9 @@ PROGRAM MAIN
     
     CALL INIT_ALL
 
-    DO i=1,nb_cell; DO jk=1,nb_subcell
-    IF((pression(sol(i)%val_subcells(jk,:))) .LT. 0 ) print *,"neg pressure init"
-    END DO; END DO
+    ! DO i=1,nb_cell; DO jk=1,nb_subcell
+    ! IF((pression(sol(i)%val_subcells(jk,:))) .LT. 0 ) print *,"neg pressure init"
+    ! END DO; END DO
 
     open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='unknown')
     open(unit=numfile_sol,      file=nomfile_sol,       form ='formatted', status ='unknown')
