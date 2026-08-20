@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-20              | noeuds du maillage 
+60              | noeuds du maillage 
 -10D-1           | xd
 10D-1            | xf
-4D-1            | T
+20D-1            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -14,11 +14,11 @@
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 --------------------------------------------------
-2               | Maximum Principle : Null(0), GMP(1),  LMP(2)
+0               | Maximum Principle : Null(0), GMP(1),  LMP(2)
 0               | Positivity Rule   : Null(0), prod(1), min(2)
-0               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
+2               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
 --------------------------------------------------
-2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
+0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
 7               | nb subcellules du sous maillage
@@ -38,15 +38,15 @@ False           | Convergence   (True, False)
 True           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-100              | print rule
+10              | print rule
 False            | exact time
 solSub          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-creneau    | solution initiale :
+composite    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc, Riemann_Buckley
                     Euler : Sod, isentropique,acoustic_wave, Blast
-Buckley           | problème (advection, burgers, Buckley, Shallow, Euler)
+advection           | problème (advection, burgers, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-Sym          | condition au bord (period, Sym, Solid)
+period          | condition au bord (period, Sym, Solid)

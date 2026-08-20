@@ -5,7 +5,7 @@
 Nous nous restreindrons ici aux problèmes hyperboliques 1D. Pour un développement 2D, voir \cite{VILAR2025}. 
 
 \paragraph{Problème hyperbolique \\}
-Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D} =]a,b[ \subset \R$, le domaine de calcul et $\mathbf{f} : \Omega \mapsto \R^M$ une fonction régulière. 
+Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D} =]a,b[ \subset \R$ le domaine de calcul et $\mathbf{f} : \Omega \mapsto \R^M$ une fonction régulière. 
 Soit $\mathbf{u} : \mathbb{D} \times \R^+ \mapsto \Omega$ la solution du problème : 
 
 \begin{equation}\label{system_hyperbolique}
@@ -19,21 +19,21 @@ On pose
 
 \noindent
 On dit alors que le système \eqref{system_hyperbolique} est hyperbolique si et seulement si : 
-$A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres bien ordonnée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \lambda_m(\mathbf{u})$.
-Et leurs vecteurs propres associés sont linéairement indépendants.\\
-On note que si la série d'inégalité est stricte, alors le système \eqref{system_hyperbolique} est dit strictement hyperbolique.
+$A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres réelles bien ordonnée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \lambda_m(\mathbf{u})$ 
+et si leur vecteurs propres associés sont linéairement indépendants.\\
+Si les inégalités sont strictes, alors le système \eqref{system_hyperbolique} est dit strictement hyperbolique.
 
 \paragraph{solutions faibles \\}
 
 En multipliant par une fonction test $\phi \in \mathcal{D}(\R)$ \eqref{system_hyperbolique} puis en intégrant et en passant par une intégration par partie, 
-On obtient une nouvelle formulation du problème \eqref{system_hyperbolique} qui demande moins de régularité des solutions $\mathbf{u}$ : 
+On obtient une nouvelle formulation du problème \eqref{system_hyperbolique}, $\mathbf{u}$ qui est moins exigente en régularité : 
 
 \begin{equation}\label{Formulation_Faible}
     \int_\mathbb{D} \partial_t \mathbf{u} \phi dx - \int_\mathbb{D} \mathbf{f}(\mathbf{u}) \partial_x \phi dx + \left[\mathbf{f}(\mathbf{u})\phi\right]^{x=a}_{x=b} \, = 0 
 \end{equation}
 
 On dit que si $\mathbf{u}$ est solution de \eqref{Formulation_Faible}, elle est solution faible du problème \eqref{system_hyperbolique}. \\
-Si $\mathbf{u}$ est solution faible et $\mathbf{u}\in \mathcal{C}^1$, elle est aussi solution forte. i.e solution de \eqref{system_hyperbolique}.\\
+Si $\mathbf{u}$ est solution faible et $\mathbf{u}\in \mathcal{C}^1$, elle est aussi solution forte \red{preuve (si place)}. i.e solution de \eqref{system_hyperbolique}.\\
 
 Nous chercherons des solutions bornées (i.e dans $L^\infty$) et à variations bornées (i.e dans $BV$ 
 \footnote{Soit $[a,b]\subset \R,\, f:[a,b]\mapsto \R$, On donne $V^a_b(f)=\sup_{P\in \mathbf{P}} \sum_i^{n_p-1}|f(x_{i+1})-f(x_i)|$, 
@@ -41,38 +41,39 @@ la variation de $f$ sur $[a,b]$, où $P=\{x_1,\dots,x_{n_p}\}$, une partition de
 On définit alors $BV([a,b])$ = $\{f|V^a_b(f)<\infty \}$ \red{faire paragraph dessus ?(si j'ajoute le cas système -> oui)} }) 
 
 \paragraph{solution faible entropique \\}
-De toutes les solutions faibles admissibles, la seul solution qui nous intéresse est la solution faible entropique. \noindent 
+De toutes les solutions faibles admissibles, la seule solution qui nous intéresse est la solution faible entropique. \noindent 
 Pour définir une telle forme de solution, il nous faut tout d'abord définir l'entropie mathématique.\\
 Soit $\eta : \Omega \mapsto \R$ une fonction convexe, on dit qu'elle est une entropie pour le système \eqref{system_hyperbolique}, si il existe une fonction flux $\phi : \Omega \mapsto \R$ telle que :
 \begin{equation}
     \nabla \eta(u) A(u) = \nabla \phi (u) \qquad  \forall u \in \Omega
 \end{equation}
 On note que pour le cas scalaire, toutes fonction convexe $\eta$ est entropie du système.\\
-Il a été prouvé \cite{godlewski2021numerical} que si \eqref{system_hyperbolique} admet une pair d'entropie ($\eta,\phi$), alors le système est symétrisable et qu'il existe une variable d'entropie $\nu(u):=\nabla \eta(u)$ en bijection avec $u$. (voir \ref{entropie_Annexes} pour plus de détails).
+Il a été prouvé \cite{godlewski2021numerical} que si \eqref{system_hyperbolique} admet une pair d'entropie ($\eta,\phi$), alors le système est symétrisable($\exists A_0\in \mathcal{M}_{M\times M}$ telle que $A_0\, A$ est symétrique)
+et qu'il existe une variable d'entropie $\nu(u):=\nabla \eta(u)$ en bijection avec $u$ solution entropique de \eqref{Formulation_Faible}. (voir \ref{entropie_Annexes} pour plus de détails). \\
 Il a aussi été prouvé \cite{SNKružkov_1970} que pour un système scalaire, il existe une unique solution entropique dans $L^\infty \cap BV$,  associée à une donnée initale $u_0$.
 \subsection{Semi-discretisation en espace, méthode Galerkin Discontinue}
-Nous ferons ici un bref rappel de la méthode Galerkin Discontinue élaboré historiquement par Cockburn et Shu dans une série de papier : \cite{C_SHU_1},\cite{C_SHU_2},\cite{C_SHU_3},\cite{C_SHU_4},\cite{C_SHU_5}
+Nous ferons ici un bref rappel de la méthode \textit{Galerkin Discontinue} (DG) élaboré historiquement par Cockburn et Shu dans une série de papier : \cite{C_SHU_1},\cite{C_SHU_2},\cite{C_SHU_3},\cite{C_SHU_4},\cite{C_SHU_5}
 \paragraph{Approximation polynomiale\\}
-Nous allons d'abord nous dôté d'un maillage de notre domaine de calcul $\mathbb{D}$ :
+Nous dotons $\mathbb{D}$ d'un maillage $\mathcal{T}_h= \{\omega_i\}_i$ selon ces règles :
 \begin{equation}\label{maillage}    
 \left\{
 \begin{aligned}
 & \overset{\circ}{\omega_i} \neq \emptyset \qquad  \forall i\\
 & \overset{\circ}{\omega_i} \,\cap \, \overset{\circ}{\omega_j} = \emptyset  \qquad \forall i\neq j\\
-& \bigcup_{i=0}^{N_x} \omega_i = \mathbb{D}
+& \bigcup_{i=0}^{N_x} \omega_i = \mathbb{D} 
 \end{aligned}
 \right.
 \end{equation}
-Comme nous travaillons en 1D, nous écrirons $\omega_i=]x_{i-\frac{1}{2}},x_{i+\frac{1}{2}}[$.\\ \noindent
-On cherche à approcher $\mathbf{u}$ comme solution faible par $\mathbf{u_h}$ une fonction facilement calculable.
+étant donné que nous travaillons en 1D, et comme tout $\omega_i$ est donné convexe, $\omega_i=]x_{i-\frac{1}{2}},x_{i+\frac{1}{2}}[$.\\ \noindent
+On cherche à approcher $\mathbf{u}$ une solution faible par $\mathbf{u_h}$ une fonction facilement calculable.
 La particularité de la méthode DG est le choix de l'espace d'approximation dans lequel nous allons chercher $\mathbf{u_h}$ : 
 
 \begin{equation}
-    \mathbf{u_h} \in V_h = \left\{ \mathbf{u_h} \in (\mathcal{D'})^M \,|\, \mathbf{u_h} \in \mathbb{P}^k(\omega_i)^M \quad \forall x\in \omega_i \right\} \subset L^\infty(\mathbb{D})\cap BV(\mathbb{D})
+    \mathbf{u_h} \in V_h = \left\{ \mathbf{u_h} \in \mathbb{P}^k(\omega_i)^M \quad \forall x\in \omega_i \right\} \subset L^\infty(\mathbb{D})\cap BV(\mathbb{D})
 \end{equation}
 \begin{wrapfigure}{l}{0.4\textwidth} 
     \includegraphics[width =0.3\textwidth]{schema/projection_L2.png}
-    \caption{projection d'une fonction sur $V_h$}
+    \caption{Projection $\mathbb{L}^2$ sur $V_h$.}
 \end{wrapfigure}
 Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i,\, \omega_v$. D'où le nom de schéma de Galerkin \textit{Discontinue}. 
 Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$ dans \eqref{Formulation_Faible}, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. 
@@ -83,45 +84,47 @@ De plus par la théorie des formulations variationnelles \red{je sens une citati
     \int_{\omega_i} \partial_t \mathbf{u_h} \phi dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \phi dx + \left[ \mathbf{f}(\mathbf{u_h})\,\phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall \phi \in \mathbb{P}^k
 \end{equation}
 \noindent
-En pratique, on se placera plus souvent sur une maille de référence $\omega=]-1,1[$ et l'on effectuera les calculs par isomorphisme avec $\omega_i$:  $\mathfrak{R}^i:\omega \mapsto \omega_i$. 
+En pratique, on se placera plus souvent sur une maille de référence $\omega=]-1,1[$ et l'on effectuera les calculs par isomorphisme avec $\omega_i$:  $\mathfrak{R}^i:\omega \mapsto \omega_i$. \\
 On remarque très vite un problème dans cette écriture : $\mathbf{u_h}$ est continue sur $\omega_i$, mais il n'est pas défini en son bord : $ {x_{i\pm\frac{1}{2}}}$. 
-Pour contourner ce problème, nous remplaçons ce dernier terme.
+Pour contourner ce problème, nous remplaçons le terme défini à l'interfaces des $\omega_i$.
 \begin{equation}
 \left[ \mathcal{F}\, \phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}
 =  \mathcal{F}(\mathbf{u_h}^i(x_{i+\frac{1}{2}},t), \mathbf{u_h}^{i+1}(x_{i+\frac{1}{2}},t)) \, \phi(x_{i+\frac{1}{2}}) - \mathcal{F}(\mathbf{u_h}^{i-1}(x_{i-\frac{1}{2}},t), \mathbf{u_h}^i(x_{i-\frac{1}{2}},t)) \, \phi(x_{i-\frac{1}{2}})
 \end{equation}
-où l'on nomme $\mathcal{F}$ le flux numérique. Il est dit consistant si l'on obtient la même solution dans le cas où $u_h$ est continue sur $\overline{w_i}$ : $\mathcal{F}(\mathbf{u},\mathbf{u}) =  \mathbf{f}(\mathbf{u})$.
-Dans notre cas, nous prendrons le flux numérique très utilisé de Lax-Friedrich premièrement proposé dans \cite{LaxFriedrichFlux}, $ \mathcal{F}(\mathbf{u},\mathbf{v}) = \frac{1}{2}(\mathbf{f}(\mathbf{u}) + \mathbf{f}(\mathbf{v}) - \gamma(\mathbf{v}-\mathbf{u}) )  $
-où $\gamma = \max_{\mathbf{w} \in I(u,v)} (|\mathbf{F'(\mathbf{w})}| )$
+où l'on nomme $\mathcal{F}$ le flux numérique. Il est dit \textit{consistant} si l'on obtient la même solution dans le cas où $u_h$ est continue sur $\overline{w_i}$ : $\mathcal{F}(\mathbf{u},\mathbf{u}) =  \mathbf{f}(\mathbf{u})$.
+Dans notre cas, nous prendrons le flux numérique de Lax-Friedrich  $ \mathcal{F}(\mathbf{u},\mathbf{v}) = \frac{1}{2}(\mathbf{f}(\mathbf{u}) + \mathbf{f}(\mathbf{v}) - \gamma(\mathbf{v}-\mathbf{u}) )  $
+où $\gamma = \max_{\mathbf{w} \in I(u,v)} (|\mathbf{F'(\mathbf{w})}| )$,premièrement introduit dans \cite{LaxFriedrichFlux}.
 
 \paragraph{Ecriture dans une base polynomiale \\}
-Soit $\{\sigma_p^i\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k(\omega_i)$, il est alors suffisant de vérifier l'équation pour $\sigma_p^i$.
-De la même manière, il est possible de regarder l'équation sur chaque variable de manière indépendante. \\
-En regardant le premier terme, et en se rappelant que $\mathbf{u_{h}}_{|\omega_i} \in \mathbb{P}^k(\omega_i)$
+Soit $\{\sigma_p^i\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k(\omega_i)$, il est suffisant de vérifier l'équation pour tout $\sigma_p^i$.\\
+On appelera la décomposition de $u_h$ dans la base polynomiale, ses moments polynomiaux.
+Comme l'écriture de chaque variable de $\mathbf{u_h}$ dans la base polynomiale est indépendante de chaque autre variable. 
+Nous nous concentrerons sur l'écriture du problème scalaire en remarquant que la seule intéraction entre chaque variable est contenu dans le flux $\mathbf{f(u_h)}$.   
+En regardant le premier terme, et en se rappelant que ${u_{h}}_{|\omega_i} \in \mathbb{P}^k(\omega_i)$
 
 \begin{equation}
-    \mathbf{u_h}(x,t) = \sum_{p=1}^{N_k} \underline{\mathbf{u}^i}_p(t) \sigma_p^i(x)\qquad  \forall x\in \omega_i 
+    {u_h}(x,t) = \sum_{p=1}^{N_k} \underline{{u}^i}_p(t) \sigma_p^i(x)\qquad  \forall x\in \omega_i 
 \end{equation}
 
 si l'on insère cette expression dans le premier terme de \eqref{Formulation_Variationnelle}, on obtient : 
 \begin{equation}
-   \int_{\omega_i} \partial_t \mathbf{u_h} \sigma_q dx= \sum_{p=1}^{N_k} \partial_t \underline{\mathbf{u}^i}_p(t) \int_{\omega_i} \sigma_p(x) \sigma_q(x)dx  
+   \int_{\omega_i} \partial_t {u_h} \sigma_q dx= \sum_{p=1}^{N_k} \partial_t \underline{{u}^i}_p(t) \int_{\omega_i} \sigma_p(x) \sigma_q(x)dx  
 \end{equation}
 
 \noindent
-En regardant chaque variable de $ \{\underline{\mathbf{u}^i}_p(t) \}_p$ comme un vecteur : $\underline{U^i_m}$ et en posant $M^i_{p,q} = \int_{\omega_i} \sigma_p^i(x) \sigma_q^i(x) dx$, la matrice de masse de $\omega_i$.
-Si $\sigma^i_p$ est de la forme $\sigma_p^i(x) = \sigma_p(\mathfrak{R}^i(x))$, on calculera plutôt $M_{p,q} = \int_{\omega} \sigma_p(x) \sigma_q(x) dx$, la matrice de masse de référence. 
-Cette dernière méthode est plus souvent utiliser par soucis de stockage. \\
-On peut voir le premier terme comme un calcul matrice vecteur : $(\partial_t \underline{U^i_m} M^i)_q$\\
+Il est alors possible de regarder les moments du polynome $u_h$ : $\{\underline{u^i}_p\}_p$ comme un vecteur : $\underline{U^i} \in \R^{N_k}$ et en posant $M^i_{p,q} = \int_{\omega_i} \sigma_p^i(x) \sigma_q^i(x) dx$, la matrice de masse de $\omega_i$.
+\footnote{Si $\sigma^i_p$ est de la forme $\sigma_p^i(x) = \sigma_p(\mathfrak{R}^i(x))$, on calculera plutôt $M_{p,q} = \int_{\omega} \sigma_p(x) \sigma_q(x) dx$, la matrice de masse sur le domaine de référence. 
+Cette dernière méthode est plus souvent utilisée car moins coûteuse en mémoire.}
+On peut voir le premier terme comme un calcul matrice vecteur : $(\partial_t \underline{U^i} \cdot M^i)_q$\\
 
 \noindent
-Le deuxième terme, dit terme volumique, peut se calculer de deux manières : \\
+Le deuxième terme, dit \textit{volumique}, peut se calculer de deux manières : \\
 -utiliser une méthode de quadrature (Gauss-Lobatto, Gauss-Legendre, \dots).\\
--on projète $\mathbf{f}(\mathbf{u_h})$ sur $ \left(\mathbb{P}^k(\omega_i)\right)^M$: $\mathbf{F}_h$, et l'on se réduit à un produit matrice vecteur avec cette fois la matrice de rigidité $K^i_{p,q} = \int_{\omega_i}  \sigma_p \sigma_q' dx $\\
-Le choix a été fait ici d'utiliser la seconde méthode. 
-En effet, en plus d'être exacte dans les cas rare où le flux est linéraire. 
-Si la base polynomiale est nodale, alors on économise des évaluations de la solution car nous avons déjà évaluer la solutions aux interfaces pour calculer le flux numérique.
-On se retrouve alors avec une équation dictant l'évolution des moments polynomiaux de la solution : 
+-projeter $\mathbf{f}(\mathbf{u_h})$ sur $ \left(\mathbb{P}^k(\omega_i)\right)^M$: $\mathbf{F}_h$, et l'on se ramène à un produit matrice vecteur avec cette fois ci la matrice de rigidité $K^i_{p,q} = \int_{\omega_i}  \sigma_p \sigma_q' dx $\\
+Nous utiliserons ici la seconde méthode. 
+En effet, en plus d'être exacte dans les cas où le flux est linéraire,
+si la base polynomiale est nodale, alors on économise des évaluations de la solution car nous avons déjà évalué la solutions aux interfaces pour calculer le flux numérique.
+On se retrouve alors avec une équation régissant l'évolution des moments polynomiaux de la solution : 
 \begin{equation}
     \partial_t \underline{U^i_m}= M^{i^{-1}} (F_{h,m} K + \mathcal{S}_m)
 \end{equation}
@@ -131,18 +134,18 @@ où $ \mathcal{S}_m = \left\{ \left[ \mathcal{F}_m\, \sigma_q \right]_{x_{i-\fra
 \paragraph{condition initiale}
 \begin{wrapfigure}{r}{0.4\textwidth} 
     \includegraphics[width =0.3\textwidth]{schema/polynome_init.png}
-    \caption{projection grossière d'une fonction sur $V_h$}
+    \caption{Projection grossière d'une fonction sur $V_h$}
 \end{wrapfigure}  
-Si l'on souhaite imposer une condition initale $u(\cdot,0) = u_0(\cdot)$, il est bien nécessaire de voir que $u_0$ est très rarement dans $\mathbb{P}^k$,
-il est alors nécessaire de trouver un moyen de trouver les polynomes $\{\underline{\mathbf{u}}_p^i\}_p$ de chaque cellules. \\  
-Il est nécessaire, par respect de la formulation Variationnelle, de faire une projection $\mathbb{L}^2$ sur $\mathbb{P}^k(\omega_i)$:
+Nous avons supposer précedemment que $u_h$ était dans $V_h$ en tout instant ce qui nous permettait d'étudier les changement de $\underline{{u}^i}_p(t)$. \\ 
+Cela laisse supposer que $u_0$ est dans $V_h$. Cette condition nous empecherais de prendre des conditions initiale de Riemann (discontinuité en $\tilde{x}_0$ entre deux état constants) pour tout $x\in \mathbb{D}$.\\
+Il nous est alors nécessaire de faire une projection de $u_0$ dans $V_h$:
 \begin{equation}
-    \tilde{\mathbf{u}}_{0,q} := \int_{\omega_i} \mathbf{u}_0 \sigma_q dx = \int_{\omega_i} \mathbf{u}_{h,0} \sigma_q dx = \sum_p \underline{\mathbf{u}}_p^0 \int_{\omega_i} \sigma_p^i \sigma_q^i dx = (M^i\underline{\mathbf{U}}_0)_q
+    \tilde{{u}}_{0,q} := \int_{\omega_i} {u}_0 \sigma_q dx = \int_{\omega_i} {u}_{h,0} \sigma_q dx = \sum_p \underline{{u}}_p^{i,0} \int_{\omega_i} \sigma_p^i \sigma_q^i dx = (M^i\underline{{U}}_0)_q
 \end{equation}
-Il est donc possible de récupérer les moments polynomiaux $\underline{\mathbf{u}}_0$ comme $M^{-1}\tilde{\mathbf{U}}_0$ \\
+Il est donc possible de récupérer les moments polynomiaux $\underline{{U}}^{i,0}$ comme $M^{i^{-1}}\tilde{{U}}_0^i $ \\
 \noindent
-Une remarque importante est que même si la projection $\mathbb{L}^2$ est égale en produit scalaire, elle n'est pas égale en tout point.
-Plus important, il n'y a rien qui contrindique, et il presque inévitable, qu'il existe un $x\in \mathcal{D}$ telle que $\mathbf{u}(x) \notin \Omega$.
+Une remarque importante est que même si la projection $\mathbb{L}^2$ est égale en produit scalaire ($\int_{\omega_i} {u}_0 \sigma_q dx = \int_{\omega_i} {u}_{h,0} \sigma_q dx$ ), elle n'est pas égale en tout point.
+Plus important, il n'y a rien qui contrindique, et il presque inévitable, qu'il existe un $x\in \mathcal{D}$ telle que $\mathbf{u_h}(x) \notin \Omega$.
 \subsection{Discretisation en temps et schéma RK SSP}
 
 \paragraph{Rappel sur les schémas Runge-Kutta}
@@ -155,27 +158,24 @@ Soit l'équation d'évolution
     \end{aligned}
     \right.
 \end{equation}
-
-Il est possible de discrétiser cette équation et de trouver une solution approchée $u^n \simeq u(t_n)$ en posant : 
-$u^0= v$ et l'on passe de $u^n$ à $u^{n+1}$ en suivant ce schéma : 
+On peut trouver une approximation de la solution de cette EDO ,$u^n \simeq u(t^n)$, en posant $u^0=v$ et il est possible de calculer $u^n$ par un schéma Runge-Kutta explicite :
 \begin{align*}
     &u_0 = u^n \\
     &u_l = \sum_{i=0}^{l-1} \alpha_{l,i}u^{i} +  \beta_{l,i} \,\Delta t_n \,\mathcal{L}(u^i,t_n + d_l\, \Delta t_n) \\
     &u^{n+1} = u_{L}
 \end{align*}
-Où $L$ est le nombre de pas intermédiaire pour compléter un pas entre $t_n$ et $t_{n+1}$ et $\Delta t_n = t_{n+1} - t_n$.
+Où $L$ le nombre d'étape pour compléter un pas $\Delta t_n = t_{n+1} - t_n$.
 les paramètres $\alpha_{i,j},\beta_{i,j}$ et $d_i$ vont définir la méthode et son ordre. \\
 
-Si l'on prend $L=1$, $\alpha_{1,0}=1$, $\beta_{1,0}=1$, $d_1=0$,on retrouve le schéma d’Euler explicite. Ce schéma, au défaut d’être ordre élevé, possède beaucoup de propriétés très intéressantes, comme la conservation de la positivité et la stabilité entropique. Il est naturel de souhaiter avoir les mêmes propriétés pour des schémas d’ordre plus élevé.
+Si l'on prend $L=1$, $\alpha_{1,0}=1$, $\beta_{1,0}=1$, $d_1=0$,on retrouve le schéma d’Euler explicite. Ce schéma, à défaut d’être ordre élevé, possède beaucoup de propriétés très intéressantes, comme la conservation de la positivité et la stabilité entropique. Il est naturel de souhaiter avoir les mêmes propriétés pour des schémas d’ordre plus élevé.
 \paragraph{schéma RK SSP \\}
-\noindent
-les schémas Runge-Kutta \textit{Strong Stability Preserving} vont nous permettre de récupérer toutes les propriétés du schéma Euler explicite en utilisant des combinaisons convexes de ce schéma : 
-Nous ne traiterons/utiliserons ici uniquement des schémas \textit{RK-SSP} explicite, ce qui implique que les contraintes sur les coefficients:  $\alpha_{i,j} \geq 0,\beta_{i,j} \geq 0$. \\
-On dit qu'un schéma est \textit{Strong Stability Preserving} si et seulement si, le schéma est stable pour une certaine norme i.e : $\left\|u^{n+1}\right\| \leq \left\|u^n\right\|$. 
-La norme qui nous intéresse ici est TV (\textit{Total Variation}) : $\text{TV}(u) = \sum_j |u_{j+1} -u_j|$ et donc $\text{TV}(u^{n+1}) \leq \text{TV}(u^n)$. \\
-La mauvaise nouvelle est qu'il n'est malheureusement pas possible d'obtenir un schéma SSP d'ordre 4  et supérieurs sous ces conditions \cite{gottlieb1998total}. 
+Les schémas \textit{ Runge-Kutta Strong Stability Preserving} vont nous permettre de récupérer toutes les propriétés du schéma Euler explicite en utilisant des combinaisons convexes de ce schéma : 
+Nous n'utiliserons ici que des schémas \textit{RK-SSP} explicite, ce qui implique que les contraintes sur les coefficients  $\alpha_{i,j} \geq 0,\beta_{i,j} \geq 0$. \\
+On dit qu'un schéma est \textit{Strong Stability Preserving} si et seulement si le schéma est stable pour une certaine norme i.e : $\left\|u^{n+1}\right\| \leq \left\|u^n\right\|$. 
+La norme qui nous intéresse ici est la norme TV (\textit{Total Variation}) : $\text{TV}(u) = \sum_j |u_{j+1} -u_j|$ et l'on a donc $\text{TV}(u^{n+1}) \leq \text{TV}(u^n)$. \\
+La mauvaise nouvelle est qu'il n'est malheureusement pas possible d'obtenir un schéma SSP d'ordre 4  et supérieur sous ces conditions \cite{gottlieb1998total}. 
 La bonne nouvelle est que tout les schéma d'ordre inférieur ne nécessite que $u_0$ et $u_{l-1}$ pour obtenir $u_l$. \\
-Il est par ailleurs possible de prouver que les schémas SSP optimaux à l'ordre 2 et ordre 3 sont respectivement : 
+Il est possible de prouver \cite{gottlieb1998total} que les schémas SSP optimaux à l'ordre 2 et ordre 3 sont : 
 \begin{equation}
     \left\{
     \begin{aligned}
