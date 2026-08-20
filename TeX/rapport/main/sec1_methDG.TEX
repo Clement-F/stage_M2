@@ -19,8 +19,8 @@ On pose
 
 \noindent
 On dit alors que le système \eqref{system_hyperbolique} est hyperbolique si et seulement si : 
-$A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres réelles bien ordonnée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \lambda_m(\mathbf{u})$ 
-et si leur vecteurs propres associés sont linéairement indépendants.\\
+$A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres réelles bien ordonnée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \leq \lambda_m(\mathbf{u})$ 
+et si leur vecteurs propres associés sont linéairement indépendants.
 Si les inégalités sont strictes, alors le système \eqref{system_hyperbolique} est dit strictement hyperbolique.
 
 \paragraph{solutions faibles \\}
@@ -41,6 +41,7 @@ la variation de $f$ sur $[a,b]$, où $P=\{x_1,\dots,x_{n_p}\}$, une partition de
 On définit alors $BV([a,b])$ = $\{f|V^a_b(f)<\infty \}$ \red{faire paragraph dessus ?(si j'ajoute le cas système -> oui)} }) 
 
 \paragraph{solution faible entropique \\}
+\red{à réecrire}
 De toutes les solutions faibles admissibles, la seule solution qui nous intéresse est la solution faible entropique. \noindent 
 Pour définir une telle forme de solution, il nous faut tout d'abord définir l'entropie mathématique.\\
 Soit $\eta : \Omega \mapsto \R$ une fonction convexe, on dit qu'elle est une entropie pour le système \eqref{system_hyperbolique}, si il existe une fonction flux $\phi : \Omega \mapsto \R$ telle que :
@@ -48,7 +49,7 @@ Soit $\eta : \Omega \mapsto \R$ une fonction convexe, on dit qu'elle est une ent
     \nabla \eta(u) A(u) = \nabla \phi (u) \qquad  \forall u \in \Omega
 \end{equation}
 On note que pour le cas scalaire, toutes fonction convexe $\eta$ est entropie du système.\\
-Il a été prouvé \cite{godlewski2021numerical} que si \eqref{system_hyperbolique} admet une pair d'entropie ($\eta,\phi$), alors le système est symétrisable($\exists A_0\in \mathcal{M}_{M\times M}$ telle que $A_0\, A$ est symétrique)
+Il a été prouvé \cite{godlewski2021numerical} que si \eqref{system_hyperbolique} admet une pair d'entropie ($\eta,\phi$), alors le système est symétrisable \footnote{$\forall u \in \Omega,\, \exists A_0(u)\in \mathcal{M}_{M\times M}$ telle que $A_0(u)\, A(u)$ est symétrique}
 et qu'il existe une variable d'entropie $\nu(u):=\nabla \eta(u)$ en bijection avec $u$ solution entropique de \eqref{Formulation_Faible}. (voir \ref{entropie_Annexes} pour plus de détails). \\
 Il a aussi été prouvé \cite{SNKružkov_1970} que pour un système scalaire, il existe une unique solution entropique dans $L^\infty \cap BV$,  associée à une donnée initale $u_0$.
 \subsection{Semi-discretisation en espace, méthode Galerkin Discontinue}
@@ -77,7 +78,7 @@ La particularité de la méthode DG est le choix de l'espace d'approximation dan
 \end{wrapfigure}
 Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i,\, \omega_v$. D'où le nom de schéma de Galerkin \textit{Discontinue}. 
 Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$ dans \eqref{Formulation_Faible}, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. 
-De plus par la théorie des formulations variationnelles \red{je sens une citation ici}, il est raisonnable de regarder si l'équation est vraie pour des fonctions tests dans $V_h$.
+De plus par la théorie des formulations variationnelles \red{besoin d'une explication plus clair}, il est raisonnable de regarder si l'équation est vraie pour des fonctions tests dans $V_h$.
 
 
 \begin{equation}\label{Formulation_Variationnelle}
@@ -134,7 +135,7 @@ où $ \mathcal{S}_m = \left\{ \left[ \mathcal{F}_m\, \sigma_q \right]_{x_{i-\fra
 \paragraph{condition initiale}
 \begin{wrapfigure}{r}{0.4\textwidth} 
     \includegraphics[width =0.3\textwidth]{schema/polynome_init.png}
-    \caption{Projection grossière d'une fonction sur $V_h$}
+    \caption{Projection d'une fonction sur $V_h$ avec peu de mailles. \red{mauvais titre}}
 \end{wrapfigure}  
 Nous avons supposer précedemment que $u_h$ était dans $V_h$ en tout instant ce qui nous permettait d'étudier les changement de $\underline{{u}^i}_p(t)$. \\ 
 Cela laisse supposer que $u_0$ est dans $V_h$. Cette condition nous empecherais de prendre des conditions initiale de Riemann (discontinuité en $\tilde{x}_0$ entre deux état constants) pour tout $x\in \mathbb{D}$.\\
@@ -144,7 +145,7 @@ Il nous est alors nécessaire de faire une projection de $u_0$ dans $V_h$:
 \end{equation}
 Il est donc possible de récupérer les moments polynomiaux $\underline{{U}}^{i,0}$ comme $M^{i^{-1}}\tilde{{U}}_0^i $ \\
 \noindent
-Une remarque importante est que même si la projection $\mathbb{L}^2$ est égale en produit scalaire ($\int_{\omega_i} {u}_0 \sigma_q dx = \int_{\omega_i} {u}_{h,0} \sigma_q dx$ ), elle n'est pas égale en tout point.
+Une remarque importante est que même si la projection $\mathbb{L}^2$ est égale en produit scalaire ($\int_{\omega_i} {u}_0 \sigma_q dx = \int_{\omega_i} {u}_{h,0} \sigma_q dx$ ) \red{besoin ?}, elle n'est pas égale en tout point.
 Plus important, il n'y a rien qui contrindique, et il presque inévitable, qu'il existe un $x\in \mathcal{D}$ telle que $\mathbf{u_h}(x) \notin \Omega$.
 \subsection{Discretisation en temps et schéma RK SSP}
 

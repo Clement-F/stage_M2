@@ -30,7 +30,7 @@ les intégrales sur $S_m^i$ seront calculées avec une méthode de quadrature su
 Il est important de noter que contrairement à la méthode DG "classique", il est possible et grandement utile de changer la méthode d'initialisation.\\
 En effet, si l'on prend naivement les sous-moyennes des polynômes que l'on a calculé comme projection $\mathbb{L}^2$ de $u_0$, on peut avoir $\overline{U} \notin \Omega$.
 Ainsi, il préférable d'initialiser $\overline{U}$ comme sous-moyennes de $U_0$ et de définir $\underline{U}$ à partir de $\overline{U}$ par moindres carrés \eqref{passage_svf} 
-\paragraph{ Construction des flux reconstruit \red{à changer} \\}
+\paragraph{ Construction des flux reconstruit \red{nom à changer} \\}
 
 En reprenant la formulation variationnelle \eqref{Formulation_Variationnelle}, si l'on projette ${f}({u_h})$ sur $\mathbb{P}^k(\omega_i)$ : ${F}_h$, on obtient une formulation équivalente : 
 $$\int_{\omega_i} \partial_t {u_h} \sigma dx - \int_{\omega_i} {F}_h^i \partial_x \sigma dx 
@@ -195,7 +195,9 @@ comme $\theta \in [0,1]$, on sait que $\theta^2 \leq \theta$ et que la condition
 \end{equation}
 où $M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2}$, 
 $B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
-$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$ et 
+$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$.\\
+
+Cette condition garantie à la fois que $\widetilde{\rho}^{\pm} >0$ mais aussi que $\widetilde{\epsilon}^{\pm}>0$ 
 
 \paragraph{Détections d'extrema locaux}
 Un des problèmes de ce schéma est qu'il est très facile de se retrouver avec une convergence à l'ordre 1 
@@ -235,3 +237,7 @@ $$\partial_x \overline{f_h}^m = \frac{1}{|S_m^i|} \int_{S_m^i}\partial_x f_h =\f
     \partial_{xx} \overline{f_h}^m = (\mathcal{P}''F_h)_m\qquad \mathcal{P}''_{mp} =  \frac{1}{|S_m^i|}\int_{S_m^i} \partial_{xx} \sigma_p(x)dx = \frac{\partial_x \sigma_p(\tilde{x}^i_{m+1/2}) - \partial_x \sigma_p(\tilde{x}^i_{m-1/2})}{|S_m^i|}
 \end{equation}
 
+% \subsubsection{conservation de l'entropie}
+% \paragraph{critère d'ordre 1}
+% \paragraph{critère d'ordre 2}
+% \paragraph{critère d'ordre arbitraire}
