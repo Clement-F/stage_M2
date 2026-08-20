@@ -149,11 +149,9 @@ CONTAINS
           END IF
 
         END IF
-
         param = min(beta - u_Riemann(1), u_Riemann(1)- alpha)
         
         THETA_max =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec); 
-        
         IF(max_rule == 3) THEN 
           IF((abs(DF(3))) < eps0) return
 
@@ -320,32 +318,31 @@ CONTAINS
     END IF
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+      ! print *,"------------------"
       pos = 1._prec; LMP = 1._prec; ent =1._prec
 
       theta_temp = 1._prec
       voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
       voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
 
-      IF(TRIM(bdry_cond)=="Solid" .AND. TRIM(flux_name)=="Euler") THEN
-        IF(ni == 1      .AND. jj ==1           )  ug(2) = -ug(2)
-        IF(ni ==nb_cell .AND. jj ==nb_subcell+1)  ud(2) = -ud(2)
-      END IF
-
       IF(flux_num == 0) gamma_mp = max_dflux
       IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
 
       flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_mp*(ud-ug))  * 0.5_prec
-      
+
       DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
 
-      IF(ISNAN(DF(1)))  DF = 0._prec
+      IF(ISNAN(DF(1)))   STOP "NAN DF"
+
+      ! print *,Voi_L,Voi_R
+
 
       IF(.not. mesh_out) THEN
       theta_(ni,jj) = theta(voi_L,voi_R, DF)
       ELSE 
-        IF(minval(abs(DF)) < eps0) THEN; theta_(ni,jj) = 1._prec;  ! check le besoin du calcul qui suit
+        IF(minval(abs(DF)) < eps0) THEN; !print*,ni,jj; 
+        theta_(ni,jj) = 1._prec;  ! check le besoin du calcul qui suit
         ELSE 
-                
           u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
           ! positivité pour le pb  d'Euler
@@ -367,6 +364,8 @@ CONTAINS
 
           END IF
       END IF
+
+      ! write(*,fmt="(f6.3)") theta_(ni,jj)
 
       IF(coeff_smooth == 1) THEN 
       subcells_(voi_L(1),voi_L(2))%theta = min(theta_(ni,jj), subcells_(voi_L(1),voi_L(2))%theta)

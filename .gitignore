@@ -1,4 +1,3 @@
 ZTest/*
-TeX/*
-TeX/!.TEX
-TeX/!.pdf
+TeX/files/*
+TeX/images/*

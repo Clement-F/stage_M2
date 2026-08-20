@@ -132,8 +132,8 @@ CONTAINS
 
     DO tni =1,order_t
       
+      print *,"========================="
       CALL flux_numerique
-      ! print *,"========================="
       ! TO CHANGE
       DO ni =1,nb_cell;     
 
@@ -189,17 +189,16 @@ CONTAINS
     END DO
 
     DO ii=1,order_t
+
+      ! print *,"========================="
       CALL flux_numerique
       DO ni = 1,nb_cell;
-
         DO jj =1,nb_subcell
-          
           L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
-
           sol_step(ni)%val_subcells(jj,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,:) &
                                         &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
                                         &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
-                                                                      
+                                                                 
         END DO
       END DO
 
@@ -253,25 +252,28 @@ CONTAINS
         IF(monolithique) THEN
           gamma_bf =eps0; dt_loc = 2._prec
 
+        IF(flux_name == "Buckley") THEN; 
+          max_dflux =2.4_prec
+          gamma_temp = 2.4_prec
+          dt_loc = CFL* minval(cell_size)*minval(subcell_size)/(4._prec*max_dflux)
+        ELSE; 
+
           DO i=1,nb_cell;    DO j=1,nb_subcell
             ! print *,i,j
             nxt_ = Voisin_Face(i,j,'R')
 
             u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
 
-            IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
-              gamma_temp = 2.4_prec
-              dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
-            ELSE; 
             gamma_temp = max(gamma_calc(u_, v_),eps0)
             dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
-            END IF
+            
 
 
 
             max_dflux = max(max_dflux, gamma_temp)
             gamma_bf = gamma_temp
           END DO;END DO 
+          END IF
 
         ELSE 
 
@@ -287,6 +289,13 @@ CONTAINS
 
       ELSE IF(flux_num == 0) THEN; 
         ! print *, max_dflux
+
+        IF(flux_name == "Buckley") THEN; 
+          max_dflux =2.4_prec
+          gamma_temp = 2.4_prec
+          dt_loc = CFL* minval(cell_size)*minval(subcell_size)/(4._prec*max_dflux)
+        ELSE; 
+
         DO i=1,nb_cell;
           nxt_ = Voisin_quad(i,nb_nodes,'R')
           ! IF(i == 1) THEN
@@ -299,7 +308,8 @@ CONTAINS
                     
           max_dflux = max(max_dflux, gamma_temp)
         END DO
-        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))       
+        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))    
+        END IF   
       END IF
 
     END IF
@@ -692,16 +702,14 @@ CONTAINS
       ! IF(mesh_out)CALL Out_The_Mesh(time)
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
      
-      print*,"------"
-
       IF(subcell_use)THEN
       DO i=1,nb_cell;DO j=1,nb_subcell
         dxj = (x_subcell(j+1)-x_subcell(j))/REAL(ndx,prec)
         DO k=1,ndx
           xj = x_subcell(j) + REAL(k,prec)*dxj
           xi = Ref_to_loc(i,xj)
-          out = sol(i)%val_subcells(j,:)
-          ! out = eval_sol(xi,i,LOC=LLoc)
+          ! out = sol(i)%val_subcells(j,:)
+          out = eval_sol(xi,i,LOC=LLoc)
           IF(TRIM(flux_name) == "advection") THEN     
             out_ex =Q_init(xi - time*vit_adv,0,nb_var)
           END IF

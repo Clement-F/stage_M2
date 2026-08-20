@@ -11,7 +11,7 @@ nb_var = int(lines[0][10:16])
 orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
-space = orderx*20
+space = nb_sub
 nx = nb_cell *space
 
 sm = int(lines[5][5:11])
@@ -23,9 +23,9 @@ for k in range(6,6+sm):
 
 #   solDG   SolSub   file_sol    
 
-with open('solPol.txt') as f:
+with open('solSub.txt') as f:
     lines1 = f.readlines()      
-with open('solPol'+'ex'+'.txt') as f:
+with open('solSub'+'ex'+'.txt') as f:
     lines2 = f.readlines()   
 
 
@@ -40,7 +40,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,):
+for k in range(0,sm,5):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]         = lines1[k*(nx+1) +i][10:27]
@@ -62,7 +62,7 @@ for k in range(0,sm,):
             X_midcell[int(i/J)] = (X_cell[int(i/J)]+X_cell[int(i/J) +1])/2
             
     
-        U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
+        #U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
         # if(nb_var >1) : 
         #      U_ex[k][i][1]   = lines2[k*(nx+1) +i][28:43]
         # if(nb_var >2) :
@@ -80,8 +80,9 @@ for k in range(0,sm,):
         J=i*space
         plt.plot(X_cell[i],U_t[k,J,0],"b",marker="x")
         if(i>0): plt.plot(X_cell[i],U_t[k,J-1,0],"b",marker="x")        
-        # plt.plot(X[J:J+orderx+1],U_t[k,J:J+orderx+1,0],'b-', marker='.')
+        plt.plot(X[J:J+orderx+1],U_t[k,J:J+orderx+1,0],'b-', marker='.')
     
+    print(min(U_t[k,:,0]))
     plt.plot(X_cell[-1],U_t[k,-1,0],"b",marker="x")        
     
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
@@ -123,7 +124,7 @@ for k in range(0,sm,):
 
 
 
-if(False):
+if(True):
     with open('sol_ex/buckley.dat') as f:
         lines = f.readlines()
         
@@ -133,9 +134,17 @@ if(False):
         X_B[i] = lines[i][0:16]
         U_B[i] = lines[i][17:32]
         
+        
     for i in range(0,nb_cell+1): 
         1+1
-        #plt.plot([X_cell[i],X_cell[i]],[-1,2],linestyle='--', color='gray')
+        plt.plot([X_cell[i],X_cell[i]],[-2,2],linestyle='--', color='gray')
+        
+    for i in range(0,nb_cell): 
+        J=i*space
+        plt.plot(X_cell[i],U_t[k,J,0],"b",marker="x")
+        if(i>0): plt.plot(X_cell[i],U_t[k,J-1,0],"b",marker="x")        
+        plt.plot(X[J:J+orderx+1],U_t[k,J:J+orderx+1,0],'b-', marker='.')
+    
     plt.plot(X_B,U_B, 'r')
     
     plt.plot(X,U_t[k],'b', marker=".")
