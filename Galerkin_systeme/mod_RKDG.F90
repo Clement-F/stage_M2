@@ -336,7 +336,7 @@ CONTAINS
     INTEGER :: i,j
     REAL(prec), DIMENSION(nb_var) :: out, out_ex
     REAL(prec) :: xi
-    REAL(prec) :: err1 , err2, errLi, entropy
+    REAL(prec) :: err1 , err2, errLi, entropy, pression_,p_max,p_min
 
     LOGICAL, optional :: switch
     LOGICAL :: force
@@ -351,6 +351,9 @@ CONTAINS
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
+
+
+    save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
 
     IF((time .GE.  Time_stemp(n_imp+1)-eps0) .OR. force )  THEN
       ! IF(mesh_out)CALL Out_The_Mesh(time)
@@ -377,10 +380,18 @@ CONTAINS
 
             END IF
 
-            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
-            write(unit=numfile_sol,    fmt=save_format) xi,out, Ref_to_loc(i,x_subcell(j))
-            IF(error_calc)write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+            write(unit=numfile_sol,    fmt=save_format,  advance="no") xi,out
+            IF(error_calc) write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
 
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_quad(j,:); 
+            pression_ = pression(sol(i)%val_subcells(j,:) )
+            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(2x,f10.6)') pression_
+            ELSE;
+               write(unit=numfile_sol,   fmt= '(1x)')
+               write(unit=numfile_solex, fmt= '(1x)')
+            END IF
 
           END DO 
           
@@ -412,7 +423,6 @@ CONTAINS
 
             END IF
 
-            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
             write(unit=numfile_sol,    fmt=save_format,  advance="no") xi,out
             IF(error_calc) write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
 
@@ -423,14 +433,15 @@ CONTAINS
 
             IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
 
-            ! IF(TRIM(flux_name)== "Euler" ) THEN
-            ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
-            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
-            ! write(unit=numfile_sol, fmt= '(f10.6)') pression_
-            ! ELSE;
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_quad(j,:); 
+            pression_ = pression(sol(i)%val_quad(j,:) )
+            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(f10.6)') pression_
+            ELSE;
                write(unit=numfile_sol,   fmt= '(1x)')
                write(unit=numfile_solex, fmt= '(1x)')
-            ! END IF
+            END IF
 
           END DO
 
@@ -590,9 +601,7 @@ CONTAINS
 
     CALL DEALLOCATE_all
 
-
-    print *, "EMERGENCY STOP"
-    STOP
+    STOP "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
 
 

@@ -67,7 +67,7 @@ CONTAINS
 
     theta = min(1._prec, THETA_pos(u_Riemann,gamma_mp,DF),THETA_max(mc,pv, u_Riemann,gamma_mp,DF), THETA_ent(ug,ud,DF,gamma_mp))
     theta = max(theta, 0._prec)
-    IF(ISNAN(theta(1))) THEN; print *,"theta nan"; STOP; END IF
+    IF(ISNAN(theta(1)))  STOP "theta nan"
 
   END FUNCTION
 
@@ -78,14 +78,18 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec) :: A,B,C,M
+    REAL(prec) :: A,B,C,M, E,U,rho
 
     THETA_pos = 1._prec
     theta_temp = 1._prec
 
     IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
       ! positivité de rho
-      theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*(u_Riemann(1)-eps0))
+      IF(abs(DF(1)) .LT. eps0) THEN; 
+        theta_temp(1) = 1._prec 
+      ELSE ;
+        theta_temp(1) = min(1._prec, abs(gamma_mp/DF(1))*(u_Riemann(1)-eps0))
+      END IF
 
       ! positivité de E//P
       IF(positivity == 1) THEN 
@@ -114,19 +118,47 @@ CONTAINS
         IF(DF(1) .LT. 0) theta_temp(1) = 0._prec
         THETA_pos(1) = theta_temp(1)
         ! print *, theta_temp(1)
-        A = theta_temp(1)*DF(1)*u_Riemann(3)/gamma_mp
+        A = DF(1)*u_Riemann(3)/gamma_mp
         B = (DF(2)**2 /(2._prec* gamma_mp**2 ))- DF(2)*u_Riemann(2)/gamma_mp
         C = DF(3)*u_Riemann(1)/gamma_mp - theta_temp(1)*sign(1._prec,DF(1))*u_Riemann(1)*DF(3)/gamma_mp 
         
-        M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2 - max(A,eps0)
-        ! print *, M
-        ! IF(M .LT. eps0) STOP
+        M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2 !- max(A,eps0)
+        print *,theta_temp(1)
+        print *,"M", M
+        A = abs(A); B= abs(B); C= abs(C)
+        IF(M .LT. eps0) STOP "M"
 
-        CALL Knapsack_greedy(THETA_pos(2:3),(/B,C /),M,(/1._prec,1._prec/),2)
+        CALL Knapsack_greedy(THETA_pos,(/A,B,C /),M,(/THETA_pos(1),1._prec,1._prec/),3)
 
-        ! THETA_pos(2:3) = theta_temp(2:3)
-        ! THETA_pos(1) = min(THETA_pos(1), theta_temp(1)) 
+      ELSE IF(positivity == 4) THEN 
+        ! print *,"---------------"
+        ! critère pour rho^+ 
+        ! rho = u_Riemann(1) + theta_temp(1)*DF(1); print *,"rho",rho
+        ! E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
+        ! A = (DF(3)/(gamma_mp*rho))
+        ! B = (DF(2)/(gamma_mp*rho)) + (DF(2)/2._prec*(gamma_mp*rho))**2
+        ! M = E - U**2 /2._prec
+
+        ! CALL Knapsack_greedy(theta_temp(2:3),(/A,B /),M,(/1._prec,1._prec/),2)
+        ! THETA_pos = theta_temp
+
+        ! critère pour rho^- 
+        rho = u_Riemann(1) + theta_temp(1)*DF(1)
+        E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
+        B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
+        A = (DF(2)/(gamma_mp*rho))**2 /2._prec
+        M = E - 0.5_prec *U**2 
+
+        theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
+        ! THETA_pos(2:3) = min(theta_temp(2),theta_temp(1))
+        THETA_pos(2:3) = theta_temp(2)
+        THETA_pos(1) = theta_temp(1) 
         
+        ! CALL Knapsack_greedy(theta_temp(2:3),(/A,B /),M,(/1._prec,1._prec/),2)
+        ! THETA_pos = min(THETA_pos, theta_temp)
+        
+        ! write(*,fmt="(3(f8.4,1x))")THETA_pos
+
       END IF
     END IF
   END FUNCTION THETA_pos
@@ -316,8 +348,11 @@ CONTAINS
     END IF
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell
+    subcells_(ni,jj)%theta(:) =1._prec
+    END DO; END DO;
 
-      subcells_(ni,jj)%theta(:) = 1._prec 
+    DO ni=1,nb_cell; DO jj=1,nb_subcell+1
+      ! print *,ni,jj
       pos = 1._prec; LMP = 1._prec; ent =1._prec
 
       theta_temp = 1._prec
@@ -345,7 +380,7 @@ CONTAINS
         
         IF(smooth_extrema .GT. 0) extrema = subcells_(voi_L(1),voi_L(2))%extrema .AND.  subcells_(voi_R(1),voi_R(2))%extrema 
 
-        IF(minval(abs(DF)) < eps0) THEN; theta_(ni,jj,:) = 1._prec;  ! check le besoin du calcul qui suit
+        IF(maxval(abs(DF)) < eps0) THEN; theta_(ni,jj,:) = 1._prec;  ! check le besoin du calcul qui suit
         ELSE 
           ! print *,"--------------",ni,jj,"----------"
           ! print *, gamma_mp
@@ -362,13 +397,13 @@ CONTAINS
           theta_(ni,jj,:) = min(theta_(ni,jj,:), LMP)
 
           ! Entropie 
-          ent = THETA_ent(ug,ud,DF,gamma_mp)
-          IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
+          ! ent = THETA_ent(ug,ud,DF,gamma_mp)
+          ! IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
             
 
           theta_(ni,jj,:) = min(max(theta_(ni,jj,:),0._prec),1._prec)
           
-          IF(ISNAN(theta_(ni,jj,1))) THEN; print *,"theta nan"; STOP; END IF
+          IF(ISNAN(theta_(ni,jj,1))) STOP 'theta nan'
 
           END IF
       END IF

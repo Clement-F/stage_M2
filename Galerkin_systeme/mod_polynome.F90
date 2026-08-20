@@ -242,8 +242,7 @@ CONTAINS
 
         IF (order_x.GT.9) THEN
         WRITE(*,*) "PROBLEM IN init_coef_legendre"
-        WRITE(*,*) "THE order_x IS TOO HIGH"
-        STOP
+        STOP "THE order_x IS TOO HIGH"
         END IF
         
         coeff_legendre=0._prec

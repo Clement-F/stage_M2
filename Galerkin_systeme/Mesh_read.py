@@ -7,7 +7,7 @@ nb_var = int(lines[0][10:16])
 orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
-nx = nb_cell * nb_sub
+nx = nb_cell * (nb_sub+1)
     
 sm = int(lines[5][5:11]) -2
 with open('mesh_out.txt') as f:
@@ -46,7 +46,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-1.; xR=1.
+xL=-0.; xR=1.
 
 for i in range(0,3):
     plt.pcolormesh(X, T, theta_[:,:,i], shading='auto', cmap='viridis')

@@ -102,10 +102,9 @@ CONTAINS
                     YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
                     sol(ni)%val_subcells(j,:) = sol(ni)%val_subcells(j,:) + Q_init(YY,ni,nb_var)*w_quad(kk)/2._prec
                 END DO; END DO
-            
-                DO j=1,size_base
-                sol(ni)%base_poly(j,:) = MATMUL(Projection_VF_inv(j,:), sol(ni)%val_subcells(:,:))
-                END DO
+                
+                sol(ni)%base_poly(:,:) = MATMUL(Projection_VF_inv(:,:), sol(ni)%val_subcells(:,:))
+
             ELSE 
                 DO ii=1,nb_var
                     CALL Projection_Soli(Q_init,sol(ni)%base_poly(:,ii), LOC=LLoc, ni= ni)
