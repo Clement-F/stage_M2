@@ -43,7 +43,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,1):
+for k in range(0,sm,10):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][10:27]

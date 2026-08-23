@@ -21,7 +21,7 @@ T   = np.zeros(sm)
 line =[]
 
 for k in range(0,sm):
-    # print(k,k*(nx+1) )
+    print(k,k*(nx+1) )
     # print (lines[k*(nx+1)])
     #print (lines[k*(nx+1)+0+1][65])
     T[k] = lines[k*(nx+1)][9:19]

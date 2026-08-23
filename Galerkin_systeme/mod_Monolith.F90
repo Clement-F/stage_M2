@@ -133,26 +133,28 @@ CONTAINS
       ELSE IF(positivity == 4) THEN 
         ! print *,"---------------"
         ! critère pour rho^+ 
-        ! rho = u_Riemann(1) + theta_temp(1)*DF(1); print *,"rho",rho
-        ! E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
-        ! A = (DF(3)/(gamma_mp*rho))
-        ! B = (DF(2)/(gamma_mp*rho)) + (DF(2)/2._prec*(gamma_mp*rho))**2
-        ! M = E - U**2 /2._prec
+        rho = u_Riemann(1) + theta_temp(1)*DF(1); 
+        E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
+        B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
+        A = (DF(2)/(gamma_mp*rho))**2 /2._prec
+        M = E - 0.5_prec *(U**2)
 
+        theta_temp(2) = min(1._prec,M/max(A-B,eps0))
         ! CALL Knapsack_greedy(theta_temp(2:3),(/A,B /),M,(/1._prec,1._prec/),2)
         ! THETA_pos = theta_temp
 
         ! critère pour rho^- 
-        rho = u_Riemann(1) + theta_temp(1)*DF(1)
+        rho = u_Riemann(1) - theta_temp(1)*DF(1)
         E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
         B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
-        A = (DF(2)/(gamma_mp*rho))**2 /2._prec
-        M = E - 0.5_prec *U**2 
+        A = 0.5_prec*(DF(2)/(gamma_mp*rho))**2
+        M = E - 0.5_prec *(U**2)
 
-        theta_temp(2) = min(1._prec, max(M,eps0)/(max(abs(B),eps0)+ max(eps0,A)))
-        ! THETA_pos(2:3) = min(theta_temp(2),theta_temp(1))
-        THETA_pos(2:3) = theta_temp(2)
-        THETA_pos(1) = theta_temp(1) 
+        theta_temp(3) = min(1._prec,max(M,eps0)/max(A+B,eps0))
+        
+        theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
+        THETA_pos(1:3)= minval(theta_temp(1:3))
+        ! THETA_pos(1) = theta_temp(1)
         
         ! CALL Knapsack_greedy(theta_temp(2:3),(/A,B /),M,(/1._prec,1._prec/),2)
         ! THETA_pos = min(THETA_pos, theta_temp)
@@ -180,7 +182,7 @@ CONTAINS
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
-      DO ii = 1,1
+      DO ii = 2,3
         IF(max_rule==1) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
           beta = 0.99_prec*(max_glob-eps0);
@@ -293,7 +295,7 @@ CONTAINS
       END DO;
     ELSE 
 
-      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell+1; 
+      DO ni=1,nb_cell;  DO n_sub =1,nb_subcell; 
         face_L = .FALSE.; face_R = .FALSE.
         nL = Voisin_cell(ni,n_sub, 'L') 
         nR = Voisin_cell(ni,n_sub, 'R') 
