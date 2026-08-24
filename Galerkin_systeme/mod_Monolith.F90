@@ -1,5 +1,6 @@
 MODULE mod_Monolith
     use mod_flux
+    use mod_Abgrall
   IMPLICIT NONE
 
 CONTAINS
@@ -136,30 +137,51 @@ CONTAINS
         rho = u_Riemann(1) + theta_temp(1)*DF(1); 
         E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
         B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
-        A = (DF(2)/(gamma_mp*rho))**2 /2._prec
+        A = 0.5_prec* (DF(2)/(gamma_mp*rho))**2
         M = E - 0.5_prec *(U**2)
 
+        ! if(M .LT. -eps0) print *,"neg M 1" ,M
         theta_temp(2) = min(1._prec,M/max(A-B,eps0))
-        ! CALL Knapsack_greedy(theta_temp(2:3),(/A,B /),M,(/1._prec,1._prec/),2)
-        ! THETA_pos = theta_temp
-
-        ! critère pour rho^- 
+        ! CALL Knapsack_greedy(theta_temp(2:3),(/A        ! critère pour rho^- 
         rho = u_Riemann(1) - theta_temp(1)*DF(1)
         E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
         B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
         A = 0.5_prec*(DF(2)/(gamma_mp*rho))**2
         M = E - 0.5_prec *(U**2)
 
-        theta_temp(3) = min(1._prec,max(M,eps0)/max(A+B,eps0))
+        ! if(M .LT. -eps0) print *,"neg M 2" ,M
+        theta_temp(3) = min(1._prec,M/max(A+B,eps0))
         
         theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
         THETA_pos(1:3)= minval(theta_temp(1:3))
         ! THETA_pos(1) = theta_temp(1)
+
+      ELSE IF(positivity == 5) THEN 
+        ! print *,"---------------"
+        ! critère pour rho^+ 
+        rho = u_Riemann(1) + theta_temp(1)*DF(1); 
+        U = u_Riemann(2)/rho
+        B = (-DF(3) + DF(2)*U)/gamma_mp
+        A = DF(2)**2 /(2._prec*rho* gamma_mp**2)
+        M = u_Riemann(3) - (u_Riemann(2)**2)/(2._prec*rho)
+        ! print *,M, A+B
+        theta_temp(2) = 1._prec
+        if(M .GT. eps0) theta_temp(2) = max(min(1._prec,M/max(A+B,eps0)),0._prec)
+        ! critère pour rho^- 
+        rho = u_Riemann(1) - theta_temp(1)*DF(1); 
+        U = u_Riemann(2)/rho
+        B = (DF(3) - DF(2)*U)/gamma_mp
+        A = DF(2)**2 /(2._prec*rho* gamma_mp**2)
+        M = u_Riemann(3) - (u_Riemann(2)**2)/(2._prec*rho)
+        ! print *,M, A+B
+        theta_temp(3) = 1._prec
+        if(M .GT. eps0) theta_temp(3) = max(min(1._prec,M/max(A+B,eps0)),0._prec)
+
+        ! theta_temp(3) = min(1._prec,M/max(A+B,eps0))
         
-        ! CALL Knapsack_greedy(theta_temp(2:3),(/A,B /),M,(/1._prec,1._prec/),2)
-        ! THETA_pos = min(THETA_pos, theta_temp)
-        
-        ! write(*,fmt="(3(f8.4,1x))")THETA_pos
+        theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
+        THETA_pos(2:3)= minval(theta_temp(2:3))
+        THETA_pos(1) = theta_temp(1)
 
       END IF
     END IF

@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-40              | noeuds du maillage 
+100              | noeuds du maillage 
 -00D-1           | xd
 10D-1            | xf
-20D-2            | T
+40D-3            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -14,11 +14,11 @@
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 --------------------------------------------------
-0              | Maximum Principle : Null(0), GMP(1),  LMP(2)
-4               | Positivity Rule   : Null(0), prod(1), min(2)
+2               | Maximum Principle : Null(0), GMP(1),  LMP(2)
+5               | Positivity Rule   : Null(0), prod(1), min(2)
 0               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
 --------------------------------------------------
-0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
+2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
 5               | nb subcellules du sous maillage
@@ -44,9 +44,9 @@ Solprod         | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-Sod    | solution initiale :
+Blast    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
 Euler           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-Sym          | condition au bord (period, Sym, Solid)
+Solid          | condition au bord (period, Sym, Solid)
