@@ -124,8 +124,8 @@ CONTAINS
         C = DF(3)*u_Riemann(1)/gamma_mp - theta_temp(1)*sign(1._prec,DF(1))*u_Riemann(1)*DF(3)/gamma_mp 
         
         M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2 !- max(A,eps0)
-        print *,theta_temp(1)
-        print *,"M", M
+        ! print *,theta_temp(1)
+        ! print *,"M", M
         A = abs(A); B= abs(B); C= abs(C)
         IF(M .LT. eps0) STOP "M"
 
@@ -204,7 +204,7 @@ CONTAINS
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
-      DO ii = 2,3
+      DO ii = 1,1
         IF(max_rule==1) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
           beta = 0.99_prec*(max_glob-eps0);
@@ -368,7 +368,7 @@ CONTAINS
     
     IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
       write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) time
-      theta_outstring = '(f7.4,1x,3(f5.3,1x),1x,3(f5.3,1x),1x,3(f5.3,1x),1x,l1)'
+      theta_outstring  = "(f7.4,1x"//Repeat(",f5.3,1x",nb_var)//",1x"//Repeat(",f5.3,1x",nb_var)//",1x"//Repeat(",f5.3,1x",nb_var)//",1x,l1 )"
     END IF
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell
@@ -439,6 +439,7 @@ CONTAINS
       subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj,:)/2._prec + subcells_(voi_L(1),voi_L(2))%theta
       subcells_(voi_R(1),voi_R(2))%theta = theta_(ni,jj,:)/2._prec + subcells_(voi_R(1),voi_R(2))%theta
       ELSE IF(coeff_smooth == 0) THEN 
+      ! print *,voi_L
       subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj,:)
       END IF
 

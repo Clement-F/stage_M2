@@ -81,6 +81,8 @@ CONTAINS
     IF(monolithique) THEN 
     IF(smooth_extrema .GT. 0) CALL extrema_detect
 
+    IF(entropie_rule == 4) CALL update_RF_entropie
+
     CALL Construct_thetaMesh
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1                    
@@ -458,9 +460,18 @@ CONTAINS
       END IF
 
       IF(monolithique) THEN
-      write(*, fmt ='("avg theta = ", f10.6, f10.6, f10.6)')  Sum(subcells_(:,:)%theta(1))/REAL((nb_cell)*(nb_subcell),prec), Sum(subcells_(:,:)%theta(2))/REAL((nb_cell)*(nb_subcell),prec), Sum(subcells_(:,:)%theta(3))/REAL((nb_cell)*(nb_subcell),prec)
-      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)')  maxval(subcells_(:,:)%theta(1)), maxval(subcells_(:,:)%theta(2)), maxval(subcells_(:,:)%theta(3))
-      write(*, fmt ='("min theta = ", f10.6, f10.6, f10.6)')  minval(subcells_(:,:)%theta(1)), minval(subcells_(:,:)%theta(2)), minval(subcells_(:,:)%theta(3))
+      write(*, fmt ='("avg theta = ", f10.6, f10.6, f10.6)',advance = "no")  
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(subcells_(:,:)%theta(i))/REAL((nb_cell)*(nb_subcell),prec);        END DO
+      write(*, fmt ='(1x)')
+
+      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)',advance = "no")  
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") maxval(subcells_(:,:)%theta(i));        END DO
+      write(*, fmt ='(1x)')
+
+      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)',advance = "no")  
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(subcells_(:,:)%theta(i));        END DO
+      write(*, fmt ='(1x)')
+
 
       IF(entropie_rule .GT. 0) THEN 
       write(*, fmt ='("entropy = ", f12.6)')  entropy

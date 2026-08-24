@@ -24,7 +24,8 @@ MODULE mod_declaration
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER,    DIMENSION(2) :: L, LL, R, RR
-    REAL(prec), DIMENSION(3) :: theta     !<- TEMP 
+    ! REAL(prec), DIMENSION(3) :: theta     !<- TEMP 
+    REAL(prec), DIMENSION(1) :: theta     !<- TEMP 
     LOGICAL :: extrema
   END TYPE subcells
 
@@ -43,6 +44,7 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:,:), POINTER :: coeff_Taylor, coeff_legendre
 
   REAL(prec), DIMENSION(:,:,:),   POINTER :: theta_
+  REAL(prec), DIMENSION(:),   POINTER :: vc_star,alpha_entr, beta_entr
   REAL(prec), DIMENSION(:,:), POINTER :: RK_alpha
   REAL(prec), DIMENSION(:),   POINTER :: RK_time,RK_beta
   REAL(prec), DIMENSION(:),   POINTER :: L_step
@@ -99,6 +101,7 @@ MODULE mod_declaration
     ALLOCATE( x_cell(nb_cell+1),        x_middle(nb_cell),        cell_size(nb_cell)) 
     ALLOCATE( x_subcell(nb_subcell+1),  x_submiddle(nb_subcell),  subcell_size(nb_subcell))
     ALLOCATE( theta_(nb_cell,nb_subcell+1,nb_var))
+    ALLOCATE( vc_star(nb_cell), alpha_entr(nb_cell), beta_entr(nb_subcell))
 
     ALLOCATE( x_quad(nb_nodes), w_quad(nb_nodes) ) 
     ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,nb_nodes))

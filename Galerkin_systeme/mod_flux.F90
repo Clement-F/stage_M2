@@ -192,6 +192,17 @@ CONTAINS
       RETURN
     END IF
   END FUNCTION Flux_entrop
+
+  FUNCTION entr_num_VF(ul,ur)
+    IMPLICIT NONE
+    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: ul,ur
+    REAL(prec), DIMENSION(nb_var) :: flux,vl,vr
+    REAL(prec) :: entr_num_VF
+
+    vl = Var_entrop(ul); vr = Var_entrop(ur)
+    entr_num_VF = DOT_PRODUCT((vl+vr)/2._prec , Flux_FV(ul,ur)) - (entrop_pot_flux(ul)+entrop_pot_flux(ur))/2._prec
+
+  END FUNCTION entr_num_VF
   
   FUNCTION Var_entrop(u)
     IMPLICIT NONE
