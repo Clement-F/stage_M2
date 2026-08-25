@@ -7,7 +7,6 @@ PROGRAM MAIN
     INTEGER :: i
 
 
-
     CALL SYSTEM_CLOCK(COUNT_RATE=nb_prd_sec,COUNT_MAX=nb_prd_max)
     CALL SYSTEM_CLOCK(COUNT=nb_prd_ini)
     

@@ -15,9 +15,9 @@ nx = nb_cell *nb_sub
 
 sm = int(lines[5][5:11])
 
-T=[]
-for k in range(6,6+sm):
-   T.append(float(lines[k][14:30]))
+# T=[]
+# for k in range(6,6+sm):
+#    T.append(float(lines[k][14:30]))
 
 
 #   solDG   SolSub   file_sol    
@@ -43,7 +43,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,10):
+for k in range(0,sm,1):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]   = lines1[k*(nx+1) +i][10:27]
@@ -75,20 +75,20 @@ for k in range(0,sm,10):
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
     #plt.plot(X,U_t[0,:,0],'g-')
     plt.plot(X,U_t[k,:,0] ,'b-')
-    plt.plot(X,U_ex[k,:,0],'g-')
+    #plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
     print(sum(U_t[k,:,0]))
     if(nb_var>1):
         1+1
         #plt.plot(X,U_ex[k,:,1],'k-')
-        #plt.plot(X,U_t[k,:,1],'r-', marker='.')
+        plt.plot(X,U_t[k,:,1],'r-', marker='.')
         #plt.plot(X,abs(U_t[k,:,1]-U_ex[k,:,1]),'k-')
         #plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r-', marker='.')
     if(nb_var>2):
         1+1
         #plt.plot(X,U_ex[k,:,2],'k-')
-        #plt.plot(X,U_t[k,:,2],'g-', marker='.')
+        plt.plot(X,U_t[k,:,2],'g-', marker='.')
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
     #plt.plot(X,P_[k,:],'k-.')

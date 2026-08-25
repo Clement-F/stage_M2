@@ -460,15 +460,15 @@ CONTAINS
       END IF
 
       IF(monolithique) THEN
-      write(*, fmt ='("avg theta = ", f10.6, f10.6, f10.6)',advance = "no")  
+      write(*, fmt ='("avg theta = ")',advance = "no")  
       DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(subcells_(:,:)%theta(i))/REAL((nb_cell)*(nb_subcell),prec);        END DO
       write(*, fmt ='(1x)')
 
-      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)',advance = "no")  
+      write(*, fmt ='("max theta = ")',advance = "no")  
       DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") maxval(subcells_(:,:)%theta(i));        END DO
       write(*, fmt ='(1x)')
 
-      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)',advance = "no")  
+      write(*, fmt ='("max theta = ")',advance = "no")  
       DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(subcells_(:,:)%theta(i));        END DO
       write(*, fmt ='(1x)')
 

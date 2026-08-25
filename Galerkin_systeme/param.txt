@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-50              | noeuds du maillage 
--10D-1           | xd
-10D-1            | xf
-20D-1            | T
+40              | noeuds du maillage 
+-50D-1           | xd
+50D-1            | xf
+18D-1            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -14,19 +14,19 @@
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 --------------------------------------------------
-2               | Maximum Principle : Null(0), GMP(1),  LMP(2)
-0               | Positivity Rule   : Null(0), prod(1), min(2)
-4               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3), Abgrall(4)
+2               | Maximum Principle : None(0), GMP(1),  LMP(2)
+7               | Positivity Rule   : None(0), prod(1), min(2), knapsac(3), linear_multi(7)
+0               | Entropie   Rule   : None(0), discrete(1), semi(2), cell(3), Abgrall(4)
 --------------------------------------------------
-2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
-0               | coefficient smoothening : Null(0), min(1), mean(2)
+0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
+1               | coefficient smoothening : None(0), min(1), mean(2)
 --------------------------------------------------
-5               | nb subcellules du sous maillage
+6               | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
 =================================================
     Paramètres DG
 =================================================
-4               | ordre espace
+5               | ordre espace
 3               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
@@ -44,9 +44,9 @@ Solprod         | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-sinus    | solution initiale :
+acoustic_wave    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
-advection           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+Euler           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-period          | condition au bord (period, Sym, Solid)
+Sym          | condition au bord (period, Sym, Solid)

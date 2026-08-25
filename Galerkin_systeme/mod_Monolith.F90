@@ -79,7 +79,9 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec) :: A,B,C,M, E,U,rho
+    REAL(prec) :: A,B,C,M, E,U,rho, B_e,B_u,t
+
+    INTEGER :: pm
 
     THETA_pos = 1._prec
     theta_temp = 1._prec
@@ -183,6 +185,139 @@ CONTAINS
         THETA_pos(2:3)= minval(theta_temp(2:3))
         THETA_pos(1) = theta_temp(1)
 
+      ELSE IF(positivity == 6) THEN
+        ! Assumptions : rho>0, M>0, A>0
+        THETA_pos(1) = theta_temp(1)
+        
+        DO pm = 0,1
+
+          if(pm == 0)  rho = u_Riemann(1) + theta_temp(1)*DF(1)/gamma_mp; 
+          if(pm == 1)  rho = u_Riemann(1) - theta_temp(1)*DF(1)/gamma_mp; 
+
+          IF(rho .LT. 0) print *,"rho<0",rho,DF(1),theta_temp(1), u_Riemann(1)
+
+          IF(rho .LT. 1) THEN ;   
+            !E>0
+            M   = u_Riemann(3) - u_Riemann(2)**2 /(2._prec*rho) 
+
+            if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp*rho)
+            if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp*rho)
+
+            if(pm == 0) B_e = -DF(3)/gamma_mp
+            if(pm == 1) B_e = DF(3)/gamma_mp
+            
+            A   = DF(2)**2/max(2._prec* gamma_mp**2* rho,eps0)
+          ELSE;  
+            !rho*E >0
+            M   = rho*u_Riemann(3) - u_Riemann(2)**2 /2._prec 
+
+            if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
+            if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
+
+            if(pm == 0) B_e = -rho*DF(3)/gamma_mp
+            if(pm == 1) B_e = rho*DF(3)/gamma_mp
+
+            A   = DF(2)**2/max(2._prec* gamma_mp**2,eps0)
+          END IF
+
+          IF(M .LT. 0 .AND. pm ==1) return
+
+          
+          IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
+          
+          IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
+            THETA_pos(2) = min(1._prec,THETA_pos(2))
+            THETA_pos(3) = min(1._prec,THETA_pos(3))
+            return
+          END IF
+
+          IF(B_e .LT. eps0) THEN
+            THETA_pos(2) = min(1._prec,(M-B_e)/max(B_u+A,eps0), THETA_pos(2))
+            THETA_pos(3) = min(1._prec,THETA_pos(3))
+          END IF
+
+          IF(B_u .LT. -A) THEN
+            THETA_pos(2) = min(1._prec,THETA_pos(2))
+            THETA_pos(3) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), THETA_pos(3))
+          END IF
+
+          IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
+            ! IF(M .LT. 0) print *,"M",M
+            IF(B_e .LT. 0) print *,"Be",B_e
+            IF(B_u .LT. -A) print *,"Bu",B_u
+            IF(A .LT. 0) print *,"A",A
+
+            THETA_pos(2) = min(1._prec,M*(B_u+A)/(B_e**2 + (B_u+A)**2),THETA_pos(2))
+            THETA_pos(3) = min(1._prec,M*    B_e/(B_e**2 + (B_u+A)**2),THETA_pos(3))
+          END IF
+
+          IF(M .LT. 0 .AND. pm == 0) THETA_pos(2:3) =1._prec 
+
+
+        END DO
+        return
+      ELSE IF(positivity == 7) THEN
+        ! heuristique
+
+        THETA_pos(1) = theta_temp(1)
+        
+        DO pm = 0,1
+ 
+          if(pm == 0)  rho = u_Riemann(1) + theta_temp(1)*DF(1)/gamma_mp; 
+          if(pm == 1)  rho = u_Riemann(1) - theta_temp(1)*DF(1)/gamma_mp; 
+
+          IF(rho .LT. 0) print *,"rho<0",rho,DF(1),theta_temp(1), u_Riemann(1)
+
+          M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+
+          IF(M .LT. eps0) THEN; THETA_pos=0._prec; return; END IF;
+
+          if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
+          if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
+
+          if(pm == 0) B_e = -(DF(3)/gamma_mp) * rho
+          if(pm == 1) B_e =  (DF(3)/gamma_mp) * rho
+            
+          A   = DF(2)**2/(2._prec* gamma_mp**2)
+
+          IF(M .LT. 0 .AND. pm ==1) return
+
+          
+          IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
+          
+          IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
+            THETA_pos(2) = min(1._prec,THETA_pos(2))
+            THETA_pos(3) = min(1._prec,THETA_pos(3))
+            return
+          END IF
+
+          IF(B_e .LT. eps0) THEN
+            THETA_pos(2) = min(1._prec,(M-B_e)/max(B_u+A,eps0), THETA_pos(2))
+            THETA_pos(3) = min(1._prec,THETA_pos(3))
+          END IF
+
+          IF(B_u .LT. -A) THEN
+            THETA_pos(2) = min(1._prec,THETA_pos(2))
+            THETA_pos(3) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), THETA_pos(3))
+          END IF
+
+          IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
+            ! IF(M .LT. 0) print *,"M",M
+            IF(B_e .LT. 0) print *,"Be",B_e
+            IF(B_u .LT. -A) print *,"Bu",B_u
+            IF(A .LT. 0) print *,"A",A
+            
+            THETA_pos(2) = min(1._prec,M*(B_u+A)/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),THETA_pos(2))
+            THETA_pos(3) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),THETA_pos(3))
+          END IF
+
+          ! IF(M .LT. 0) print *,"M<0",M
+
+          ! IF(M .LT. 0 .AND. pm == 0) THETA_pos(2:3) =1._prec 
+
+
+        END DO
+        return
       END IF
     END IF
   END FUNCTION THETA_pos
@@ -357,7 +492,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: DF,pos, LMP, ent,out1
     REAL(prec) :: gamma_mp
     REAL(prec) :: xi
-    Character(len=64) theta_outstring
+    Character(len=128) theta_outstring
 
     LOGICAL :: extrema
     INTEGER :: ni, jj
@@ -414,6 +549,7 @@ CONTAINS
 
           ! positivité pour le pb  d'Euler
           pos = THETA_pos(u_Riemann,gamma_mp,DF)
+          ! if(minval(pos) .LT. 0) print *,pos
           theta_(ni,jj,:) = min(theta_(ni,jj,:), pos)
           
           ! check si l'interface se trouve entre deux sous-cellules qui captent un extrema
