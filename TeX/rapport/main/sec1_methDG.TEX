@@ -5,8 +5,8 @@
 Nous nous restreindrons ici aux problèmes hyperboliques 1D. Pour un développement 2D, voir \cite{VILAR2025}. 
 
 \paragraph{Problème hyperbolique \\}
-Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D} =]a,b[ \subset \R$ le domaine de calcul et $\mathbf{f} : \Omega \mapsto \R^M$ une fonction régulière. 
-Soit $\mathbf{u} : \mathbb{D} \times \R^+ \mapsto \Omega$ la solution du problème : 
+Soit $\Omega\subset \R^M$ l'espace des phases, $\mathbb{D} =]a,b[ \subset \R$ le domaine de calcul et $\mathbf{f} : \Omega \to \R^M$ une fonction régulière. 
+Soit $\mathbf{u} : \mathbb{D} \times \R^+ \to \Omega$ la solution du problème : 
 
 \begin{equation}\label{system_hyperbolique}
     \partial_t \mathbf{u} + \partial_x \mathbf{f}(\mathbf{u}) = 0 \qquad \forall x \in \mathbb{D},\, \forall t >0
@@ -18,42 +18,45 @@ On pose
 \end{equation*}
 
 \noindent
-On dit alors que le système \eqref{system_hyperbolique} est hyperbolique si et seulement si : 
+On dit alors que le système \eqref{system_hyperbolique} est \emph{hyperbolique} si et seulement si : 
 $A(\mathbf{u})$ est diagonalisable en $M$ valeurs propres réelles bien ordonnée $\lambda_1(\mathbf{u})\leq \lambda_2(\mathbf{u}) \leq \dots \leq \lambda_m(\mathbf{u})$ 
-et si leur vecteurs propres associés sont linéairement indépendants.
-Si les inégalités sont strictes, alors le système \eqref{system_hyperbolique} est dit strictement hyperbolique.
+et si leurs vecteurs propres associés sont linéairement indépendants.
+Si les inégalités sont strictes, alors le système \eqref{system_hyperbolique} est dit \emph{strictement hyperbolique}.
 
-\paragraph{solutions faibles \\}
+\paragraph{Solutions faibles \\}
 
-En multipliant par une fonction test $\phi \in \mathcal{D}(\R)$ \eqref{system_hyperbolique} puis en intégrant et en passant par une intégration par partie, 
-On obtient une nouvelle formulation du problème \eqref{system_hyperbolique}, $\mathbf{u}$ qui est moins exigente en régularité : 
+En multipliant \eqref{system_hyperbolique} par une fonction test $\phi \in \mathcal{D}(\R)$ puis en intégrant et en passant par une intégration par partie,
+on obtient une nouvelle formulation du problème \eqref{system_hyperbolique}. 
+La solution $\mathbf{u}$ de ce problème est alors moins exigente en régularité
 
 \begin{equation}\label{Formulation_Faible}
     \int_\mathbb{D} \partial_t \mathbf{u} \phi dx - \int_\mathbb{D} \mathbf{f}(\mathbf{u}) \partial_x \phi dx + \left[\mathbf{f}(\mathbf{u})\phi\right]^{x=a}_{x=b} \, = 0 
 \end{equation}
 
-On dit que si $\mathbf{u}$ est solution de \eqref{Formulation_Faible}, elle est solution faible du problème \eqref{system_hyperbolique}. \\
-Si $\mathbf{u}$ est solution faible et $\mathbf{u}\in \mathcal{C}^1$, elle est aussi solution forte \red{preuve (si place)}. i.e solution de \eqref{system_hyperbolique}.\\
+On dit que la fonction $\mathbf{u}$ est une \emph{solution faible} du problème \eqref{system_hyperbolique} si elle est solution de l'équation \eqref{Formulation_Faible}.\\
+Remarque : si $\mathbf{u}$ est solution faible et $\mathbf{u}\in \mathcal{C}^1$, elle est aussi solution forte \red{preuve (si place)}. i.e solution de \eqref{system_hyperbolique}.\\
 
 Nous chercherons des solutions bornées (i.e dans $L^\infty$) et à variations bornées (i.e dans $BV$ 
-\footnote{Soit $[a,b]\subset \R,\, f:[a,b]\mapsto \R$, On donne $V^a_b(f)=\sup_{P\in \mathbf{P}} \sum_i^{n_p-1}|f(x_{i+1})-f(x_i)|$, 
+\footnote{Soit $[a,b]\subset \R,\, f:[a,b]\to \R$, On donne $V^a_b(f)=\sup_{P\in \mathbf{P}} \sum_i^{n_p-1}|f(x_{i+1})-f(x_i)|$, 
 la variation de $f$ sur $[a,b]$, où $P=\{x_1,\dots,x_{n_p}\}$, une partition de  $[a,b]$ telle que $x_i\leq x_{i+1}$ et $\mathbf{P}$ l'ensemble de ces partitions. 
 On définit alors $BV([a,b])$ = $\{f|V^a_b(f)<\infty \}$ \red{faire paragraph dessus ?(si j'ajoute le cas système -> oui)} }) 
 
-\paragraph{solution faible entropique \\}
+\paragraph{Solution faible entropique \\}
 \red{à réecrire}
 De toutes les solutions faibles admissibles, la seule solution qui nous intéresse est la solution faible entropique. \noindent 
 Pour définir une telle forme de solution, il nous faut tout d'abord définir l'entropie mathématique.\\
-Soit $\eta : \Omega \mapsto \R$ une fonction convexe, on dit qu'elle est une entropie pour le système \eqref{system_hyperbolique}, si il existe une fonction flux $\phi : \Omega \mapsto \R$ telle que :
+Soit $\eta : \Omega \to \R$ une fonction convexe, on dit qu'elle est une \emph{entropie} pour le système \eqref{system_hyperbolique},
+s'il existe une fonction flux $\phi : \Omega \to \R$ telle que :
 \begin{equation}
     \nabla \eta(u) A(u) = \nabla \phi (u) \qquad  \forall u \in \Omega
 \end{equation}
-On note que pour le cas scalaire, toutes fonction convexe $\eta$ est entropie du système.\\
-Il a été prouvé \cite{godlewski2021numerical} que si \eqref{system_hyperbolique} admet une pair d'entropie ($\eta,\phi$), alors le système est symétrisable \footnote{$\forall u \in \Omega,\, \exists A_0(u)\in \mathcal{M}_{M\times M}$ telle que $A_0(u)\, A(u)$ est symétrique}
-et qu'il existe une variable d'entropie $\nu(u):=\nabla \eta(u)$ en bijection avec $u$ solution entropique de \eqref{Formulation_Faible}. (voir \ref{entropie_Annexes} pour plus de détails). \\
-Il a aussi été prouvé \cite{SNKružkov_1970} que pour un système scalaire, il existe une unique solution entropique dans $L^\infty \cap BV$,  associée à une donnée initale $u_0$.
-\subsection{Semi-discretisation en espace, méthode Galerkin Discontinue}
-Nous ferons ici un bref rappel de la méthode \textit{Galerkin Discontinue} (DG) élaboré historiquement par Cockburn et Shu dans une série de papier : \cite{C_SHU_1},\cite{C_SHU_2},\cite{C_SHU_3},\cite{C_SHU_4},\cite{C_SHU_5}
+On note que pour le cas scalaire, toute fonction convexe $\eta$ est entropie du système.\\
+Il a été prouvé (voir \cite{godlewski2021numerical}) que si \eqref{system_hyperbolique} admet une pair d'entropie ($\eta,\phi$), alors le système est symétrisable \footnote{$\forall u \in \Omega,\, \exists A_0(u)\in \mathcal{M}_{M\times M}$ telle que $A_0(u)\, A(u)$ est symétrique}
+et qu'il existe une variable d'entropie $\nu(u):=\nabla \eta(u)$ en bijection avec $\mathbf{u}$ la solution entropique de \eqref{Formulation_Faible} (voir \ref{entropie_Annexes} pour plus de détails) dans le sens où l'on peut écrire le système comme $\mathbf{u(\nu)}$. \\
+Il a aussi été prouvé (voir \cite{SNKružkov_1970}) que pour un système scalaire, il existe une unique solution entropique dans $L^\infty \cap BV$,  associée à une donnée initale $u_0$.
+\subsection{Semi-discrétisation en espace, méthode Galerkin Discontinue}
+Nous ferons ici un bref rappel de la méthode \textit{Galerkin Discontinue} (DG) élaborée historiquement par Cockburn et Shu dans une série de papier : 
+()\cite{C_SHU_1},\cite{C_SHU_2},\cite{C_SHU_3},\cite{C_SHU_4},\cite{C_SHU_5}).
 \paragraph{Approximation polynomiale\\}
 Nous dotons $\mathbb{D}$ d'un maillage $\mathcal{T}_h= \{\omega_i\}_i$ selon ces règles :
 \begin{equation}\label{maillage}    
@@ -62,12 +65,12 @@ Nous dotons $\mathbb{D}$ d'un maillage $\mathcal{T}_h= \{\omega_i\}_i$ selon ces
 & \overset{\circ}{\omega_i} \neq \emptyset \qquad  \forall i\\
 & \overset{\circ}{\omega_i} \,\cap \, \overset{\circ}{\omega_j} = \emptyset  \qquad \forall i\neq j\\
 & \bigcup_{i=0}^{N_x} \omega_i = \mathbb{D} 
-\end{aligned}
+\end{aligned}.
 \right.
 \end{equation}
-étant donné que nous travaillons en 1D, et comme tout $\omega_i$ est donné convexe, $\omega_i=]x_{i-\frac{1}{2}},x_{i+\frac{1}{2}}[$.\\ \noindent
-On cherche à approcher $\mathbf{u}$ une solution faible par $\mathbf{u_h}$ une fonction facilement calculable.
-La particularité de la méthode DG est le choix de l'espace d'approximation dans lequel nous allons chercher $\mathbf{u_h}$ : 
+Étant donné que nous travaillons en 1D, et comme tout $\omega_i$ est donné convexe, on a $\omega_i=]x_{i-\frac{1}{2}},x_{i+\frac{1}{2}}[$.\\ \noindent
+On cherche à approcher une solution faible $\mathbf{u}$ par une fonction facilement calculable $\mathbf{u_h}$.
+La particularité de la méthode DG est le choix de l'espace d'approximation dans lequel nous allons chercher la fonction $\mathbf{u_h}$ : 
 
 \begin{equation}
     \mathbf{u_h} \in V_h = \left\{ \mathbf{u_h} \in \mathbb{P}^k(\omega_i)^M \quad \forall x\in \omega_i \right\} \subset L^\infty(\mathbb{D})\cap BV(\mathbb{D})
@@ -76,7 +79,7 @@ La particularité de la méthode DG est le choix de l'espace d'approximation dan
     \includegraphics[width =0.3\textwidth]{schema/projection_L2.png}
     \caption{Projection $\mathbb{L}^2$ sur $V_h$.}
 \end{wrapfigure}
-Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i,\, \omega_v$. D'où le nom de schéma de Galerkin \textit{Discontinue}. 
+Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i,\, \omega_j$. D'où le nom de schéma de Galerkin \textit{Discontinue}. 
 Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$ dans \eqref{Formulation_Faible}, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. 
 De plus par la théorie des formulations variationnelles \red{besoin d'une explication plus clair}, il est raisonnable de regarder si l'équation est vraie pour des fonctions tests dans $V_h$.
 
@@ -85,7 +88,7 @@ De plus par la théorie des formulations variationnelles \red{besoin d'une expli
     \int_{\omega_i} \partial_t \mathbf{u_h} \phi dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \phi dx + \left[ \mathbf{f}(\mathbf{u_h})\,\phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall \phi \in \mathbb{P}^k
 \end{equation}
 \noindent
-En pratique, on se placera plus souvent sur une maille de référence $\omega=]-1,1[$ et l'on effectuera les calculs par isomorphisme avec $\omega_i$:  $\mathfrak{R}^i:\omega \mapsto \omega_i$. \\
+Remarque : en pratique, on se placera plus souvent sur une maille de référence $\omega=]-1,1[$ et l'on effectuera les calculs par un isomorphisme avec $\omega_i$,  $\mathfrak{R}^i$. \\
 On remarque très vite un problème dans cette écriture : $\mathbf{u_h}$ est continue sur $\omega_i$, mais il n'est pas défini en son bord : $ {x_{i\pm\frac{1}{2}}}$. 
 Pour contourner ce problème, nous remplaçons le terme défini à l'interfaces des $\omega_i$.
 \begin{equation}
