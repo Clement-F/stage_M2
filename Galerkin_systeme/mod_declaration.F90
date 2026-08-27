@@ -18,6 +18,7 @@ MODULE mod_declaration
     REAL(prec), DIMENSION(:,:), POINTER :: flux_VF
     REAL(prec), DIMENSION(:,:), POINTER :: flux_DG
     REAL(prec), DIMENSION(:,:), POINTER :: flux_subcells
+    REAL(prec), DIMENSION(:,:), POINTER :: flux_Abgrall
     REAL(prec), DIMENSION(:,:), POINTER :: flux_tilde
   END TYPE flux_
 
@@ -43,6 +44,8 @@ MODULE mod_declaration
   REAL(prec), DIMENSION(:,:), POINTER :: coeff_Taylor, coeff_legendre
 
   REAL(prec), DIMENSION(:,:),   POINTER :: theta_
+  REAL(prec), DIMENSION(:,:), POINTER :: Adjacency
+  REAL(prec), DIMENSION(:),   POINTER :: vc_star,alpha_entr, beta_entr
   REAL(prec), DIMENSION(:,:), POINTER :: RK_alpha
   REAL(prec), DIMENSION(:),   POINTER :: RK_time,RK_beta
   REAL(prec), DIMENSION(:),   POINTER :: L_step
@@ -104,12 +107,14 @@ MODULE mod_declaration
     ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,nb_nodes))
     ALLOCATE( coeff_DG(size_base, size_base) ) 
 
+    ALLOCATE( vc_star(nb_cell), alpha_entr(nb_cell), beta_entr(nb_subcell))
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
     ALLOCATE( Time_stemp(print_rule+2))
     
     ALLOCATE( pts_DG(size_base)) 
     ALLOCATE( C_m(nb_subcell+1), C_p(nb_subcell+1))
+    ALLOCATE( Adjacency(nb_subcell-1,nb_subcell))
     ALLOCATE( Projection_VF(nb_subcell,size_base),    Projection_VF_inv(size_base,nb_subcell))
     ALLOCATE( Projection_VF_d(nb_subcell,size_base))
     ALLOCATE( Projection_VF_dd(nb_subcell,size_base))
@@ -122,7 +127,7 @@ MODULE mod_declaration
       ALLOCATE(sol_step(i)%base_poly(size_base,nb_var));  ALLOCATE(sol_step(i)%val_quad(nb_nodes,nb_var)); ALLOCATE(sol_step(i)%val_subcells(nb_subcell,nb_var)); ALLOCATE(sol_step(i)%inter(2,nb_var))
                                      
 
-      ALLOCATE(flux_h(i)%flux_DG(size_base,nb_var))      
+      ALLOCATE(flux_h(i)%flux_DG(size_base,nb_var));      ALLOCATE(flux_h(i)%flux_Abgrall(nb_subcell+1,nb_var))
       ALLOCATE(flux_h(i)%flux_tilde(nb_subcell+1,nb_var));ALLOCATE(flux_h(i)%flux_VF(nb_subcell+1,nb_var)); ALLOCATE(flux_h(i)%flux_subcells(nb_subcell+1,nb_var));  
     
       ALLOCATE(sol_step(i)%deriv(size_base, nb_var))

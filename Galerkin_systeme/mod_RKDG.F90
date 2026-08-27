@@ -2,6 +2,7 @@ MODULE mod_RKDG
    use mod_Monolith
    use mod_SolIni
    use mod_Divers
+   use mod_Abgrall
   IMPLICIT NONE
 
 CONTAINS
@@ -75,10 +76,9 @@ CONTAINS
                                         & - C_p(jj)*(fh_R-g(ni+1,ii))
                               
       END DO
-
-      
     END DO; END DO
 
+    if(entropie_rule == 4) CALL update_RF_entropie
     
     IF(monolithique) THEN 
     IF(smooth_extrema .GT. 0) CALL extrema_detect
@@ -311,14 +311,14 @@ CONTAINS
                     
           max_dflux = max(max_dflux, gamma_temp)
         END DO
-        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))       
+        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*max(max_dflux,eps0))       
       END IF
 
     END IF
 
     if(.not. monolithique) dt_loc =  2._prec
     
-    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux), tmax-time, dt_loc)
+    dt = min(CFL*dx/max(REAL(2*order_x-1,prec)*max_dflux,eps0), tmax-time, dt_loc)
     IF(exact_time) dt = min(dt, Time_stemp(n_imp+1)-time)
 
     IF((order_x .GT. order_t).AND. convergence ) THEN
@@ -360,7 +360,7 @@ CONTAINS
     END IF
  
     ! print *,"writout"
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;entropy=0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
@@ -415,13 +415,12 @@ CONTAINS
 
           END DO; END IF
           
+          IF(entropie_rule .GT. 0) THEN
           DO j=1,size_base
-            xi = Ref_to_loc(i,x_quad(j))
-
             out = sol(i)%val_quad(j,:)
-          IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
-
-          END DO
+            entropy = entropy + entropie_numerique(out(1))*cell_size(i) *w_quad(j)/2._prec
+          END DO  
+          END IF
         ELSE
           
           DO j=1,size_base
@@ -452,7 +451,7 @@ CONTAINS
             err1 = err1 + (abs(out(1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + (((out(1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
-            IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
+            IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out(1))*cell_size(i)/2 *w_quad(j) 
 
             ! IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)

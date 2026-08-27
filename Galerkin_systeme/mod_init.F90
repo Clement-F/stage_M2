@@ -32,7 +32,7 @@ CONTAINS
             max_dflux = abs(vit_adv)
             nb_var=1
         Case("burgers") 
-            nb_var=2
+            nb_var=1
         Case("Buckley") 
             nb_var=1
 
@@ -77,7 +77,7 @@ CONTAINS
         theta_(:,:) = 1._prec
 
 
-
+        CALL init_Adj
         CALL Coeff_quad_init
         CALL Coeff_DG_init
         

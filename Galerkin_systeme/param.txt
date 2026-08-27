@@ -4,7 +4,7 @@
 40              | noeuds du maillage 
 -10D-1           | xd
 10D-1            | xf
-6D-1            | T
+10D0            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -14,20 +14,20 @@
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 --------------------------------------------------
-2               | Maximum Principle : Null(0), GMP(1),  LMP(2)
-2               | Positivity Rule   : Null(0), prod(1), min(2)
-0               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
+0               | Maximum Principle : Null(0), GMP(1),  LMP(2)
+0               | Positivity Rule   : Null(0), prod(1), min(2)
+4               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
 --------------------------------------------------
-2               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
+0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
-6               | nb subcellules du sous maillage
+2               | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
 =================================================
     Paramètres DG
 =================================================
-6               | ordre espace
-3               | ordre temps
+2               | ordre espace
+1               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
 =================================================
@@ -38,15 +38,15 @@ False           | Convergence   (True, False)
 False           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-10              | print rule
+200              | print rule
 False            | exact time
 solSub          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-creneau    | solution initiale :
+sinus    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc, Riemann_Buckley
                     Euler : Sod, isentropique,acoustic_wave, Blast
-Buckley           | problème (advection, burgers, Buckley, Shallow, Euler)
-1D0             | vitesse advection (si pb = advection)
-Sym          | condition au bord (period, Sym, Solid)
+advection           | problème (advection, burgers, Buckley, Shallow, Euler)
+1D-1             | vitesse advection (si pb = advection)
+period          | condition au bord (period, Sym, Solid)

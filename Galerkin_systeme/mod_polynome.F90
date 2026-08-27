@@ -875,6 +875,8 @@ CONTAINS
             END DO
         END DO
 
+        beta_entr = 1._prec
+
 
     END SUBROUTINE sub_cells_init
 
@@ -892,6 +894,18 @@ CONTAINS
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm
+
+    SUBROUTINE init_Adj
+        IMPLICIT NONE
+        INTEGER :: ii, jj 
+
+        DO ii = 1,nb_subcell-1
+            Adjacency(ii,1:ii) = REAL(nb_subcell-ii,prec); 
+            Adjacency(ii,ii+1:nb_subcell) = REAL(-ii,prec);
+        END DO
+        Adjacency = Adjacency/Real(nb_subcell,prec)
+        CALL print_mat(Adjacency,nb_subcell-1,nb_subcell)
+    END SUBROUTINE init_Adj
 
     SUBROUTINE print_submesh
         IMPLICIT NONE

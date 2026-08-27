@@ -18,7 +18,7 @@ CONTAINS
         INTEGER,    INTENT(in) :: ni
         REAL(prec) :: creneau 
         creneau = eps0
-        if(-0.5_prec<x .and. x<eps0) creneau = 1._prec
+        if(-0.5_prec<x .and. x<eps0) creneau = 0.1_prec
     END FUNCTION creneau
 
     FUNCTION composite(x,ni) result(res)
