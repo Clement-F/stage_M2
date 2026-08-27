@@ -79,7 +79,7 @@ CONTAINS
         theta_ = 1._prec
 
 
-
+        CALL init_Adj
         CALL Coeff_quad_init
         CALL Coeff_DG_init
         

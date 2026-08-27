@@ -71,17 +71,16 @@ CONTAINS
         flux_h(ni)%flux_subcells(jj,ii) = eval_poly(x_s,ni=ni, base_poly=flux_h(ni)%flux_DG(:,ii),LOC= LRef) &
                                         & - C_m(jj)*(fh_L-g(ni  ,ii)) &
                                         & - C_p(jj)*(fh_R-g(ni+1,ii))
-                              
       END DO
 
       
     END DO; END DO
 
+    IF(entropie_rule == 4) CALL update_RF_entropie
     
     IF(monolithique) THEN 
     IF(smooth_extrema .GT. 0) CALL extrema_detect
 
-    IF(entropie_rule == 4) CALL update_RF_entropie
 
     CALL Construct_thetaMesh
 
@@ -294,6 +293,8 @@ CONTAINS
 
       ELSE IF(flux_num == 0) THEN; 
         ! print *, max_dflux
+        IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
+        ELSE
         DO i=1,nb_cell;
           nxt_ = Voisin_quad(i,nb_nodes,'R')
 
@@ -302,6 +303,7 @@ CONTAINS
                     
           max_dflux = max(max_dflux, gamma_temp)
         END DO
+        END IF
         dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))       
       END IF
 
@@ -349,7 +351,7 @@ CONTAINS
     ELSE; force = .FALSE.
     END IF
 
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;entropy=0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
@@ -396,14 +398,13 @@ CONTAINS
             END IF
 
           END DO 
-          
+
+          IF(entropie_rule .GT. 0) THEN
           DO j=1,size_base
-            xi = Ref_to_loc(i,x_quad(j))
-
             out = sol(i)%val_quad(j,:)
-          IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
-
-          END DO
+            entropy = entropy + entropie_numerique(out)*cell_size(i) *w_quad(j)/2._prec
+          END DO  
+          END IF
         ELSE
           
           DO j=1,size_base
@@ -471,7 +472,6 @@ CONTAINS
       write(*, fmt ='("max theta = ")',advance = "no")  
       DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(subcells_(:,:)%theta(i));        END DO
       write(*, fmt ='(1x)')
-
 
       IF(entropie_rule .GT. 0) THEN 
       write(*, fmt ='("entropy = ", f12.6)')  entropy

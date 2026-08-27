@@ -14,6 +14,7 @@ nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
 nx = nb_cell *nb_sub
 
 sm = int(lines[5][5:11])
+#sm =10
 
 # T=[]
 # for k in range(6,6+sm):
@@ -52,10 +53,10 @@ for k in range(0,sm,1):
         if(nb_var >2) :
             U_t[k][i][2]   = lines1[k*(nx+1) +i][44:58]
             
-        # if(i%nb_sub==0) : 
-        #     X_cell[int(i/nb_sub)] =lines1[k*(nx+1) + i][59:69]
-        #     U_cell[k][int(i/nb_sub)-1][0] = sum(U_t[k,i-nb_sub:i,0])/nb_sub
-        #     X_midcell[int(i/nb_sub)] = (X_cell[int(i/nb_sub)]+X_cell[int(i/nb_sub)+1])/2
+        if((i)%(nb_sub)==0) :
+            X_cell[int((i)/(nb_sub))] =lines1[k*(nx+1) + i][0:10]
+            U_cell[k][int((i)/(nb_sub))-1][0] = sum(U_t[k,i-nb_sub:i,0])/nb_sub
+            X_midcell[int((i)/(nb_sub))] = (X_cell[int(i/(nb_sub))]+X_cell[int(i/(nb_sub))+1])/2
             
     
         # U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
@@ -71,11 +72,11 @@ for k in range(0,sm,1):
                   
     for i in range(0,nb_cell+1): 
         1+1
-        #plt.plot([X_cell[i],X_cell[i]],[-1,2],linestyle='--', color='gray')
+        plt.plot([X_cell[i],X_cell[i]],[-1,2],linestyle='--', color='gray')
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
     #plt.plot(X,U_t[0,:,0],'g-')
-    plt.plot(X,U_t[k,:,0] ,'b-')
-    #plt.plot(X,U_ex[k,:,0],'g-')
+    plt.plot(X,U_t[k,:,0] ,'b-o')
+    plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
     print(sum(U_t[k,:,0]))

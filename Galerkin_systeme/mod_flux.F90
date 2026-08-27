@@ -36,31 +36,29 @@ CONTAINS
     END SELECT
   END FUNCTION flux
 
+  SUBROUTINE Projection_Flux
+    IMPLICIT NONE
+    INTEGER :: ni,jj,kk,ii
+    REAL(prec), DIMENSION(nb_var) :: f_loc
+    REAL(prec), DIMENSION(nb_var)            :: u_loc
+    REAL(prec), DIMENSION(size_base, nb_var) :: fh_loc
+    DO ni= 1,nb_cell
 
-    SUBROUTINE Projection_Flux
-      IMPLICIT NONE
-      INTEGER :: ni,jj,kk,ii
-      REAL(prec), DIMENSION(nb_var) :: f_loc
-      REAL(prec), DIMENSION(nb_var)            :: u_loc
-      REAL(prec), DIMENSION(size_base, nb_var) :: fh_loc
-      DO ni= 1,nb_cell
+      fh_loc = 0._prec
 
-        fh_loc = 0._prec
-
-        DO kk =1,nb_nodes
-          u_loc = sol_step(ni)%val_quad(kk,:)
-          f_loc = flux(u_loc)
-        DO jj =size_base,1,-1
-                fh_loc(jj,:) = fh_loc(jj,:) + f_loc*sig_quad(jj,kk)*w_quad(kk)
-        END DO
-        END DO
-
-        flux_h(ni)%flux_DG = MATMUL(Masse_inv,  fh_loc)
-
+      DO kk =1,nb_nodes
+        u_loc = sol_step(ni)%val_quad(kk,:)
+        f_loc = flux(u_loc)
+      DO jj =size_base,1,-1
+              fh_loc(jj,:) = fh_loc(jj,:) + f_loc*sig_quad(jj,kk)*w_quad(kk)
+      END DO
       END DO
 
-    END SUBROUTINE Projection_Flux
+      flux_h(ni)%flux_DG = MATMUL(Masse_inv,  fh_loc)
 
+    END DO
+
+  END SUBROUTINE Projection_Flux
 
   FUNCTION pression(u) result(p)
     IMPLICIT NONE
@@ -71,7 +69,6 @@ CONTAINS
     ! if(p .LT. eps0) STOP " negative pressure"
 
   END FUNCTION pression
-
 
   FUNCTION Flux_FV(u,v)
     IMPLICIT NONE
@@ -156,17 +153,20 @@ CONTAINS
 
   END FUNCTION flux_d
 
+  !===============================================
+  !===============================================
+
   FUNCTION entropie_numerique(u)
     IMPLICIT NONE
     REAL(prec) :: entropie_numerique
     REAL(prec), DIMENSION(nb_var) :: u
-    REAL(prec) :: ke = -0.00001_prec
+    REAL(prec) :: ke = 1.00001_prec
     REAL(prec) :: epsi = 0.25_prec
 
     entropie_numerique = 0._prec
 
     IF(nb_var == 1) THEN
-      IF(entropie_num == 0) entropie_numerique = 0.5_prec * DOT_PRODUCT(u,u)
+      IF(entropie_num == 0) entropie_numerique = 0.5_prec * u(1)**2
       IF(entropie_num == 1) entropie_numerique = (abs(u(1)-ke)**(1+epsi) )/(1+epsi)
       RETURN
     END IF
@@ -182,7 +182,8 @@ CONTAINS
     Flux_entrop = 0._prec
 
     IF(nb_var == 1) THEN
-      IF(flux_name == "advection" .AND. entropie_num == 0) Flux_entrop = vit_adv * u(1)
+      IF(flux_name == "advection" .AND. entropie_num == 0) Flux_entrop = vit_adv * u(1)**2 /2._prec
+      IF(flux_name == "burgers_SCL" .AND. entropie_num == 0) Flux_entrop = u(1)**3 /3._prec
 
       IF(flux_name == "advection" .AND. entropie_num == 1) THEN
         IF(u(1) .GT. ke) Flux_entrop =  vit_adv * abs(u(1)-ke)**epsi
@@ -193,36 +194,28 @@ CONTAINS
     END IF
   END FUNCTION Flux_entrop
 
-  FUNCTION entr_num_VF(ul,ur)
+  FUNCTION Flux_entrop_VF(ul,ur)
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: ul,ur
-    REAL(prec), DIMENSION(nb_var) :: flux,vl,vr
-    REAL(prec) :: entr_num_VF
+    REAL(prec), DIMENSION(nb_var) :: vl,vr
+    REAL(prec) :: Flux_entrop_VF
 
-    vl = Var_entrop(ul); vr = Var_entrop(ur)
-    entr_num_VF = DOT_PRODUCT((vl+vr)/2._prec , Flux_FV(ul,ur)) - (entrop_pot_flux(ul)+entrop_pot_flux(ur))/2._prec
+    ! vl = Var_entrop(ul); vr = Var_entrop(ur)
+    ! Flux_entrop_VF = DOT_PRODUCT((vl+vr)/2._prec , Flux_FV(ul,ur)) - (entrop_pot_flux(ul)+entrop_pot_flux(ur))/2._prec
+    
+    
+    IF(flux_num == 0) Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur) - max_dflux*        (entropie_numerique(ur)-entropie_numerique(ul)))/2._prec
+    IF(flux_num == 1) Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur) - gamma_calc(ul,ur)*(entropie_numerique(ur)-entropie_numerique(ul)))/2._prec
 
-  END FUNCTION entr_num_VF
+    ! Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur))/2._prec
+  END FUNCTION Flux_entrop_VF
   
   FUNCTION Var_entrop(u)
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var) :: Var_entrop
     REAL(prec), DIMENSION(nb_var) :: u
-    REAL(prec) :: ke = -0.00001_prec
-    REAL(prec) :: epsi = 0.25_prec
 
-    Var_entrop = 0._prec
-
-    IF(nb_var == 1) THEN
-      IF(entropie_num == 0) Var_entrop = u
-      
-      IF(entropie_num == 1) THEN
-        IF(u(1) .GT. ke) Var_entrop = abs( u(1)-ke)**epsi
-        IF(u(1) .LT. ke) Var_entrop =-abs( u(1)-ke)**epsi
-      END IF
-
-      RETURN
-    END IF
+    Var_entrop = u
   END FUNCTION Var_entrop
 
   FUNCTION entrop_pot_flux(u)

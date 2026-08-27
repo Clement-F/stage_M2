@@ -71,7 +71,7 @@ CONTAINS
         
         IF(.not. present(kk)) THEN
             DO ii = 1,size_base
-                eval_step = eval_step + sol_step(ni)%base_poly(ii,:) * DG_base(YY,ii, LOC,ni)
+                eval_step = eval_step + sol_step(ni)%base_poly(ii,:) *  DG_base(YY,ii, LOC,ni)
             END DO
         ELSE 
             DO ii = 1,size_base
@@ -890,6 +890,18 @@ CONTAINS
         if((x .LE. xrs ) .and. (x .GE. xls)) unit_sm =1._prec
 
     END FUNCTION unit_sm
+
+    SUBROUTINE init_Adj
+        IMPLICIT NONE
+        INTEGER :: ii, jj 
+
+        DO ii = 1,nb_subcell-1
+            Adjacency(ii,1:ii) = REAL(nb_subcell-ii,prec); 
+            Adjacency(ii,ii+1:nb_subcell) = REAL(-ii,prec);
+        END DO
+        Adjacency = Adjacency/Real(nb_subcell,prec)
+        CALL print_mat(Adjacency,nb_subcell-1,nb_subcell)
+    END SUBROUTINE init_Adj
 
     SUBROUTINE print_submesh
         IMPLICIT NONE

@@ -10,7 +10,6 @@ ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
 nx = nb_cell * nb_sub
 
-sm = int(lines[5][5:11]) -1
 
 with open('convergence_err.txt') as f:
     lines = f.readlines()
@@ -48,7 +47,6 @@ plt.loglog(nx,ord4,linestyle ='-.', color='lightgray')
 plt.loglog(nx,err_L1,linestyle ='-',marker='x', label="err_L1")
 plt.loglog(nx,err_L2,linestyle ='-',marker='x', label="err_L2")
 plt.loglog(nx,err_Li,linestyle ='-',marker='x', label="err_Linf")
-
 title = "convergence de la méthode DG avec P^"+str(orderx-1)+" et RK SSP d'ordre "+str(ordert)
 
 plt.title(title)
