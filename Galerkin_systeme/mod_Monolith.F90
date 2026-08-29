@@ -66,25 +66,26 @@ CONTAINS
     
     u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
-    theta = min(1._prec, THETA_pos(u_Riemann,gamma_mp,DF),THETA_max(mc,pv, u_Riemann,gamma_mp,DF))!, THETA_ent(ug,ud,DF,gamma_mp))
+    theta = min(1._prec,THETA_max(mc,pv, u_Riemann,gamma_mp,DF))!, THETA_ent(ug,ud,DF,gamma_mp))
+    theta = min(1._prec,THETA_pos(u_Riemann,gamma_mp,DF, theta))
     theta = max(theta, 0._prec)
     IF(ISNAN(theta(1)))  STOP "theta nan"
 
   END FUNCTION
 
-  FUNCTION THETA_pos(u_Riemann,gamma_mp,DF)
+  FUNCTION THETA_pos(u_Riemann,gamma_mp,DF, theta_inc)
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var) :: THETA_pos
     REAL(prec), INTENT(IN) :: gamma_mp
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
-    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
+    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann, theta_inc
     REAL(prec), DIMENSION(nb_var) :: theta_temp
     REAL(prec) :: A,B,C,M, E,U,rho, B_e,B_u,B_r,A_r
 
     INTEGER :: pm
 
-    THETA_pos = 1._prec
-    theta_temp = 1._prec
+    THETA_pos = theta_inc
+    theta_temp = theta_inc
 
     IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
       ! positivité de rho
@@ -147,12 +148,9 @@ CONTAINS
           A_r = abs(DF(1)*DF(3)/gamma_mp**2)
 
           THETA_pos(1)  = min((M-B_u*Theta_pos(2)- B_e*THETA_pos(3)-A*Theta_pos(2)**2)/max(B_r+A_r*Theta_pos(3),eps0) ,1._prec)
-        END IF
-        
-
-        
+        END IF       
       
-      ELSE IF(positivity == 7) THEN
+      ELSE IF(positivity == 5) THEN
         ! heuristique
 
         Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
@@ -233,6 +231,7 @@ CONTAINS
   FUNCTION THETA_max(mc,pv, u_Riemann,gamma_mp,DF)
     IMPLICIT NONE
     REAL(prec) :: THETA_max
+    INTEGER :: maxi
     INTEGER, DIMENSION(2), INTENT(IN) :: mc,pv
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
@@ -244,10 +243,13 @@ CONTAINS
 
     THETA_max = 1._prec
 
+    if(max_rule .LT. 3) maxi= 1
+    if(max_rule .GE. 3) maxi= 3
+
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
-      DO ii = 1,1
+      DO ii = 1,maxi
         IF(max_rule==1) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
           beta = 0.99_prec*(max_glob-eps0);
@@ -507,13 +509,13 @@ CONTAINS
 
 
           ! positivité pour le pb  d'Euler
-          pos = THETA_pos(u_Riemann,gamma_mp,DF)
-          ! if(minval(pos) .LT. 0) print *,pos
-          theta_(ni,jj,:) = min(theta_(ni,jj,:), pos)
-          
           ! check si l'interface se trouve entre deux sous-cellules qui captent un extrema
           LMP = THETA_max(voi_L,voi_R, u_Riemann,gamma_mp,DF)
           theta_(ni,jj,:) = min(theta_(ni,jj,:), LMP)
+
+          pos = THETA_pos(u_Riemann,gamma_mp,DF,theta_(ni,jj,:))
+          theta_(ni,jj,:) = min(theta_(ni,jj,:), pos)
+          
 
           ! Entropie 
           ! ent = THETA_ent(ug,ud,DF,gamma_mp)

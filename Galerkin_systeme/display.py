@@ -29,8 +29,8 @@ with open('solSub.txt') as f:
 # with open('Solprod.txt') as f:
 #     lines2 = f.readlines()   
     
-with open('solSub'+'ex'+'.txt') as f:
-    lines2 = f.readlines()   
+# with open('solSub'+'ex'+'.txt') as f:
+#     lines2 = f.readlines()   
 
 
 U_t = np.zeros((sm,nx,nb_var));     P_ = np.zeros((sm,nx))
@@ -55,10 +55,10 @@ for k in range(0,sm,1):
         
     #print(min(U_t[k]),max(U_t[k]))
             
-        # if((i)%(nb_sub)==0) :
-        #     X_cell[int((i)/(nb_sub))] =lines1[k*(nx+1) + i][0:10]
-        #     U_cell[k][int((i)/(nb_sub))-1][0] = sum(U_t[k,i-nb_sub:i,0])/nb_sub
-        #     X_midcell[int((i)/(nb_sub))] = (X_cell[int(i/(nb_sub))]+X_cell[int(i/(nb_sub))+1])/2
+        if((i)%(nb_sub)==0) :
+            X_cell[int((i)/(nb_sub))] =lines1[k*(nx+1) + i][0:10]
+            U_cell[k][int((i)/(nb_sub))-1][0] = sum(U_t[k,i-nb_sub:i,0])/nb_sub
+            X_midcell[int((i)/(nb_sub))] = (X_cell[int(i/(nb_sub))]+X_cell[int(i/(nb_sub))+1])/2
             
     
         # U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]

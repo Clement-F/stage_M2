@@ -875,7 +875,6 @@ CONTAINS
             END DO
         END DO
 
-        beta_entr = 1._prec
 
 
     END SUBROUTINE sub_cells_init

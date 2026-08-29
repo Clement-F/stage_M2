@@ -46,7 +46,7 @@ MODULE mod_declaration
 
   REAL(prec), DIMENSION(:,:,:),   POINTER :: theta_
   REAL(prec), DIMENSION(:,:), POINTER :: Adjacency
-  REAL(prec), DIMENSION(:),   POINTER :: vc_star,alpha_entr, beta_entr
+  ! REAL(prec), DIMENSION(:),   POINTER :: vc_star,alpha_entr, beta_entr
   REAL(prec), DIMENSION(:,:), POINTER :: RK_alpha
   REAL(prec), DIMENSION(:),   POINTER :: RK_time,RK_beta
   REAL(prec), DIMENSION(:),   POINTER :: L_step
@@ -103,13 +103,12 @@ MODULE mod_declaration
     ALLOCATE( x_cell(nb_cell+1),        x_middle(nb_cell),        cell_size(nb_cell)) 
     ALLOCATE( x_subcell(nb_subcell+1),  x_submiddle(nb_subcell),  subcell_size(nb_subcell))
     ALLOCATE( theta_(nb_cell,nb_subcell+1,nb_var))
-    ALLOCATE( vc_star(nb_cell), alpha_entr(nb_cell), beta_entr(nb_subcell))
+    ! ALLOCATE( vc_star(nb_cell), alpha_entr(nb_cell), beta_entr(nb_subcell))
 
     ALLOCATE( x_quad(nb_nodes), w_quad(nb_nodes) ) 
     ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,nb_nodes))
     ALLOCATE( coeff_DG(size_base, size_base) ) 
 
-    ALLOCATE( vc_star(nb_cell), alpha_entr(nb_cell), beta_entr(nb_subcell))
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
     ALLOCATE( Time_stemp(print_rule+2))

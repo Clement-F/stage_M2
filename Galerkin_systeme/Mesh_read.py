@@ -23,28 +23,28 @@ line =[]
 p=0
 
 for k in range(0,sm):
-    print(k,k*(nx+1) )
+    # print(k,k*(nx+1) )
     # print (lines[k*(nx+1)])
     #print (lines[k*(nx+1)+0+1][65])
     T[k] = lines[k*(nx+1)][9:19]
     for i in range(0,(nx)):
-        print(p)
+        # print(p)
         line = lines[k*(nx+1) +i+1]
         X[i] = lines[k*(nx+1)+i+1][0:8]
         p=8 
         for j in range(nb_var):
-            print(p)
+            # print(p)
             theta_[k,i,j] = float(line[p:p+6])
             p +=6
         p+=1
         for j in range(nb_var):
-            print(p)
-            if(line[p:p+8] != "***** ") :pos[k,i,j] = float(line[p:p+6])
+            # print(p)
+            if(line[p:p+6] != '***** ') :pos[k,i,j] = float(line[p:p+6])
             p +=6
         p+=1
             
         for j in range(nb_var):
-            print(p)
+            # print(p)
             LMP[k,i,j] = float(line[p:p+6])
             p +=6
 
@@ -55,7 +55,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-1.; xR=1.
+xL=0.; xR=1.
 
 for i in range(0,nb_var):
     plt.pcolormesh(X, T, theta_[:,:,i], shading='auto', cmap='viridis')

@@ -65,7 +65,7 @@ CONTAINS
     IF(subcell_use) THEN
       
     DO ni = 1,nb_cell; DO ii = 1,nb_var
-      flux_h(ni)%flux_subcells(:,:)= 0._prec
+      ! flux_h(ni)%flux_subcells(:,:)= 0._prec
       ! F(uh(x)) .ne. Fh(x)
       fh_L = eval_poly(-1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
       fh_R = eval_poly( 1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
@@ -312,8 +312,9 @@ CONTAINS
                     
           max_dflux = max(max_dflux, gamma_temp)
         END DO
+        END IF     
         dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*max(max_dflux,eps0))  
-      END IF     
+
       END IF
 
     END IF
@@ -388,7 +389,6 @@ CONTAINS
             write(unit=numfile_sol, fmt= '(1x,e12.6)') pression(out)
             ELSE;
                write(unit=numfile_sol,   fmt= '(1x)')
-               write(unit=numfile_solex, fmt= '(1x)')
             END IF
 
           END DO
@@ -492,7 +492,7 @@ CONTAINS
 
       IF(monolithique) THEN
       write(*, fmt ='("avg theta = ")',advance = "no")  
-      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(theta_(:,:,i))/REAL((nb_cell)*(nb_subcell),prec);        END DO
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(theta_(:,:,i))/REAL((nb_cell)*(nb_subcell+1),prec);        END DO
       write(*, fmt ='(1x)')
 
       write(*, fmt ='("max theta = ")',advance = "no")  

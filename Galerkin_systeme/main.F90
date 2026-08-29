@@ -18,8 +18,8 @@ PROGRAM MAIN
 
     open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='unknown')
     open(unit=numfile_sol,      file=nomfile_sol,       form ='formatted', status ='unknown')
-    open(unit=numfile_solex,    file=nomfile_solex,     form ='formatted', status ='unknown')
-    open(unit=numfile_meshout,  file=nomfile_meshout,   form ='formatted', status ='unknown')
+    if(mesh_out  ) open(unit=numfile_meshout,  file=nomfile_meshout,   form ='formatted', status ='unknown')
+    if(error_calc) open(unit=numfile_solex,    file=nomfile_solex,     form ='formatted', status ='unknown')
    
 
     write(unit= numfile_data, fmt='("nb var  = ",i5)') nb_var
