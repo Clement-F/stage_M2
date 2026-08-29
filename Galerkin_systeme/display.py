@@ -45,7 +45,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,1):
+for k in range(0,sm,10):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]         = lines1[k*(nx+1) +i][10:27]
@@ -79,9 +79,9 @@ for k in range(0,sm,1):
         #P_[k,i] = p(U_t[k,i,:])
     U_cell[k][-1][0] = sum(U_t[k,-(orderx+1)-1:-1,0])/(orderx+1)
            
-    for i in range(0,nb_cell+1): 
-        1+1
-        plt.plot([X_cell[i],X_cell[i]],[-2,2],linestyle='--', color='gray')
+    # for i in range(0,nb_cell+1): 
+    #     1+1
+    #     plt.plot([X_cell[i],X_cell[i]],[-2,2],linestyle='--', color='gray')
         
     # for i in range(0,nb_cell): 
     #     J=i*space

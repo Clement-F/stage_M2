@@ -519,7 +519,7 @@ CONTAINS
       END IF
       
       write(unit=numfile_sol  , fmt='("----------",f10.6,"--------------")' ) time
-      write(unit=numfile_solex, fmt='("----------",f10.6,"--------------")' ) time
+      IF(error_calc)write(unit=numfile_solex, fmt='("----------",f10.6,"--------------")' ) time
     END IF
   END SUBROUTINE writout
   

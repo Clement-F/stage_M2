@@ -1,50 +1,21 @@
 \section{Resultat numérique}
 
-\subsection{Schéma RKDG et reconstruit}
+\subsection{Schéma RKDG avec flux reconstruit}
+Avant de passer au coeur du sujet, il s'agirait de savoir quel résultat attendre d'un schéma \emph{DG} sans corrections.
+Pour ce faire, nous allons regarder divers problème de conservation scalaire (LCS) et la solution d'un schéma DG à différents ordre.
+\paragraph{advection}
+le problème d'advection définit par $f(u)=v\,u$, correspondant à une translation de la solution initiale $u_0$ à une vitesse $v \in \R$. 
+En plus d'être un problème linéaire, ce problème possède une solution explicite. Il est donc très facile de vérifier l'ordre de la méthode grâce à un graphe de convergence.
+\paragraph{Burgers}
+\paragraph{Buckley}
 
-Si l'on essaye de comparer les deux schéma, d'avoir les mêmes conditions et donc la même initialisation.
-On comparera les deux représentation sur divers problème classique de la littérature. 
-\subsubsection{advection \red{à changer}}
-Le problème de l'advection défini par $f(u)= c\, u$ a l'avantage d'être linéaire et correspond à un déplacement d'un signal à vitesse $c$.
-La solution exacte est on ne peut plus simple à calculer comme $u_{ex}(x,t) =u_0(x-ct)$. \\
-Ces deux charactéristiques rendent ce problème à la fois simple à étudier et très utile pour tester la convergence d'un modèle dans des cas simples.
-\paragraph{test régulier : signal sinusoidale}
-$u_0(x) = sin(2\pi x)$
-\paragraph{test de dispersion : signal composite}
-On regardera ici le cas d'un signal composite premièrement introduit dans \cite{JIANG1996202}, 
-est une solution initiale composé de 4 signaux distinct permettant de tester la \red{dispersion} du schéma pour différents signaux. 
-Une combinaison de gaussiène, un signal carré, un signal triangulaire et une combinaison de racine carré.
-\begin{equation}
-    u_0(x) = \left\{
-\begin{aligned}
-    &\frac{1}{6}(G(x,\beta,z-\delta) +G(x,\beta,z+\delta)+4G(x,\beta,z)) & \text{si } -0.8 \leq x\leq -0.6\\
-    &1 & \text{si } -0.4 \leq x \leq -0.2 \\ 
-    &1-|10(x-0.1)| & \text{si } 0 \leq x \leq 0.2 \\
-    &\frac{1}{6}(F(x,\alpha,a-\delta) +F(x,\alpha,a+\delta)+4F(x,\alpha,a)) & \text{si } 0.4\leq x \leq 0.6 \\
-    &0 & \text{sinon }
-\end{aligned}
-    \right.
-\end{equation}
-
-\subsubsection{Burgers \red{à changer}}
-Le problème de Burgers défini par $f(u) = \frac{u^2}{2}$ est l'un des plus simple problème non linéaire, 
-et étant donnée une solution régulière simple comme une signal sinusoidale $u_0(x)= \sin(2\pi x)$ ou un problème de Riemann,
-La solution exacte est relativement simple à trouver. 
-Dans le cas du signal sinusoidale, on utilisera une méthode de dichotomie \red{explication ?} pour retrouver la solution, cette méthode ne fonctionnant uniquement pour $t$ inférieur à un temps \textit{critique}.\\
-Cela nous donnera un cas test pour un flux non linéaire simple.
-\paragraph{cas test régulier : sinusoidale}
-
-\paragraph{cas test simple : combinaison de problème de Riemann}
-
-\subsubsection{Buckley \red{à changer}}
-les deux cas test étant introduit dans \cite{CHEN2017427}
-\paragraph{cas test Riemann}
-\paragraph{cas test carré}
-
-\subsubsection{Système \red{à changer}}
-
-\subsection{Schéma Monolithique}
-
-\subsubsection{GMP/LMP \red{à changer}}
-\subsubsection{positivité \red{à changer}}
-\subsubsection{entropie \red{à changer}}
+\subsection{Schéma monolithique}
+\subsubsection{Problèmes LCS}
+\paragraph{Advection}
+\paragraph{Burgers}
+\paragraph{Buckley}
+\subsubsection{Système de Euler}
+\paragraph{Tube de Sod modifié}
+\paragraph{Flux isentropique régulier}
+\paragraph{Interaction d'onde de choc}
+\paragraph{Problème d'Interaction de choc accoustique-onde}
