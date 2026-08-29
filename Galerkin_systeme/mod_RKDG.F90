@@ -77,6 +77,7 @@ CONTAINS
       
     END DO; END DO
 
+    IF(entropie_rule == 4) CALL update_RF_entropie
     
     IF(monolithique) THEN 
     IF(smooth_extrema .GT. 0) CALL extrema_detect
@@ -347,7 +348,7 @@ CONTAINS
     ELSE; force = .FALSE.
     END IF
 
-    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;
+    err1 = 0._prec; err2 =0._prec; errLi = 0._prec;entropy=0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
     END IF
@@ -394,17 +395,16 @@ CONTAINS
             END IF
 
           END DO 
-          
+
+          IF(entropie_rule .GT. 0) THEN
           DO j=1,size_base
-            xi = Ref_to_loc(i,x_quad(j))
-
             out = sol(i)%val_quad(j,:)
-          IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
-
-          END DO
+            entropy = entropy + entropie_numerique(out)*cell_size(i) *w_quad(j)/2._prec
+          END DO  
+          END IF
         ELSE
           
-          DO j=1,size_base
+          DO j=1,nb_nodes
             xi = Ref_to_loc(i,x_quad(j))
 
             out = sol(i)%val_quad(j,:)
@@ -458,9 +458,17 @@ CONTAINS
       END IF
 
       IF(monolithique) THEN
-      write(*, fmt ='("avg theta = ", f10.6, f10.6, f10.6)')  Sum(subcells_(:,:)%theta(1))/REAL((nb_cell)*(nb_subcell),prec), Sum(subcells_(:,:)%theta(2))/REAL((nb_cell)*(nb_subcell),prec), Sum(subcells_(:,:)%theta(3))/REAL((nb_cell)*(nb_subcell),prec)
-      write(*, fmt ='("max theta = ", f10.6, f10.6, f10.6)')  maxval(subcells_(:,:)%theta(1)), maxval(subcells_(:,:)%theta(2)), maxval(subcells_(:,:)%theta(3))
-      write(*, fmt ='("min theta = ", f10.6, f10.6, f10.6)')  minval(subcells_(:,:)%theta(1)), minval(subcells_(:,:)%theta(2)), minval(subcells_(:,:)%theta(3))
+      write(*, fmt ='("avg theta = ")',advance = "no")  
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(subcells_(:,:)%theta(i))/REAL((nb_cell)*(nb_subcell),prec);        END DO
+      write(*, fmt ='(1x)')
+
+      write(*, fmt ='("max theta = ")',advance = "no")  
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") maxval(subcells_(:,:)%theta(i));        END DO
+      write(*, fmt ='(1x)')
+
+      write(*, fmt ='("max theta = ")',advance = "no")  
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(subcells_(:,:)%theta(i));        END DO
+      write(*, fmt ='(1x)')
 
       IF(entropie_rule .GT. 0) THEN 
       write(*, fmt ='("entropy = ", f12.6)')  entropy
