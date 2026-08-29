@@ -292,47 +292,47 @@ CONTAINS
 
   END FUNCTION THETA_max
 
-  FUNCTION THETA_ent(ug,ud,DF,gamma_mp)
-    IMPLICIT NONE
-    REAL(prec) :: THETA_ent
-    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: ug,ud,DF
-    REAL(prec), INTENT(IN) :: gamma_mp
-    REAL(prec), DIMENSION(nb_var) :: vg, vd
+  ! FUNCTION THETA_ent(ug,ud,DF,gamma_mp)
+  !   IMPLICIT NONE
+  !   REAL(prec) :: THETA_ent
+  !   REAL(prec), DIMENSION(nb_var), INTENT(IN) :: ug,ud,DF
+  !   REAL(prec), INTENT(IN) :: gamma_mp
+  !   REAL(prec), DIMENSION(nb_var) :: vg, vd
 
-    LOGICAL :: extrema
+  !   LOGICAL :: extrema
 
-    THETA_ent = 1._prec
+  !   THETA_ent = 1._prec
 
-    IF(.not. extrema .AND. entropie_rule .GT. 0) THEN 
+  !   IF(.not. extrema .AND. entropie_rule .GT. 0) THEN 
 
-      IF(entropie_rule == 1) THEN 
+  !     IF(entropie_rule == 1) THEN 
 
-        IF(DOT_PRODUCT(ud-ug, DF) .GT. eps0) THETA_ent =  &
-          & min(1._prec, (max_dflux-gamma_mp)* minval((ud-ug)/(2._prec *DF)) )
+  !       IF(DOT_PRODUCT(ud-ug, DF) .GT. eps0) THETA_ent =  &
+  !         & min(1._prec, (max_dflux-gamma_mp)* minval((ud-ug)/(2._prec *DF)) )
         
-      ELSEIF(entropie_rule==2) THEN 
+  !     ELSEIF(entropie_rule==2) THEN 
 
-        vg = Var_entrop(ug); vd = Var_entrop(ud)
-        ! IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp*(ud-ug)))/2._prec  -Flux_entrop(ug) - &
-        !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp*(ud-ug)))/2._prec  -Flux_entrop(ud)) / &
-        !                                                 & (DOT_PRODUCT((vd-vg), DF))
+  !       vg = Var_entrop(ug); vd = Var_entrop(ud)
+  !       ! IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp*(ud-ug)))/2._prec  -Flux_entrop(ug) - &
+  !       !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp*(ud-ug)))/2._prec  -Flux_entrop(ud)) / &
+  !       !                                                 & (DOT_PRODUCT((vd-vg), DF))
 
-        IF(DOT_PRODUCT(vd-vg,DF) .GT. eps0) THETA_ent = ((entrop_pot_flux(ud)-entrop_pot_flux(ug)) - DOT_PRODUCT(Flux_FV(ug,ud),vd-vg))/DOT_PRODUCT(vd-vg,DF)
+  !       IF(DOT_PRODUCT(vd-vg,DF) .GT. eps0) THETA_ent = ((entrop_pot_flux(ud)-entrop_pot_flux(ug)) - DOT_PRODUCT(Flux_FV(ug,ud),vd-vg))/DOT_PRODUCT(vd-vg,DF)
 
-          ! print *,"------------------------"
-        ! write(*,fmt='(f10.6, f10.6, f10.6, f10.6)') vg, vd, vd-vg, DF
-        ! ! write(*,fmt='(f10.6, f10.6, f10.6)')(entrop_pot_flux(ud)-entrop_pot_flux(ug)), -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)),(DOT_PRODUCT((vd-vg), DF))
-        ! write(*,fmt='(f10.6)')(DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) 
-        ! ! write(*,fmt='(f10.6)') ( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))
-        ! ! write(*,fmt='(f10.6)')( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg))) / (DOT_PRODUCT((vd-vg), DF))
-        ! write(*,fmt='(f10.6)') THETA_ent
+  !         ! print *,"------------------------"
+  !       ! write(*,fmt='(f10.6, f10.6, f10.6, f10.6)') vg, vd, vd-vg, DF
+  !       ! ! write(*,fmt='(f10.6, f10.6, f10.6)')(entrop_pot_flux(ud)-entrop_pot_flux(ug)), -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)),(DOT_PRODUCT((vd-vg), DF))
+  !       ! write(*,fmt='(f10.6)')(DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) 
+  !       ! ! write(*,fmt='(f10.6)') ( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))
+  !       ! ! write(*,fmt='(f10.6)')( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg))) / (DOT_PRODUCT((vd-vg), DF))
+  !       ! write(*,fmt='(f10.6)') THETA_ent
 
-        ! print *, THETA_ent                                                
-        THETA_ent = max(min(1._prec,THETA_ent),0._prec)
-        ! print *,((entrop_pot_flux(ud)-entrop_pot_flux(ug))-DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))/(DOT_PRODUCT((vd-vg), DF))       
-      END IF
-    END IF
-  END FUNCTION THETA_ent
+  !       ! print *, THETA_ent                                                
+  !       THETA_ent = max(min(1._prec,THETA_ent),0._prec)
+  !       ! print *,((entrop_pot_flux(ud)-entrop_pot_flux(ug))-DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))/(DOT_PRODUCT((vd-vg), DF))       
+  !     END IF
+  !   END IF
+  ! END FUNCTION THETA_ent
 
   ! SUBROUTINE ENTROPI_CELL(ni)
   !   INTEGER, INTENT(IN) :: ni
@@ -455,9 +455,7 @@ CONTAINS
     INTEGER :: ni, jj
 
     extrema = .FALSE. 
-    IF(coeff_smooth ==0 .OR. coeff_smooth == 1)    subcells_(:,:)%theta = 1._prec 
-    IF(coeff_smooth ==2)                           subcells_(:,:)%theta = 0._prec 
-    theta_(:,:) = 1._prec;  
+    theta_(:,:,:) = 1._prec;  
     
     
     IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
@@ -466,7 +464,9 @@ CONTAINS
     END IF
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell
-    subcells_(ni,jj)%theta(:) =1._prec
+    IF(coeff_smooth ==0 .OR. coeff_smooth == 1)    subcells_(ni,jj)%theta = 1._prec 
+    IF(coeff_smooth ==2)                           subcells_(ni,jj)%theta = 0._prec 
+    ! subcells_(ni,jj)%theta(:) =1._prec
     END DO; END DO;
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell+1
@@ -516,8 +516,8 @@ CONTAINS
           theta_(ni,jj,:) = min(theta_(ni,jj,:), LMP)
 
           ! Entropie 
-          ent = THETA_ent(ug,ud,DF,gamma_mp)
-          IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
+          ! ent = THETA_ent(ug,ud,DF,gamma_mp)
+          ! IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
             
 
           theta_(ni,jj,:) = min(max(theta_(ni,jj,:),0._prec),1._prec)

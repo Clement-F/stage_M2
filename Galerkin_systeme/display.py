@@ -11,10 +11,10 @@ nb_var = int(lines[0][10:16])
 orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
-nx = nb_cell *nb_sub
+nx = nb_cell *(nb_sub)
 
-sm=100
-#sm = int(lines[5][5:11])
+#sm=100
+sm = int(lines[5][5:11])
 
 # T=[]
 # for k in range(6,6+sm):
@@ -23,13 +23,13 @@ sm=100
 
 #   solDG   SolSub   file_sol    
 
-with open('Solprod.txt') as f:
+with open('solSub.txt') as f:
     lines1 = f.readlines()   
     
 # with open('Solprod.txt') as f:
 #     lines2 = f.readlines()   
     
-with open('Solprod'+'ex'+'.txt') as f:
+with open('solSub'+'ex'+'.txt') as f:
     lines2 = f.readlines()   
 
 
@@ -80,7 +80,7 @@ for k in range(0,sm,1):
     plt.plot(X,U_ex[k,:,0],'g-')
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
-    print(sum(U_t[k,:,0]))
+    # print(sum(U_t[k,:,0]))
     if(nb_var>1):
         1+1
         #plt.plot(X,U_ex[k,:,1],'k-')
@@ -94,7 +94,7 @@ for k in range(0,sm,1):
         #plt.plot(X,abs(U_t[k,:,2]-U_ex[k,:,2]),'k-')
     
     #plt.plot(X,P_[k,:],'k-.')
-    print(min(P_[k,:]))
+    # print(min(P_[k,:]))
     #plt.plot(X,P2_[k,:],'g-.')
     #m=-.2; M=1.2
     

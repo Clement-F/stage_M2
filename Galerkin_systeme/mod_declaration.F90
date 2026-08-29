@@ -134,7 +134,7 @@ MODULE mod_declaration
     
       ALLOCATE(sol_step(i)%deriv(size_base, nb_var))
       DO j=1,nb_subcell
-      ALLOCATE(subcells_(i,j)%theta(nb_subcell))
+      ALLOCATE(subcells_(i,j)%theta(nb_var))
       END DO
     END DO
     

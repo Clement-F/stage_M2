@@ -492,15 +492,15 @@ CONTAINS
 
       IF(monolithique) THEN
       write(*, fmt ='("avg theta = ")',advance = "no")  
-      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(subcells_(:,:)%theta(i))/REAL((nb_cell)*(nb_subcell),prec);        END DO
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") Sum(theta_(:,:,i))/REAL((nb_cell)*(nb_subcell),prec);        END DO
       write(*, fmt ='(1x)')
 
       write(*, fmt ='("max theta = ")',advance = "no")  
-      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") maxval(subcells_(:,:)%theta(i));        END DO
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") maxval(theta_(:,:,i));        END DO
       write(*, fmt ='(1x)')
 
       write(*, fmt ='("max theta = ")',advance = "no")  
-      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(subcells_(:,:)%theta(i));        END DO
+      DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(theta_(:,:,i));        END DO
       write(*, fmt ='(1x)')
 
       IF(entropie_rule .GT. 0) THEN 
