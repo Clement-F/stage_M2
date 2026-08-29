@@ -134,193 +134,85 @@ CONTAINS
         CALL Knapsack_greedy(THETA_pos,(/A,B,C /),M,(/THETA_pos(1),1._prec,1._prec/),3)
 
       ELSE IF(positivity == 4) THEN 
-        ! print *,"---------------"
-        ! critère pour rho^+ 
-        rho = u_Riemann(1) + theta_temp(1)*DF(1); 
-        E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
-        B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
-        A = 0.5_prec* (DF(2)/(gamma_mp*rho))**2
-        M = E - 0.5_prec *(U**2)
-
-        ! if(M .LT. -eps0) print *,"neg M 1" ,M
-        theta_temp(2) = min(1._prec,M/max(A-B,eps0))
-        ! CALL Knapsack_greedy(theta_temp(2:3),(/A        ! critère pour rho^- 
-        rho = u_Riemann(1) - theta_temp(1)*DF(1)
-        E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
-        B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
-        A = 0.5_prec*(DF(2)/(gamma_mp*rho))**2
-        M = E - 0.5_prec *(U**2)
-
-        ! if(M .LT. -eps0) print *,"neg M 2" ,M
-        theta_temp(3) = min(1._prec,M/max(A+B,eps0))
         
-        theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
-        THETA_pos(1:3)= minval(theta_temp(1:3))
-        ! THETA_pos(1) = theta_temp(1)
-
-      ELSE IF(positivity == 5) THEN 
-        ! print *,"---------------"
-        ! critère pour rho^+ 
-        rho = u_Riemann(1) + theta_temp(1)*DF(1); 
-        U = u_Riemann(2)/rho
-        B = (-DF(3) + DF(2)*U)/gamma_mp
-        A = DF(2)**2 /(2._prec*rho* gamma_mp**2)
-        M = u_Riemann(3) - (u_Riemann(2)**2)/(2._prec*rho)
-        ! print *,M, A+B
-        theta_temp(2) = 1._prec
-        if(M .GT. eps0) theta_temp(2) = max(min(1._prec,M/max(A+B,eps0)),0._prec)
-        ! critère pour rho^- 
-        rho = u_Riemann(1) - theta_temp(1)*DF(1); 
-        U = u_Riemann(2)/rho
-        B = (DF(3) - DF(2)*U)/gamma_mp
-        A = DF(2)**2 /(2._prec*rho* gamma_mp**2)
-        M = u_Riemann(3) - (u_Riemann(2)**2)/(2._prec*rho)
-        ! print *,M, A+B
-        theta_temp(3) = 1._prec
-        if(M .GT. eps0) theta_temp(3) = max(min(1._prec,M/max(A+B,eps0)),0._prec)
-
-        ! theta_temp(3) = min(1._prec,M/max(A+B,eps0))
-        
-        theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
-        THETA_pos(2:3)= minval(theta_temp(2:3))
-        THETA_pos(1) = theta_temp(1)
-
-      ELSE IF(positivity == 6) THEN
-        ! Assumptions : rho>0, M>0, A>0
-        THETA_pos(1) = theta_temp(1)
-        
-        DO pm = 0,1
-
-          if(pm == 0)  rho = u_Riemann(1) + theta_temp(1)*DF(1)/gamma_mp; 
-          if(pm == 1)  rho = u_Riemann(1) - theta_temp(1)*DF(1)/gamma_mp; 
-
-          IF(rho .LT. 0) print *,"rho<0",rho,DF(1),theta_temp(1), u_Riemann(1)
-
-          IF(rho .LT. 1) THEN ;   
-            !E>0
-            M   = u_Riemann(3) - u_Riemann(2)**2 /(2._prec*rho) 
-
-            if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp*rho)
-            if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp*rho)
-
-            if(pm == 0) B_e = -DF(3)/gamma_mp
-            if(pm == 1) B_e = DF(3)/gamma_mp
-            
-            A   = DF(2)**2/max(2._prec* gamma_mp**2* rho,eps0)
-          ELSE;  
-            !rho*E >0
-            M   = rho*u_Riemann(3) - u_Riemann(2)**2 /2._prec 
-
-            if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
-            if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
-
-            if(pm == 0) B_e = -rho*DF(3)/gamma_mp
-            if(pm == 1) B_e = rho*DF(3)/gamma_mp
-
-            A   = DF(2)**2/max(2._prec* gamma_mp**2,eps0)
-          END IF
-
-          IF(M .LT. 0 .AND. pm ==1) return
-
-          
-          IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
-          
-          IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
-            THETA_pos(2) = min(1._prec,THETA_pos(2))
-            THETA_pos(3) = min(1._prec,THETA_pos(3))
-            return
-          END IF
-
-          IF(B_e .LT. eps0) THEN
-            THETA_pos(2) = min(1._prec,(M-B_e)/max(B_u+A,eps0), THETA_pos(2))
-            THETA_pos(3) = min(1._prec,THETA_pos(3))
-          END IF
-
-          IF(B_u .LT. -A) THEN
-            THETA_pos(2) = min(1._prec,THETA_pos(2))
-            THETA_pos(3) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), THETA_pos(3))
-          END IF
-
-          IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
-            ! IF(M .LT. 0) print *,"M",M
-            IF(B_e .LT. 0) print *,"Be",B_e
-            IF(B_u .LT. -A) print *,"Bu",B_u
-            IF(A .LT. 0) print *,"A",A
-
-            THETA_pos(2) = min(1._prec,M*(B_u+A)/(B_e**2 + (B_u+A)**2),THETA_pos(2))
-            THETA_pos(3) = min(1._prec,M*    B_e/(B_e**2 + (B_u+A)**2),THETA_pos(3))
-          END IF
-
-          IF(M .LT. 0 .AND. pm == 0) THETA_pos(2:3) =1._prec 
-
-
-        END DO
-        return
+      
       ELSE IF(positivity == 7) THEN
         ! heuristique
 
-        THETA_pos(1) = theta_temp(1)
+        Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
+
+        rho = u_Riemann(1) - theta_temp(1)*abs(DF(1))/gamma_mp; 
+        M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+        if(M .LT. eps0) Theta_pos(1) = 0._prec
         
-        DO pm = 0,1
- 
-          if(pm == 0)  rho = u_Riemann(1) + theta_temp(1)*DF(1)/gamma_mp; 
-          if(pm == 1)  rho = u_Riemann(1) - theta_temp(1)*DF(1)/gamma_mp; 
-
-          IF(rho .LT. 0) print *,"rho<0",rho,DF(1),theta_temp(1), u_Riemann(1)
-
-          M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
-
-          IF(M .LT. eps0) THEN; THETA_pos=0._prec; return; END IF;
-
-          if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
-          if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
-
-          if(pm == 0) B_e = -(DF(3)/gamma_mp) * rho
-          if(pm == 1) B_e =  (DF(3)/gamma_mp) * rho
-            
-          A   = DF(2)**2/(2._prec* gamma_mp**2)
-
-          IF(M .LT. 0 .AND. pm ==1) return
-
-          
-          IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
-          
-          IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
-            THETA_pos(2) = min(1._prec,THETA_pos(2))
-            THETA_pos(3) = min(1._prec,THETA_pos(3))
-            return
-          END IF
-
-          IF(B_e .LT. eps0) THEN
-            THETA_pos(2) = min(1._prec,(M-B_e)/max(B_u+A,eps0), THETA_pos(2))
-            THETA_pos(3) = min(1._prec,THETA_pos(3))
-          END IF
-
-          IF(B_u .LT. -A) THEN
-            THETA_pos(2) = min(1._prec,THETA_pos(2))
-            THETA_pos(3) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), THETA_pos(3))
-          END IF
-
-          IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
-            ! IF(M .LT. 0) print *,"M",M
-            IF(B_e .LT. 0) print *,"Be",B_e
-            IF(B_u .LT. -A) print *,"Bu",B_u
-            IF(A .LT. 0) print *,"A",A
-            
-            THETA_pos(2) = min(1._prec,M*(B_u+A)/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),THETA_pos(2))
-            THETA_pos(3) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),THETA_pos(3))
-          END IF
-
-          ! IF(M .LT. 0) print *,"M<0",M
-
-          ! IF(M .LT. 0 .AND. pm == 0) THETA_pos(2:3) =1._prec 
-
-
-        END DO
         return
       END IF
     END IF
   END FUNCTION THETA_pos
+
+  FUNCTION flat_positivity_criteria(Theta_rho,u_Riemann,gamma_mp,DF) result(Theta)
+    IMPLICIT NONE
+    Real(prec), DIMENSION(2) :: Theta
+    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann,DF
+    REAL(prec), INTENT(IN) :: Theta_rho, gamma_mp
+    REAL(prec) :: rho,M,B_u,B_e,A
+    INTEGER :: pm
+    
+        
+    DO pm = 0,1
+
+      if(pm == 0)  rho = u_Riemann(1) + Theta_rho*DF(1)/gamma_mp; 
+      if(pm == 1)  rho = u_Riemann(1) - Theta_rho*DF(1)/gamma_mp; 
+
+      IF(rho .LT. 0) print *,"rho<0",rho,DF(1),Theta_rho, u_Riemann(1)
+
+      M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+
+      IF(M .LT. eps0) THEN; Theta =0._prec;  return; END IF;
+
+      if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
+      if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
+
+      if(pm == 0) B_e = -(DF(3)/gamma_mp) * rho
+      if(pm == 1) B_e =  (DF(3)/gamma_mp) * rho
+        
+      A   = DF(2)**2/(2._prec* gamma_mp**2)
+
+      IF(M .LT. 0 .AND. pm ==1) return
+
+      
+      IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
+      
+      IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
+        Theta(1) = min(1._prec,Theta(1))
+        Theta(2) = min(1._prec,Theta(2))
+        return
+      END IF
+
+      IF(B_e .LT. eps0) THEN
+        Theta(1) = min(1._prec,(M-B_e)/max(B_u+A,eps0), Theta(1))
+        Theta(2) = min(1._prec,Theta(2))
+      END IF
+
+      IF(B_u .LT. -A) THEN
+        Theta(1) = min(1._prec,Theta(1))
+        Theta(2) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), Theta(2))
+      END IF
+
+      IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
+        ! IF(M .LT. 0) print *,"M",M
+        IF(B_e .LT. 0) print *,"Be",B_e
+        IF(B_u .LT. -A) print *,"Bu",B_u
+        IF(A .LT. 0) print *,"A",A
+        
+        Theta(1) = min(1._prec,M*(B_u+A)/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(1))
+        Theta(2) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(2))
+      END IF
+    END DO
+
+
+
+  END FUNCTION flat_positivity_criteria
 
   FUNCTION THETA_max(mc,pv, u_Riemann,gamma_mp,DF)
     IMPLICIT NONE

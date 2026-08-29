@@ -34,14 +34,18 @@ for k in range(0,sm):
         p=8 
         for j in range(nb_var):
             print(p)
-            theta_[k,i,j] = float(line[p:p+7])
+            theta_[k,i,j] = float(line[p:p+6])
             p +=6
+        p+=1
         for j in range(nb_var):
-            if(line[p:p+8] != "***** ") :pos[k,i,j] = float(line[p:p+8])
+            print(p)
+            if(line[p:p+8] != "***** ") :pos[k,i,j] = float(line[p:p+6])
             p +=6
+        p+=1
             
         for j in range(nb_var):
-            LMP[k,i,j] = float(line[p:p+8])
+            print(p)
+            LMP[k,i,j] = float(line[p:p+6])
             p +=6
 
         

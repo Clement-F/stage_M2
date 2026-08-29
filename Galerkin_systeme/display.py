@@ -59,7 +59,7 @@ for k in range(0,sm,1):
             X_midcell[int((i)/(nb_sub))] = (X_cell[int(i/(nb_sub))]+X_cell[int(i/(nb_sub))+1])/2
             
     
-        U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
+        #U_ex[k][i][0]   = lines2[k*(nx+1) +i][11:27]
         # if(nb_var >1) : 
         #      U_ex[k][i][1]   = lines2[k*(nx+1) +i][28:43]
         # if(nb_var >2) :

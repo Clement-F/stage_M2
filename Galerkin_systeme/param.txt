@@ -4,7 +4,7 @@
 20              | noeuds du maillage 
 -10D-1          | xd
 10D-1           | xf
-50D-1           | T
+50D-2           | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -14,20 +14,20 @@
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 --------------------------------------------------
-0               | Maximum Principle : None(0), GMP(1),  LMP(2)
-4               | Positivity Rule   : None(0), prod(1), min(2), knapsac(3), linear_multi(7)
+2               | Maximum Principle : None(0), GMP(1),  LMP(2)
+1               | Positivity Rule   : None(0), prod(1), min(2), knapsac(3), linear_multi(7)
 0               | Entropie   Rule   : None(0), discrete(1), semi(2), cell(3), Abgrall(4)
 --------------------------------------------------
 0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : None(0), min(1), mean(2)
 --------------------------------------------------
-7               | nb subcellules du sous maillage
-Unif         | repartition des noeuds(Unif, Lobatto)
+5               | nb subcellules du sous maillage
+Lobatto         | repartition des noeuds(Unif, Lobatto)
 =================================================
     Paramètres DG
 =================================================
-2               | ordre espace
-2               | ordre temps
+4               | ordre espace
+3               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
 =================================================
@@ -35,7 +35,7 @@ Lobatto        | quadrature (Legendre,Lobatto)
 =================================================
 0.7             | cfl
 False           | Convergence   (True, False)
-True           | Error calc    (True, False)
+False           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
 100             | print rule
@@ -44,9 +44,9 @@ Solprod         | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-sinus    | solution initiale :
+Sod    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc
                     Euler : Sod, isentropique,acoustic_wave, Blast
-advection           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
+Euler           | problème (advection, burgers, burgers_SCL, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-period          | condition au bord (period, Sym, Solid)
+Sym          | condition au bord (period, Sym, Solid)

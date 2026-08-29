@@ -185,7 +185,7 @@ CONTAINS
     INTEGER :: ni
 
     INTEGER :: ii,jj,kk
-    REAL(prec), DIMENSION(nb_subcell,nb_var) :: L
+    REAL(prec), DIMENSION(nb_var) :: L
 
     outed_mesh = 0
 
@@ -200,15 +200,15 @@ CONTAINS
       ! print *,"------------------"
       CALL flux_numerique
       
-      DO ni = 1,nb_cell;
+      DO ni = 1,nb_cell;DO jj =1,nb_subcell
           
-          DO jj=1,nb_var; L(:,jj) = (flux_h(ni)%flux_subcells(2:nb_subcell+1,jj)-flux_h(ni)%flux_subcells(1:nb_subcell,jj))*(2._prec *dt/(cell_size(ni)* subcell_size(:))); END DO;
-          
-            sol_step(ni)%val_subcells(:,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(:,:) &
-                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(:,:) &
-                                        &  - RK_beta(ii)  *L
+          L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
+
+          sol_step(ni)%val_subcells(jj,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,:) &
+                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
+                                        &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
                                                                       
-      END DO;
+      END DO; END DO
 
       DO ni = 1,nb_cell;
 
