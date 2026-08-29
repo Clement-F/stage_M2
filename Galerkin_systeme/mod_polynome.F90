@@ -869,10 +869,7 @@ CONTAINS
             END DO
         END DO
 
-        ! ===============================================================
-
-        beta_entr = 3._prec
-        beta_entr(1) = 0.1_prec
+        beta_entr = 1._prec
 
 
     END SUBROUTINE sub_cells_init

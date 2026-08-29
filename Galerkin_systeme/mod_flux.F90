@@ -200,15 +200,15 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: vl,vr,u_Riemann
     REAL(prec) :: Flux_entrop_VF
 
-    ! u_Riemann = (ul+ur)/2._prec - (Flux(ur)-Flux(ul))/(2._prec*max_dflux)
+    u_Riemann = (ul+ur)/2._prec - (Flux(ur)-Flux(ul))/(2._prec*max_dflux)
     ! vl = Var_entrop(ul); vr = Var_entrop(ur)
     ! Flux_entrop_VF = DOT_PRODUCT((vl+vr)/2._prec , Flux_FV(ul,ur)) - (entrop_pot_flux(ul)+entrop_pot_flux(ur))/2._prec
     
     
-    IF(flux_num == 0) Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur) - max_dflux*        (entropie_numerique(ur)-entropie_numerique(ul)))/2._prec
-    IF(flux_num == 1) Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur) - gamma_calc(ul,ur)*(entropie_numerique(ur)-entropie_numerique(ul)))/2._prec
+    ! IF(flux_num == 0) Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur) - max_dflux*        (entropie_numerique(ur)-entropie_numerique(ul)))/2._prec
+    ! IF(flux_num == 1) Flux_entrop_VF = (Flux_entrop(ul)+Flux_entrop(ur) - gamma_calc(ul,ur)*(entropie_numerique(ur)-entropie_numerique(ul)))/2._prec
 
-    ! Flux_entrop_VF = Flux_entrop(u_Riemann)
+    Flux_entrop_VF = Flux_entrop(u_Riemann)
   END FUNCTION Flux_entrop_VF
   
   FUNCTION Var_entrop(u)

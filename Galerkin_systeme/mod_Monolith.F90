@@ -79,7 +79,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec) :: A,B,C,M, E,U,rho, B_e,B_u,t
+    REAL(prec) :: A,B,C,M, E,U,rho, B_e,B_u,B_r,A_r
 
     INTEGER :: pm
 
@@ -134,6 +134,22 @@ CONTAINS
         CALL Knapsack_greedy(THETA_pos,(/A,B,C /),M,(/THETA_pos(1),1._prec,1._prec/),3)
 
       ELSE IF(positivity == 4) THEN 
+        M   = u_Riemann(1)* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+        B_r = u_Riemann(1)*DF(3)/gamma_mp
+        IF(theta_temp(1) .GT. M/max(B_r,eps0))THEN 
+          Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
+        ELSE 
+          Theta_pos(2:3)= flat_positivity_criteria(0._prec,u_Riemann,gamma_mp,DF)
+          
+          B_u = abs(DF(2)*u_Riemann(2))/(gamma_mp)
+          B_e = abs(DF(3)*u_Riemann(1))/(gamma_mp)
+          A   = DF(2)**2/(2._prec* gamma_mp**2)
+          A_r = abs(DF(1)*DF(3)/gamma_mp**2)
+
+          THETA_pos(1)  = min((M-B_u*Theta_pos(2)- B_e*THETA_pos(3)-A*Theta_pos(2)**2)/max(B_r+A_r*Theta_pos(3),eps0) ,1._prec)
+        END IF
+        
+
         
       
       ELSE IF(positivity == 7) THEN
@@ -190,7 +206,7 @@ CONTAINS
       END IF
 
       IF(B_e .LT. eps0) THEN
-        Theta(1) = min(1._prec,(M-B_e)/max(B_u+A,eps0), Theta(1))
+        Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e)))/(2._prec*A) )
         Theta(2) = min(1._prec,Theta(2))
       END IF
 
@@ -205,8 +221,8 @@ CONTAINS
         IF(B_u .LT. -A) print *,"Bu",B_u
         IF(A .LT. 0) print *,"A",A
         
-        Theta(1) = min(1._prec,M*(B_u+A)/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(1))
         Theta(2) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(2))
+        Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e*Theta(2))))/(2._prec*A) )
       END IF
     END DO
 

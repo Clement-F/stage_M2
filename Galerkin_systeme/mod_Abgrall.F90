@@ -22,7 +22,7 @@ SUBROUTINE update_RF_entropie
 
     DO ni=1,nb_cell
 
-        print *,"------",ni,"--------"
+        ! print *,"------",ni,"--------"
 
         vh(:) = 0._prec
         DO n_sub =1,nb_subcell;    DO kk =nb_nodes,1,-1
@@ -64,12 +64,12 @@ SUBROUTINE update_RF_entropie
         ur  =sol_step(ni)   %inter(2,:);url=sol_step(cR(1))%inter(1,:)
         
         ! print *,"-------------------"
-        print *,ulr,ul
+        ! print *,ulr,ul
         ! print *,Flux_entrop_VF(ulr,ul) 
         ! print *,Flux_entrop(ulr),Flux_entrop(ul)
         ! print *,entropie_numerique(ulr),entropie_numerique(ul)
         ! print *,"---------"
-        print *,ur,url
+        ! print *,ur,url
         ! print *,Flux_entrop_VF(ur,url) 
         ! print *,Flux_entrop(ur),Flux_entrop(url)
         ! print *,entropie_numerique(ur),entropie_numerique(url)
@@ -84,10 +84,10 @@ SUBROUTINE update_RF_entropie
 
         ! print *,"l",Flux_entrop_VF(ulr,ul)
         ! print *,"r",Flux_entrop_VF(ur,url)
-        print *,"diff",diff
-        print *,"A",A
-        print *,"B",B
-        write(*,fmt="(f10.6)")alpha_entr(ni)
+        ! print *,"diff",diff
+        ! print *,"A",A
+        ! print *,"B",B
+        ! write(*,fmt="(f10.6)")alpha_entr(ni)
 
         flux_h(ni)%flux_Abgrall(1,1) = g(ni,1)
         flux_h(ni)%flux_Abgrall(nb_subcell+1,1) = g(ni+1,1)
@@ -102,8 +102,8 @@ SUBROUTINE update_RF_entropie
 
         flux_h(ni)%flux_Abgrall(2:nb_subcell,1) = flux_h(ni)%flux_subcells(2:nb_subcell,1)- alpha_entr(ni)*MATMUL(Adjacency,d)
         ! write(*,fmt="(10(f10.6))") alpha_entr(ni)*MATMUL(Adjacency,d)
-        write(*,fmt="(10(f10.6))") flux_h(ni)%flux_Abgrall(:,1) - flux_h(ni)%flux_subcells(:,1) 
-        write(*,fmt="(2(f10.6))") flux_h(ni)%flux_subcells(1,1)-g(ni,1), flux_h(ni)%flux_subcells(nb_subcell+1,1)-g(ni+1,1)
+        ! write(*,fmt="(10(f10.6))") flux_h(ni)%flux_Abgrall(:,1) - flux_h(ni)%flux_subcells(:,1) 
+        ! write(*,fmt="(2(f10.6))") flux_h(ni)%flux_subcells(1,1)-g(ni,1), flux_h(ni)%flux_subcells(nb_subcell+1,1)-g(ni+1,1)
         ! flux_h(ni)%flux_Abgrall(nb_subcell,1) = flux_h(ni)%flux_subcells(nb_subcell,1)+ alpha_entr(ni)*d(nb_subcell)
 
 

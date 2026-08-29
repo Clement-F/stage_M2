@@ -25,8 +25,8 @@ MODULE mod_declaration
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER,    DIMENSION(2) :: L, LL, R, RR
-    REAL(prec), DIMENSION(3) :: theta     !<- TEMP 
-    ! REAL(prec), DIMENSION(1) :: theta     !<- TEMP 
+    ! REAL(prec), DIMENSION(3) :: theta     !<- TEMP 
+    REAL(prec), DIMENSION(1) :: theta     !<- TEMP 
     LOGICAL :: extrema
   END TYPE subcells
 
