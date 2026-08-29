@@ -62,6 +62,7 @@ CONTAINS
     IF(subcell_use) THEN
       
     DO ni = 1,nb_cell; DO ii = 1,nb_var
+      flux_h(ni)%flux_subcells(:,:)= 0._prec
       ! F(uh(x)) .ne. Fh(x)
       fh_L = eval_poly(-1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
       fh_R = eval_poly( 1._prec,ni,flux_h(ni)%flux_DG(:,ii), LOC= LRef)
@@ -184,7 +185,7 @@ CONTAINS
     INTEGER :: ni
 
     INTEGER :: ii,jj,kk
-    REAL(prec), DIMENSION(nb_var) :: L
+    REAL(prec), DIMENSION(nb_subcell,nb_var) :: L
 
     outed_mesh = 0
 
@@ -199,15 +200,15 @@ CONTAINS
       ! print *,"------------------"
       CALL flux_numerique
       
-      DO ni = 1,nb_cell;DO jj =1,nb_subcell
+      DO ni = 1,nb_cell;
           
-          L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
-
-          sol_step(ni)%val_subcells(jj,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,:) &
-                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
-                                        &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
+          DO jj=1,nb_var; L(:,jj) = (flux_h(ni)%flux_subcells(2:nb_subcell+1,jj)-flux_h(ni)%flux_subcells(1:nb_subcell,jj))*(2._prec *dt/(cell_size(ni)* subcell_size(:))); END DO;
+          
+            sol_step(ni)%val_subcells(:,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(:,:) &
+                                        &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(:,:) &
+                                        &  - RK_beta(ii)  *L
                                                                       
-      END DO; END DO
+      END DO;
 
       DO ni = 1,nb_cell;
 
@@ -407,7 +408,7 @@ CONTAINS
           END IF
         ELSE
           
-          DO j=1,size_base
+          DO j=1,nb_nodes
             xi = Ref_to_loc(i,x_quad(j))
 
             out = sol(i)%val_quad(j,:)

@@ -871,7 +871,8 @@ CONTAINS
 
         ! ===============================================================
 
-        beta_entr = 1._prec
+        beta_entr = 3._prec
+        beta_entr(1) = 0.1_prec
 
 
     END SUBROUTINE sub_cells_init
@@ -893,7 +894,7 @@ CONTAINS
 
     SUBROUTINE init_Adj
         IMPLICIT NONE
-        INTEGER :: ii, jj 
+        INTEGER :: ii 
 
         DO ii = 1,nb_subcell-1
             Adjacency(ii,1:ii) = REAL(nb_subcell-ii,prec); 
