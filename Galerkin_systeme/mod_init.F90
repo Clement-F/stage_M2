@@ -116,6 +116,7 @@ CONTAINS
                 END DO
             END IF
 
+            if(ni==17)print *,"base_poly",sol(ni)%base_poly(:,:)
 
             DO ii=1,nb_nodes
                 

@@ -175,6 +175,9 @@ CONTAINS
       IF(entropie_num == 1) entropie_numerique = (abs(u(1)-ke)**(1+epsi) )/(1+epsi)
       RETURN
     END IF
+
+    ! print *,"entrop :",entropie_numerique
+
   END FUNCTION entropie_numerique
 
   FUNCTION Flux_entrop(u)

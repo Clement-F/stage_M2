@@ -18,15 +18,16 @@ CONTAINS
     ! print *, mc
 
     IF(mc(2) .ne. 0) THEN 
-    sol_mc = sol_step(mc   (1))%val_subcells(mc   (2),nvar)
-    voi_L = subcells_(mc(1),mc(2))%L
-    voi_R = subcells_(mc(1),mc(2))%R
+      sol_mc = sol_step(mc   (1))%val_subcells(mc   (2),nvar)
+      voi_L = subcells_(mc(1),mc(2))%L
+      voi_R = subcells_(mc(1),mc(2))%R
     ELSE 
-    IF(TRIM(minmax) == "min") sol_mc = minval(sol_step(mc   (1))%val_subcells(:,nvar))
-    IF(TRIM(minmax) == "max") sol_mc = maxval(sol_step(mc   (1))%val_subcells(:,nvar))
-    voi_L = subcells_(mc(1),1)%L
-    voi_R = subcells_(mc(1),nb_subcell)%R
+      IF(TRIM(minmax) == "min") sol_mc = minval(sol_step(mc   (1))%val_subcells(:,nvar))
+      IF(TRIM(minmax) == "max") sol_mc = maxval(sol_step(mc   (1))%val_subcells(:,nvar))
+      voi_L = subcells_(mc(1),1)%L
+      voi_R = subcells_(mc(1),nb_subcell)%R
     END IF 
+
     IF(TRIM(minmax) == "min") THEN
     IF(max_rule == 2)   minmax_loc= min( sol_mc, &
                                         &sol_step(voi_L(1))%val_subcells(voi_L(2),nvar), &
@@ -84,7 +85,7 @@ CONTAINS
 
     INTEGER :: pm
 
-    THETA_pos = theta_inc
+    THETA_pos = 1._prec
     theta_temp = theta_inc
 
     IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
@@ -271,7 +272,6 @@ CONTAINS
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
         
         THETA_max =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec); 
-        
         IF(max_rule == 3) THEN 
           IF((abs(DF(3))) < eps0) return
 
@@ -492,7 +492,10 @@ CONTAINS
       
       DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
 
-      IF(ISNAN(DF(1)))  DF = 0._prec
+      IF(ISNAN(DF(1)))   STOP "NAN DF"
+
+      ! print *,Voi_L,Voi_R
+
 
       IF(.not. mesh_out) THEN
       theta_(ni,jj,:) = theta(voi_L,voi_R, DF)
@@ -528,6 +531,8 @@ CONTAINS
 
           END IF
       END IF
+
+      ! write(*,fmt="(f6.3)") theta_(ni,jj)
 
       IF(coeff_smooth == 1) THEN 
       subcells_(voi_L(1),voi_L(2))%theta = min(theta_(ni,jj,:), subcells_(voi_L(1),voi_L(2))%theta)

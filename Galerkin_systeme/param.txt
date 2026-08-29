@@ -44,9 +44,9 @@ solSub          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-Burgers_choc    | solution initiale :
+Riemann_Buckley    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc, Riemann_Buckley
                     Euler : Sod, isentropique,acoustic_wave, Blast
-burgers           | problème (advection, burgers, Buckley, Shallow, Euler)
+Buckley           | problème (advection, burgers, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
 Sym          | condition au bord (period, Sym, Solid)

@@ -1,5 +1,3 @@
 ZTest/*
-TeX/*
-TeX/!.TEX
-TeX/!.pdf
-Galerkin_systeme/sol_ex/blast.dat
+TeX/files/*
+TeX/images/*

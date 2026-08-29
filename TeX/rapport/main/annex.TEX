@@ -1,0 +1,51 @@
+\newpage
+\section{Annexes}
+\subsection{Projection $\mathbb{L}^2$ sur $ \mathbb{P}^k$ }\label{projection}
+Comme nous résolvons une équation différentiel non linéaire par le biais de polynome, 
+il nous est souvent requis de projeter une fonction dans l'espace des polynomes.\\
+
+Soit $g \in \mathbb{L}^2(\omega) \cap BV$. Nous chercherons à trouver $g_h \in \mathbb{P}^k(\omega)$ tel que : 
+\begin{equation}
+    \int_\omega g \sigma dx = \int_\omega g_h \sigma dx\qquad \forall \sigma \in \mathbb{P}^k(\omega)
+\end{equation}
+Soit $\{\sigma_p^i\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k(\omega)$, il est alors suffisant de regarder cette égalité $\forall \sigma_i$.
+et en utilisant l'écriture $g_h = \sum_{p=1}^{N_k} \underline{g}_p \sigma_p$, on obtient cette égalité : 
+\begin{equation}
+    \tilde{G} :=\int_\omega g \sigma_q dx = \sum_{p=1}^{N_k} \underline{g}_p \int_\omega \sigma_p\sigma_q dx = (\underline{G} M)_q \qquad \forall \sigma_q 
+\end{equation}
+On peut alors retrouver le vecteur des moments $\underline{G}$ comme $\underline{G} =\tilde{G} M^{-1}$
+
+\subsection{opérateur de reconstruction comme moindre carré} \label{moindre_carré}
+\subsection{isomorphisme par variable entropique {\color{red} Voir si l'on rajoute des détails } \label{entropie_Annexes}}
+
+Cette partie est basée sur une démonstration de \cite{godlewski2021numerical} [Introduction : entropy solution]
+\paragraph{Theorème de Godunov-Mock}
+Soit $\eta :\Omega \to \R$ une fonction strictement convexe. Il y a équivalence entre :
+\begin{enumerate}
+    \item $\eta$ est une entropie du système.
+    \item $H\eta(u)\cdot A(u)$ est symétrique.
+\end{enumerate}
+\subsubsection{Existence et unicité des variables entropiques}
+Une conséquence du théorème ci-dessus est que si $\eta$ est une entropie strictement convexe, alors le système est symétrisable.
+On a donc le théorème suivant : 
+
+\paragraph{Theorème}
+Il existe $ \eta :\Omega \to \R$, une entropie strictement convexe si et seulement s'il existe $\nu : \Omega \to \Omega$ tel que le changement de variables : $u = u(\nu)$ rend le système symétrique.
+
+On note que le changement de variables nous donne le système suivant : 
+$$u'(\nu) \partial_t \nu + A(u(\nu)) u'(\nu) \partial_x(\nu) = 0 $$
+
+Supposons que le système soit symétrique, alors par definition : $u'(\nu) = (\frac{\partial u_i}{\partial \nu_j})_{1\leq i,j \leq M} $  est symétrique et défini positif.\\
+On en déduit l'existence de $q(\nu)$ telle que : $\nabla_\nu q(\nu) = u(\nu)$, \\
+de la même manière, il existe $ p(\nu)$ telle que : $\nabla_\nu p(\nu) = f(u(\nu))$.\\
+On a alors que $\nabla_\nu u(\nu)$ défini positif est équivalent à $q(\nu)$ strictement convexe.\\
+
+En combinant toutes ces informations, on a que la fonction $\nu \to \nabla_\nu q(\nu) = u(\nu)$ est bijective. Il est alors possible d'écrire $\eta$ comme fonction de $u$\\
+Il est possible de montrer que $\eta(u) = \nu(u) \, u - q(\nu(u))$ est une entropie strictement convexe associée à fonction d'entropie $\phi = \nu(u) f(u) - p(\nu(u))$, voir \cite{godlewski2021numerical}\\
+
+Mais le résultat intéressant est que l'on puisse faire un passage de l'entropie $\eta(u)$ à $\eta^*(\nu)$ en posant : 
+\begin{align}
+    q(\nu) = \eta^*(\nu) &:= \nu \, u(\nu)   - \eta(u(\nu))\\
+    p(\nu) = \phi^*(\nu) &:=\nu \, f(u(\nu)) - \phi(u(\nu))
+\end{align} 
+et $\eta^{*'}(\nu) = u(\nu)$ 

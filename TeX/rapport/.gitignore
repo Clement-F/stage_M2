@@ -1,0 +1,12 @@
+/main/*
+!/main/main.pdf
+!/main/annex.TEX
+!/main/main.TEX
+!/main/sec1_methDG.TEX
+!/main/sec2_Monolith.TEX
+!/main/sec3_Results.TEX
+
+/Resultat_Num/*
+
+
+main.zip

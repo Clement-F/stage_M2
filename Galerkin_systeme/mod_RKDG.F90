@@ -103,7 +103,16 @@ CONTAINS
       IF(coeff_smooth == 2)theta_mp = Min(theta_(ni,jj,:), Min(      subcells_(voi_L(1),voi_L(2))%theta,  subcells_(voi_R(1),voi_R(2))%theta)  )
 
       flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) +theta_mp*DF
-    END DO; END DO
+
+      ! print *,"-------------"
+      ! print *,ni,jj
+      ! print *,voi_L,voi_R
+
+    END DO;
+    ! print *,"=========="
+    ! print *,flux_h(voi_L(1))%flux_subcells(voi_L(2),:)
+    ! print *,flux_h(voi_R(1))%flux_subcells(voi_R(2),:)
+    END DO
 
     END IF
     END IF
@@ -118,19 +127,16 @@ CONTAINS
     INTEGER :: ii,jj
     REAL(prec), DIMENSION(size_base,nb_var) :: V_B, S_B, BB,L_step
 
-
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
       sol_step(ni)%val_quad  = sol(ni)%val_quad
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
-      
-    ! print *,"-----------------"
 
     DO tni =1,order_t
       
+      print *,"========================="
       CALL flux_numerique
-      ! print *,"========================="
       ! TO CHANGE
       DO ni =1,nb_cell;     
 
@@ -145,22 +151,20 @@ CONTAINS
                                     &+ RK_alpha(tni,2) * sol_step(ni)%base_poly(:,:) &
                                     &+ RK_beta(tni)    * dt * L_step
                           
-        DO ii=1,nb_nodes          
-          sol_step(ni)%val_quad(ii,:)  = eval_step(x_quad(ii),ni=ni,kk= ii,LOC= LRef )
+        DO jj=1,nb_nodes
+          sol_step(ni)%val_quad(jj,:)  = eval_step(x_quad(jj),ni=ni, kk=jj, LOC= LRef)
         END DO
-
+        
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,:)      = sol_step(ni)%val_quad(1,jj)
-          sol_step(ni)%inter(2,:)      = sol_step(ni)%val_quad(nb_nodes,jj)
+          sol_step(ni)%inter(1,:)      = sol_step(ni)%val_quad(1       ,:)
+          sol_step(ni)%inter(2,:)      = sol_step(ni)%val_quad(nb_nodes,:)
         ELSE 
-          sol_step(ni)%inter(1,:)      = eval_step(x_cell(ni),  ni=ni, LOC= LLoc)
-          sol_step(ni)%inter(2,:)      = eval_step(x_cell(ni+1),ni=ni, LOC= LLoc)
+          sol_step(ni)%inter(1,:)      = eval_step(x_cell(ni),   ni=ni,LOC= LLoc)
+          sol_step(ni)%inter(2,:)      = eval_step(x_cell(ni+1), ni=ni,LOC= LLoc)
         END IF
 
       END DO
     END DO
-
-    ! print *,"---------------------"
 
     DO ni=1,nb_cell
         sol(ni)%base_poly  = sol_step(ni)%base_poly
@@ -177,7 +181,6 @@ CONTAINS
           sol(ni)%inter(2,:)      = eval_sol(x_cell(ni+1),ni=ni,LOC=LLoc)
         END IF
     END DO
-
 
   END SUBROUTINE Time_step
 
@@ -197,7 +200,6 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
 
-    ! print *,"==========="
     DO ii=1,order_t
       ! print *,"------------------"
       CALL flux_numerique
@@ -205,7 +207,6 @@ CONTAINS
       DO ni = 1,nb_cell;DO jj =1,nb_subcell
           
           L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
-
           sol_step(ni)%val_subcells(jj,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,:) &
                                         &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
                                         &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
@@ -241,8 +242,6 @@ CONTAINS
       sol(ni)%inter        = sol_step(ni)%inter
     END DO
 
-
-
   END SUBROUTINE Time_step_subcell
 
   SUBROUTINE dt_calc
@@ -264,25 +263,28 @@ CONTAINS
         IF(monolithique) THEN
           gamma_bf =eps0; dt_loc = 2._prec
 
+        IF(flux_name == "Buckley") THEN; 
+          max_dflux =2.4_prec
+          gamma_temp = 2.4_prec
+          dt_loc = CFL* minval(cell_size)*minval(subcell_size)/(4._prec*max_dflux)
+        ELSE; 
+
           DO i=1,nb_cell;    DO j=1,nb_subcell
             ! print *,i,j
             nxt_ = Voisin_Face(i,j,'R')
 
             u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
 
-            IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
-              gamma_temp = 2.4_prec
-              dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
-            ELSE; 
             gamma_temp = max(gamma_calc(u_, v_),eps0)
             dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
-            END IF
+            
 
 
 
             max_dflux = max(max_dflux, gamma_temp)
             gamma_bf = gamma_temp
           END DO;END DO 
+          END IF
 
         ELSE 
 
@@ -364,6 +366,8 @@ CONTAINS
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec;entropy=0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
+      CALL eval_time(nb_prd_ini,nb_prd_max,nb_prd_sec,0)
+      WRITE(*,*) " "
     END IF
 
 
@@ -375,13 +379,12 @@ CONTAINS
       DO i=1,nb_cell
         IF(subcell_use .AND.(.not. convergence) ) THEN
 
-          save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
+          save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
 
           DO j=1,nb_subcell; 
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
 
-            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
             write(unit=numfile_sol,    fmt=save_format, advance="no") xi,out !, Ref_to_loc(i,x_subcell(j))
             IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
@@ -423,7 +426,6 @@ CONTAINS
             write(unit=numfile_sol, fmt= '(2x,f10.6)') pression_
             ELSE;
                write(unit=numfile_sol,   fmt= '(1x)')
-               write(unit=numfile_solex, fmt= '(1x)')
             END IF
 
           END DO 
@@ -645,7 +647,6 @@ CONTAINS
     STOP "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
 
-
   SUBROUTINE Error_check
     IMPLICIT NONE
     INTEGER ::i,j,k
@@ -697,5 +698,76 @@ CONTAINS
 
   END SUBROUTINE Error_check
 
+
+  SUBROUTINE writout_dense(switch)
+    IMPLICIT NONE
+
+    INTEGER :: i,j,k,ndx
+    REAL(prec) :: xi,xj,dxj
+    REAL(prec), DIMENSION(nb_var) :: out,out_ex
+
+    LOGICAL, optional :: switch
+    LOGICAL :: force
+    
+    Character(len=63) :: save_format
+
+    ndx=20
+    save_format = "(f10.6"//Repeat(",f16.6",nb_var)//")"
+
+    IF(present(switch)) THEN; force = switch
+    ELSE; force = .FALSE.
+    END IF
+ 
+    ! print *,"writout"
+    IF(modulo(n_time,500) == 0)  THEN
+      write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
+    END IF
+
+    IF((time .GE.  Time_stemp(n_imp+1)-eps0) .OR. force )  THEN
+      ! IF(mesh_out)CALL Out_The_Mesh(time)
+      write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
+     
+      IF(subcell_use)THEN
+      DO i=1,nb_cell;DO j=1,nb_subcell
+        dxj = (x_subcell(j+1)-x_subcell(j))/REAL(ndx,prec)
+        DO k=1,ndx
+          xj = x_subcell(j) + REAL(k,prec)*dxj
+          xi = Ref_to_loc(i,xj)
+          ! out = sol(i)%val_subcells(j,:)
+          out = eval_sol(xi,i,LOC=LLoc)
+          IF(TRIM(flux_name) == "advection") THEN     
+            out_ex =Q_init(xi - time*vit_adv,0,nb_var)
+          END IF
+          write(unit=numfile_sol,    fmt=save_format) xi,out 
+          IF(error_calc) write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+        END DO
+
+      END DO;END DO
+      ELSE
+      DO i=1,nb_cell;DO j=1,nb_nodes-1
+        dxj = (x_quad(j+1)-x_quad(j))/REAL(ndx,prec)       
+        DO k=1,ndx
+          xj = x_quad(j) + REAL(k,prec)*dxj
+          xi = Ref_to_loc(i,xj)
+          out = eval_sol(xi,i,LOC=LLoc)
+          IF(TRIM(flux_name) == "advection") THEN     
+            out_ex =Q_init(xi - time*vit_adv,0,nb_var)
+          END IF
+          write(unit=numfile_sol,    fmt=save_format) xi,out 
+          IF(error_calc) write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+        END DO
+
+      END DO;END DO
+      END IF
+
+      IF((time .GE.  Time_stemp(n_imp+1)-eps0)) THEN
+      n_imp = n_imp +1
+      Time_stemp(n_imp) = time    
+      END IF
+      write(unit=numfile_sol  , fmt='("----------",f10.6,"--------------")' ) time
+      write(unit=numfile_solex  , fmt='("----------",f10.6,"--------------")' ) time
+    END IF
+  END SUBROUTINE writout_dense
+  
   
 END MODULE

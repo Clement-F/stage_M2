@@ -1,0 +1,205 @@
+@article{VILAR2025,
+title = {Local subcell monolithic DG/FV convex property preserving scheme on unstructured grids and entropy consideration},
+journal = {Journal of Computational Physics},
+volume = {521},
+pages = {113535},
+year = {2025},
+issn = {0021-9991},
+doi = {https://doi.org/10.1016/j.jcp.2024.113535},
+url = {https://www.sciencedirect.com/science/article/pii/S0021999124007836},
+author = {François Vilar},
+keywords = {Structure-preserving scheme, Subcell monolithic scheme, Entropy stability, Arbitrary high-order, DG subcell FV formulation, Positivity-preserving scheme, Hyperbolic conservation laws},
+abstract = {This article aims at presenting a new local subcell monolithic Discontinuous-Galerkin/Finite-Volume (DG/FV) convex property preserving scheme solving system of conservation laws on 2D unstructured grids. This is known that DG method needs some sort of nonlinear limiting to avoid spurious oscillations or nonlinear instabilities which may lead to the crash of the code. The main idea motivating the present work is to improve the robustness of DG schemes, while preserving as much as possible its high accuracy and very precise subcell resolution. To do so, a convex blending of high-order DG and first-order FV schemes will be locally performed, at the subcell scale, where it is needed. To this end, by means of the theory developed in [58], [59], we first recall that it is possible to rewrite DG scheme as a subcell FV method, defined on a subgrid, provided with some specific numerical fluxes referred to as DG reconstructed fluxes. Then, the subcell monolithic DG/FV method will be defined as follows: to each face of each subcell we will assign two fluxes, a 1st-order FV one and a high-order reconstructed one, that in the end will be blended in a convex way. The goal is then to determine, through analysis, optimal blending coefficients to achieve the desired properties. Numerical results on various type problems will be presented to assess the very good performance of the design method. A particular emphasis will be put on entropy consideration. By means of this subcell monolithic framework, we will attempt to address the following questions: is this possible through this monolithic framework to ensure any entropy stability? What do we mean by entropy stability? What is the cost of such constraints? Is this absolutely needed while aiming for high-order accuracy?}
+}
+
+@book{godlewski2021numerical,
+  title={Numerical Approximation of Hyperbolic Systems of Conservation Laws},
+  author={Godlewski, E. and Raviart, P.A.},
+  isbn={9781071613443},
+  series={Applied Mathematical Sciences},
+  url={https://books.google.fr/books?id=2-M_EAAAQBAJ},
+  year={2021},
+  publisher={Springer New York}
+}
+
+
+@article{SNKružkov_1970,
+doi = {10.1070/SM1970v010n02ABEH002156},
+url = {https://doi.org/10.1070/SM1970v010n02ABEH002156},
+year = {1970},
+month = {feb},
+publisher = {},
+volume = {10},
+number = {2},
+pages = {217},
+author = {S N Kružkov},
+title = {FIRST ORDER QUASILINEAR EQUATIONS IN SEVERAL INDEPENDENT VARIABLES},
+journal = {Mathematics of the USSR-Sbornik},
+abstract = {In this paper we construct a theory of generalized solutions in the large of Cauchy's problem for the equations 
+in the class of bounded measurable functions. We define the generalized solution and prove existence, uniqueness and stability theorems for this solution. To prove the existence theorem we apply the “vanishing viscosity method”; in this connection, we first study Cauchy's problem for the corresponding parabolic equation, and we derive a priori estimates of the modulus of continuity in  of the solution of this problem which do not depend on small viscosity.  Bibliography: 22 items.}
+}
+
+@article{gottlieb1998total,
+  title={Total variation diminishing Runge-Kutta schemes},
+  author={Gottlieb, Sigal and Shu, Chi-Wang},
+  journal={Mathematics of computation},
+  volume={67},
+  number={221},
+  pages={73--85},
+  year={1998}
+}
+@article{LaxFriedrichFlux,
+author = {Lax, Peter D.},
+title = {Weak solutions of nonlinear hyperbolic equations and their numerical computation},
+journal = {Communications on Pure and Applied Mathematics},
+volume = {7},
+number = {1},
+pages = {159-193},
+doi = {https://doi.org/10.1002/cpa.3160070112},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/cpa.3160070112},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpa.3160070112},
+year = {1954}
+}
+@article{C_SHU_5,
+title = {The Runge–Kutta Discontinuous Galerkin Method for Conservation Laws V: Multidimensional Systems},
+journal = {Journal of Computational Physics},
+volume = {141},
+number = {2},
+pages = {199-224},
+year = {1998},
+issn = {0021-9991},
+doi = {https://doi.org/10.1006/jcph.1998.5892},
+url = {https://www.sciencedirect.com/science/article/pii/S0021999198958922},
+author = {Bernardo Cockburn and Chi-Wang Shu},
+abstract = {This is the fifth paper in a series in which we construct and study the so-called Runge–Kutta discontinuous Galerkin method for numerically solving hyperbolic conservation laws. In this paper, we extend the method to multidimensional nonlinear systems of conservation laws. The algorithms are described and discussed, including algorithm formulation and practical implementation issues such as the numerical fluxes, quadrature rules, degrees of freedom, and the slope limiters, both in the triangular and the rectangular element cases. Numerical experiments for two-dimensional Euler equations of compressible gas dynamics are presented that show the effect of the (formal) order of accuracy and the use of triangles or rectangles on the quality of the approximation.}
+}
+@article{C_SHU_4,
+  title={The Runge-Kutta local projection discontinuous Galerkin finite element method for conservation laws. IV. The multidimensional case},
+  author={Cockburn, Bernardo and Hou, Suchung and Shu, Chi-Wang},
+  journal={Mathematics of Computation},
+  volume={54},
+  number={190},
+  pages={545--581},
+  year={1990}
+}
+@article{C_SHU_3,
+  title={TVB Runge-Kutta local projection discontinuous Galerkin finite element method for conservation laws III: one-dimensional systems},
+  author={Cockburn, Bernardo and Lin, San-Yih and Shu, Chi-Wang},
+  journal={Journal of computational Physics},
+  volume={84},
+  number={1},
+  pages={90--113},
+  year={1989},
+  publisher={Elsevier}
+}
+@article{C_SHU_2,
+  title={TVB Runge-Kutta local projection discontinuous Galerkin finite element method for conservation laws. II. General framework},
+  author={Cockburn, Bernardo and Shu, Chi-Wang},
+  journal={Mathematics of computation},
+  volume={52},
+  number={186},
+  pages={411--435},
+  year={1989}
+}
+@article{C_SHU_1,
+     author = {Cockburn, Bernardo and Shu, Chi-Wang},
+     title = {The {Runge-Kutta} local projection $P^1${-discontinuous-Galerkin} finite element method for scalar conservation laws},
+     journal = {ESAIM : Mod\'elisation math\'ematique et analyse num\'erique},
+     pages = {337--361},
+     year = {1991},
+     publisher = {AFCET - Gauthier-Villars},
+     address = {Paris},
+     volume = {25},
+     number = {3},
+     mrnumber = {1103092},
+     zbl = {0732.65094},
+     language = {en},
+     url = {https://www.numdam.org/item/M2AN_1991__25_3_337_0/}
+}
+
+@article{VANLEER1979101,
+title = {Towards the ultimate conservative difference scheme. V. A second-order sequel to Godunov's method},
+journal = {Journal of Computational Physics},
+volume = {32},
+number = {1},
+pages = {101-136},
+year = {1979},
+issn = {0021-9991},
+doi = {https://doi.org/10.1016/0021-9991(79)90145-1},
+url = {https://www.sciencedirect.com/science/article/pii/0021999179901451},
+author = {Bram {van Leer}},
+abstract = {A method of second-order accuracy is described for integrating the equations of ideal compressible flow. The method is based on the integral conservation laws and is dissipative, so that it can be used across shocks. The heart of the method is a one-dimensional Lagrangean scheme that may be regarded as a second-order sequel to Godunov's method. The second-order accuracy is achieved by taking the distributions of the state quantities inside a gas slab to be linear, rather than uniform as in Godunov's method. The Lagrangean results are remapped with least-squares accuracy onto the desired Euler grid in a separate step. Several monotonicity algorithms are applied to ensure positivity, monotonicity and nonlinear stability. Higher dimensions are covered through time splitting. Numerical results for one-dimensional and two-dimensional flows are presented, demonstrating the efficiency of the method. The paper concludes with a summary of the results of the whole series “Towards the Ultimate Conservative Difference Scheme.”}
+}
+@article{BURBEAU2001111,
+title = {A Problem-Independent Limiter for High-Order Runge–Kutta Discontinuous Galerkin Methods},
+journal = {Journal of Computational Physics},
+volume = {169},
+number = {1},
+pages = {111-150},
+year = {2001},
+issn = {0021-9991},
+doi = {https://doi.org/10.1006/jcph.2001.6718},
+url = {https://www.sciencedirect.com/science/article/pii/S002199910196718X},
+author = {A. Burbeau and P. Sagaut and Ch.-H. Bruneau},
+abstract = {This paper is devoted to the use of discontinuous Galerkin methods to solve hyperbolic conservation laws. The emphasis is laid on the elaboration of slope limiters to enforce nonlinear stability for shock-capturing. The objectives are to derive problem-independent methods that maintain high-order of accuracy in regions where the solution is smooth, and in the neighborhood of shock waves. The aim is also to define a way of taking into account high-order space discretization in limiting process, to make use of all the expansion terms of the approximate solution. A new slope limiter is first presented for one-dimensional problems and any order of approximation. Next, it is extended to bidimensional problems, for unstructured triangular meshes. The new method is totally free of problem-dependence. Numerical experiments show its capacity to preserve the accuracy of discontinuous Galerkin method in smooth regions, and to capture strong shocks.}
+}
+﻿@Article{Rueda-Ramírez2024,
+author={Rueda-Ram{\'i}rez, Andr{\'e}s M.
+and Bolm, Benjamin
+and Kuzmin, Dmitri
+and Gassner, Gregor J.},
+title={Monolithic Convex Limiting for Legendre-Gauss-Lobatto Discontinuous Galerkin Spectral-Element Methods},
+journal={Communications on Applied Mathematics and Computation},
+year={2024},
+month={Sep},
+day={01},
+volume={6},
+number={3},
+pages={1860-1898},
+abstract={We extend the monolithic convex limiting (MCL) methodology to nodal discontinuous Galerkin spectral-element methods (DGSEMS). The use of Legendre-Gauss-Lobatto (LGL) quadrature endows collocated DGSEM space discretizations of nonlinear hyperbolic problems with properties that greatly simplify the design of invariant domain-preserving high-resolution schemes. Compared to many other continuous and discontinuous Galerkin method variants, a particular advantage of the LGL spectral operator is the availability of a natural decomposition into a compatible subcell flux discretization. Representing a high-order spatial semi-discretization in terms of intermediate states, we perform flux limiting in a manner that keeps these states and the results of Runge-Kutta stages in convex invariant domains. In addition, local bounds may be imposed on scalar quantities of interest. In contrast to limiting approaches based on predictor-corrector algorithms, our MCL procedure for LGL-DGSEM yields nonlinear flux approximations that are independent of the time-step size and can be further modified to enforce entropy stability. To demonstrate the robustness of MCL/DGSEM schemes for the compressible Euler equations, we run simulations for challenging setups featuring strong shocks, steep density gradients, and vortex dominated flows.},
+issn={2661-8893},
+doi={10.1007/s42967-023-00321-6},
+url={https://doi.org/10.1007/s42967-023-00321-6}
+}
+
+﻿@Article{Kuzmin2020,
+author={Kuzmin, Dmitri},
+title={Monolithic convex limiting for continuous finite element discretizations of hyperbolic conservation laws},
+journal={Computer Methods in Applied Mechanics and Engineering},
+year={2020},
+month={Apr},
+day={01},
+volume={361},
+pages={112804},
+keywords={Hyperbolic conservation laws; Positivity preservation; Invariant domains; Finite elements; Algebraic flux correction; Convex limiting},
+abstract={Using the theoretical framework of algebraic flux correction and invariant domain preserving schemes, we introduce a monolithic approach to convex limiting in continuous finite element schemes for linear advection equations, nonlinear scalar conservation laws, and hyperbolic systems. In contrast to flux-corrected transport (FCT) algorithms that apply limited antidiffusive corrections to bound-preserving low-order solutions, our new limiting strategy exploits the fact that these solutions can be expressed as convex combinations of bar states belonging to a convex invariant set of physically admissible solutions. Each antidiffusive flux is limited in a way which guarantees that the associated bar state remains in the invariant set and preserves appropriate local bounds. There is no free parameter and no need for limit fluxes associated with the consistent mass matrix of time derivative term separately. Moreover, the steady-state limit of the nonlinear discrete problem is well defined and independent of the pseudo-time step. In the case study for the Euler equations, the components of the bar states are constrained sequentially to satisfy local maximum principles for the density, velocity, and specific total energy in addition to positivity preservation for the density and pressure. The results of numerical experiments for standard test problems illustrate the ability of built-in convex limiters to resolve steep fronts in a sharp and nonoscillatory manner.},
+issn={0045-7825},
+url={https://www.sciencedirect.com/science/article/pii/S0045782519306966}
+}
+
+@article{JIANG1996202,
+title = {Efficient Implementation of Weighted ENO Schemes},
+journal = {Journal of Computational Physics},
+volume = {126},
+number = {1},
+pages = {202-228},
+year = {1996},
+issn = {0021-9991},
+doi = {https://doi.org/10.1006/jcph.1996.0130},
+url = {https://www.sciencedirect.com/science/article/pii/S0021999196901308},
+author = {Guang-Shan Jiang and Chi-Wang Shu},
+abstract = {In this paper, we further analyze, test, modify, and improve the high order WENO (weighted essentially non-oscillatory) finite difference schemes of Liu, Osher, and Chan. It was shown by Liuet al.that WENO schemes constructed from therth order (inL1norm) ENO schemes are (r+ 1)th order accurate. We propose a new way of measuring the smoothness of a numerical solution, emulating the idea of minimizing the total variation of the approximation, which results in a fifth-order WENO scheme for the caser= 3, instead of the fourth-order with the original smoothness measurement by Liuet al.This fifth-order WENO scheme is as fast as the fourth-order WENO scheme of Liuet al.and both schemes are about twice as fast as the fourth-order ENO schemes on vector supercomputers and as fast on serial and parallel computers. For Euler systems of gas dynamics, we suggest computing the weights from pressure and entropy instead of the characteristic values to simplify the costly characteristic procedure. The resulting WENO schemes are about twice as fast as the WENO schemes using the characteristic decompositions to compute weights and work well for problems which do not contain strong shocks or strong reflected waves. We also prove that, for conservation laws with smooth solutions, all WENO schemes are convergent. Many numerical tests, including the 1D steady state nozzle flow problem and 2D shock entropy wave interaction problem, are presented to demonstrate the remarkable capability of the WENO schemes, especially the WENO scheme using the new smoothness measurement in resolving complicated shock and flow structures. We have also applied Yang's artificial compression method to the WENO schemes to sharpen contact discontinuities.}
+}
+@article{CHEN2017427,
+title = {Entropy stable high order discontinuous Galerkin methods with suitable quadrature rules for hyperbolic conservation laws},
+journal = {Journal of Computational Physics},
+volume = {345},
+pages = {427-461},
+year = {2017},
+issn = {0021-9991},
+doi = {https://doi.org/10.1016/j.jcp.2017.05.025},
+url = {https://www.sciencedirect.com/science/article/pii/S002199911730400X},
+author = {Tianheng Chen and Chi-Wang Shu},
+keywords = {System of conservation laws, Entropy stability, Discontinuous Galerkin method, Summation-by-parts},
+abstract = {It is well known that semi-discrete high order discontinuous Galerkin (DG) methods satisfy cell entropy inequalities for the square entropy for both scalar conservation laws (Jiang and Shu (1994) [39]) and symmetric hyperbolic systems (Hou and Liu (2007) [36]), in any space dimension and for any triangulations. However, this property holds only for the square entropy and the integrations in the DG methods must be exact. It is significantly more difficult to design DG methods to satisfy entropy inequalities for a non-square convex entropy, and/or when the integration is approximated by a numerical quadrature. In this paper, we develop a unified framework for designing high order DG methods which will satisfy entropy inequalities for any given single convex entropy, through suitable numerical quadrature which is specific to this given entropy. Our framework applies from one-dimensional scalar cases all the way to multi-dimensional systems of conservation laws. For the one-dimensional case, our numerical quadrature is based on the methodology established in Carpenter et al. (2014) [5] and Gassner (2013) [19]. The main ingredients are summation-by-parts (SBP) operators derived from Legendre Gauss–Lobatto quadrature, the entropy conservative flux within elements, and the entropy stable flux at element interfaces. We then generalize the scheme to two-dimensional triangular meshes by constructing SBP operators on triangles based on a special quadrature rule. A local discontinuous Galerkin (LDG) type treatment is also incorporated to achieve the generalization to convection–diffusion equations. Extensive numerical experiments are performed to validate the accuracy and shock capturing efficacy of these entropy stable DG methods.}
+}

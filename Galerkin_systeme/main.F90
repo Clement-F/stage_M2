@@ -53,10 +53,10 @@ PROGRAM MAIN
         time = time +dt
         n_time = n_time +1
         
-        CALL writout 
+        CALL writout
     END DO
         
-    CALL writout 
+    CALL writout
 
     open(unit=numfile_data,     file=nomfile_data,      form ='formatted', status ='old',  position='append')
     write(unit= numfile_data, fmt='("nt = ",i5)') n_imp

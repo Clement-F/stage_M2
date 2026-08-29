@@ -1,144 +1,45 @@
-\documentclass[11pt]{article}%Documentation de la class
-
+\documentclass[16pt]{article}%Documentation de la class
+\usepackage[margin=2cm,a4paper]{geometry}
+% \geometry{left=2.cm,right=2.cm,top=2.cm,bottom=2.cm}
 \input{../macro}
+\input{../tikz_figure.TEX}
 
-\title{Résumé de la méthode RKDG}
-\author{clement fontan}
+\usepackage[backend=biber,style=numeric,sortcites,sorting=none,backref,natbib,hyperref]{biblatex}
+
+\addbibresource{../ref.bib}
+\graphicspath{{../../images}}
+
+\usepackage{fancyhdr}
+\usepackage{lipsum}
+\usepackage{ragged2e}
+\usepackage{csquotes}
+
+\title{  Mémoire \\
+  \large sur un schéma monolithique DG/FV}
+\author{clement fontan\\
+\textit {mémoire encadré par Mr F. Vilar}}
 \date{Juin 2026}
 
 \begin{document}
+\maketitle
+\section{Remerciement}
+\lipsum[1]
+\section{Introduction}
+\lipsum[1-3]
+\newpage
+\input{sec0_Rappels.TEX}
+\input{sec1_methDG.TEX}
+\input{sec2_Monolith.TEX}
+% \input{sec3_Results.TEX}
+\section{Conclusion}
+\lipsum[1-4]
+\input{annex.TEX}
+\newpage
+\printbibliography[
+heading=bibintoc,
+title={Bibliography}
+] %Prints the entire used bibliography with the title "Whole bibliography"
 
-\section{Rappel sur les équations hyperboliques}
-\subsection{Solution forte}
-On s'intéresse aux solutions $u$ liée à l'équation  
-\begin{equation}\label{eq forte}
-    \partial_tu + \partial_{x}f(u) =0
-\end{equation}
-On dit que $u$ est solution forte si $u \in \C^1(\R \times\R^+)$\\
-On supposera que $u$ est à valeurs dans un espace $\Omega \subseteq \R^n$ dit de phase et que cet espace est convexe.
-On suppose de plus que l'équation est hyperbolique i.e : \\
-$\forall u \in \Omega$, $A(u) = \nabla f_i(u)$ est diagonalisable et soit $(\lambda_i,r_i)_{i=1,\dots,n}$ les valeurs propres et vecteurs propres associée à $A(u)$, (donc implicitement dépendent de $u$), on a que :
-\begin{equation}
-\qquad \forall u\in\Omega \qquad 
-    \left\{   
-    \begin{aligned}
-    & \lambda_i(u) \geq 0 \qquad \forall i=1,\dots,n \\
-    & r_1(u),r_2(u),\dots,r_n(u) \quad \text{sont linéairement indépendant}
-    \end{aligned}
-    \right.    
-\end{equation}
-
-\paragraph{exemples}
-On s'intéressera principalement à des problèmes dit de conservation scalaire ($n=1$, $\Omega \subseteq \R$) :
-\begin{align}
-    &\partial_tu +\partial_x(c\,u) =0   &\text{problème d'advection} \\
-    &\partial_tu +\partial_x(u^2) =0 &\text{problème de Burgers} \\
-    &\partial_tu +\partial_x\left(\frac{4u^2}{4u^2+(1-u)^2}\right) =0 &\text{problème de Buckley} \\
-\end{align}
-ou au problème de la dynamique des gaz (système d'Euler) : ($n=3$, $\Omega \subseteq(\R^+\times\R^2)$, $u=(\rho,\rho v, \rho E)$
-\begin{equation}
-    \left\{
-    \begin{aligned}
-        &\partial_t(\rho) + \partial_x(\rho v) = 0\\
-        &\partial_t(\rho v)+\partial_x(\rho\, v^2 +p)=0\\
-        &\partial_t(\rho E)+\partial_x(\rho E v+pu)=0\\
-        &p = (\gamma-1)\left( \rho E - \frac{(\rho u)^2}{2\rho} \right)
-    \end{aligned}\right.
-\end{equation}
-
-
-\subsection{Solution faible et formulation variationnelle}
-On s'intéresse maintenant à obtenir des solutions moins régulière que les solutions forte. On introduit la formulation faible de \eqref{eq forte} : 
-\begin{equation}\label{eq faible}
-    \int_{\R^+}\int_\R \partial_tu(x,t) \,\varphi(x,t) +\partial_xf(u(x,t))\,\varphi(x,t)\,dx\,dt   = 0 
-\end{equation}
-On dit que $u$ est solution faible si elle est solution de la formulation variationnelle pour tout $\varphi\in C^\infty(\R\times \R^+)$.\\
-
-On note que toutes solution forte est solution faible mais que pas toutes solution faible est solution forte. 
-En particulier, des solutions discontinues (donc pas $C^1$) peuvent être solution faible. 
-Il est facile de se convaincre de cela en regardant les solutions faibles liée au problème d'advection dont la donnée initiale est discontinue.\\
-
-Basé sur la formulation faible \eqref{eq faible}, on introduit la formulation variationnelle :\\ on cherche $u \in V$ telle que : 
-\begin{equation}\label{Formulation Variationnelle}
-    \int_\R \partial_tu(x) \,\varphi(x) \,dx+ \int_\R \partial_xf(u(x))\, \varphi(x) \,dx  = 0 \qquad \forall\varphi \in V
-\end{equation}
-On s'attend ici à ce que $V\subseteq (\mathbf{BV}\cap L^\infty(\R^d))^n$.
-
-\paragraph{Méthode de Petrov-Galerkin \\}
-On note que l'on peut généraliser la méthode explicité ici en cherchant des fonctions tests $\varphi$ dans un autre espace fonctionnel $W$. On se limitera pour le moment à une méthode de Galerkin.
-
-\subsection{entropie}
-{\color{red} à rajouter}
-
-\section{Semi-discrétisation en espace par méthode DG}
-la méthode de Galerkin Discontinue (DG) reprends la formulation variationnel \eqref{Formulation Variationnelle} et va chercher une solution $u_h$ dans un espace $V_h$ de fonction non nécessairement continue.\\
-Le désavantage de chercher des solutions à la formulation variationnel qui ne sont potentiellement pas des solutions forte du problème (car non continue) se compensent avec le gain en calcule de ne pas avoir à connecter les solutions en tout points à chaque pas de temps (et donc de devoir résoudre un système gigantesque). \\ On obtient de plus une majoration de l'erreur commise par une étude à posteriori de la solution.
-{\color{red} à reformuler}
-
-\subsection{Espace d'approximation}
-On considère un maillage de $\R^d$ : $\mathcal{T}_h = \{\omega_i\}_i$ telle que 
-\begin{align}
-    & \overset{\circ}{\omega_i} \neq \emptyset \qquad  \forall i\\
-    & \overset{\circ}{\omega_i} \,\cap \, \overset{\circ}{\omega_j} = \emptyset  \qquad \forall i\neq j\\
-    &\bigcup_i \omega_i = \R^d
-\end{align}
-On définit par la même occasion $h =\sup_i \sup_{x,y\in \omega_i} \|x-y\|$\\
-On définit sur $\mathcal{T}_h$ l'espace d'approximation $V_h$ : 
-\begin{equation}
-    V_h = \left\{  u\in V | \ u|_{\omega_i} \in P^k(\omega_i) \quad \forall i \right\}
-\end{equation}
-
-\paragraph{méthode hp\\}
-On note qu'il existe des méthodes dite "hp" qui n'utilisent pas le même dégrées de polynômes en tout $\omega_i$ 
-et préfèrent utilisé des polynômes de dégrées plus élevée là où la fonction oscille le plus et laisser des polynômes de bas dégrées 
-là où la fonction oscille le moins. Par soucis de place et de temps, nous ne nous pencherons pas plus sur la méthode. \\
-
-\subsection{formulation variationnelle}
-à partir de cette espace $V_h$, il devient alors facile de travailler la formulation variationnelle \eqref{Formulation Variationnelle} car si $u_h$, la solution approché que l'on recherche, se trouve dans $V_h$ alors on peut l'écrire : 
-
-\begin{equation}
-    u_h(x,t) = \sum_{m=0}^k u_{i,m}(t)\,\sigma_m(x)\qquad \forall x \in \omega_i
-\end{equation}
-Où $\{\sigma_i\}_{i=0,\dots,k}$ est base de $P^k(\omega_i)$ et $u_{i,m} \in C^1(\R^+ )$.\\
-Il est alors facile de se convaincre qu'il y a équivalence entre $u_h \in V_h$ est solution de \eqref{Formulation Variationnelle} et 
-\begin{equation}\label{FV local}
-    \int_{\omega_i} \partial_tu_h \,\varphi \, dx + \partial_xf(u_h) \, \varphi \,dx =0 \qquad \forall \varphi \in P^k(\omega_i)
-\end{equation}
-(on peut utiliser $\varphi_i \in V_h$ telle que $\varphi_i =0 \, \forall \omega_j$, $j\neq i$)
-
-à partir de \eqref{FV local}, on peut développer l'intégrale en $3$ termes : 
-\begin{equation}
-    \int_{\omega_i} \partial_tu_h \,\varphi \, dx \,- \int_{\omega_i} f(u_h) \,\partial_x \varphi \,dx \, + 
-    \int_{\partial \omega_i} \varphi \,f(u_h)   \, d\nu 
-    =0  \qquad \forall \varphi \in P^k(\omega_i)
-\end{equation}
-On cherche à résoudre pour le premier terme en fonction des deux autres que l'on appellera respectivement le terme de volume et le terme de surface (due aux support des intégrales). \\
-Cependant, on remarque que $u_h$ n'est pas bien définit sur $\partial\omega_i$, il est cependant possible de remplacer ce terme par un terme dépendant des autres mailles : le flux numérique $\mathcal{F}$.
-\begin{align}
-    &\int_{\partial \omega_i} \varphi \, \mathcal{F}  \, d\nu = \sum_j \int_{\partial\omega_i \cap \partial\omega_j} \varphi \mathcal{F}(u_{h,i},u_{h,j}) d\nu\\
-    &\mathcal{F}(u,v) = \frac{f(u)+f(v)}{2} + \frac{\gamma(u,v)}{2}(u-v)\\
-    &\gamma(u,v) \geq \max_{w\in I(u,v)} \|\nabla f(w) \| \qquad I(u,v) = [\min(u,v), \, \max(u,v)] \label{local LF} 
-\end{align}
-
-\paragraph{Flux numérique\\}
-Il existe d'autres manière de définir le flux numérique, 
-cependant pour les méthodes DG le flux reste défini à partir de la solution des deux côtés de l'interface $\partial\omega_i$ 
-et nous avons ici fait le choix d'utiliser le flux de Lax-Friedrichs Local. La partie local vient de \eqref{local LF}. 
-Si l'on remplace cette équation par $\gamma(u,v)= \gamma = \max_w \|\nabla f(w) \|$, alors on parle du flux de Lax-Friedrichs global.
-
-\subsection{convergence de l'erreur}
-{\color{red} à ajouter}
-
-\subsection{considérations numérique}
-Dans le monde parfait des équations, l'analyse de cette semi-discrétisation ce termine ici. Cependant si l'on souhaite implémenter la méthode et mettre la main à la pâte, il nous faut trouver des moyens  
-
-
-\section{méthode Runge-Kutta}
-\subsection{Rappel sur la méthode Runge-Kutta}
-\subsection{propriétés des méthodes RK SSP}
-
-\section{méthode Monolithique}
-\subsection{équivalence avec un problème sur sous-mailles}
 
 
 
