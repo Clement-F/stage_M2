@@ -2,6 +2,7 @@ MODULE mod_RKDG
    use mod_Monolith
    use mod_SolIni
    use mod_Divers
+   use mod_Abgrall
   IMPLICIT NONE
 
 CONTAINS
@@ -56,8 +57,10 @@ CONTAINS
 
 
     END DO
-    
+    ! print *,"proj"
+
     CALL Projection_Flux
+    ! print *,"projected"
     
     IF(subcell_use) THEN
       
@@ -73,8 +76,6 @@ CONTAINS
                                         & - C_m(jj)*(fh_L-g(ni  ,ii)) &
                                         & - C_p(jj)*(fh_R-g(ni+1,ii))
       END DO
-
-      
     END DO; END DO
 
     IF(entropie_rule == 4) CALL update_RF_entropie
@@ -184,7 +185,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER :: ni
 
-    INTEGER :: ii,jj,kk
+    INTEGER :: ii,jj
     REAL(prec), DIMENSION(nb_var) :: L
 
     outed_mesh = 0
@@ -196,6 +197,7 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
 
+    ! print *,"==========="
     DO ii=1,order_t
       ! print *,"------------------"
       CALL flux_numerique
@@ -234,11 +236,10 @@ CONTAINS
 
     DO ni=1,nb_cell
       sol(ni)%base_poly    = sol_step(ni)%base_poly
-      sol(ni)%val_quad    = sol_step(ni)%val_quad
+      sol(ni)%val_quad     = sol_step(ni)%val_quad
       sol(ni)%val_subcells = sol_step(ni)%val_subcells
       sol(ni)%inter        = sol_step(ni)%inter
     END DO
-
 
 
 
@@ -251,6 +252,8 @@ CONTAINS
     REAL(prec) :: gamma_temp, dt_loc, gamma_bf
     REAL(prec), DIMENSION(nb_var) :: u_,v_
 
+    ! write (*,*) "dt calc"
+
     IF(TRIM(flux_name) == "advection" .AND. (.NOT. monolithique)) THEN
       max_dflux = abs(vit_adv)
     ELSE 
@@ -262,13 +265,14 @@ CONTAINS
           gamma_bf =eps0; dt_loc = 2._prec
 
           DO i=1,nb_cell;    DO j=1,nb_subcell
+            ! print *,i,j
             nxt_ = Voisin_Face(i,j,'R')
 
             u_=sol(i)%val_subcells(j,:); v_ = sol(nxt_(1))%val_subcells(nxt_(2),:)
 
             IF(flux_name == "Buckley") THEN; max_dflux =2.4_prec
-            gamma_temp = 2.4_prec
-            dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
+              gamma_temp = 2.4_prec
+              dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(4._prec*max_dflux), dt_loc)
             ELSE; 
             gamma_temp = max(gamma_calc(u_, v_),eps0)
             dt_loc = min(CFL* cell_size(i)*subcell_size(j)/(2._prec*(gamma_bf + gamma_temp)), dt_loc)
@@ -298,21 +302,25 @@ CONTAINS
         ELSE
         DO i=1,nb_cell;
           nxt_ = Voisin_quad(i,nb_nodes,'R')
-
+          ! IF(i == 1) THEN
+          ! u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)  
+          ! u_(2) = -u_(2)        
+          ! ELSE
           u_=sol(i)%val_quad(nb_nodes,:); v_ = sol(nxt_(1))%val_quad(nxt_(2),:)
+          ! END IF
           gamma_temp = gamma_calc(u_, v_)
                     
           max_dflux = max(max_dflux, gamma_temp)
         END DO
-        END IF
-        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*(max_dflux))       
+        dt_loc = CFL* minval(cell_size(:))*minval(subcell_size(:))/(4._prec*max(max_dflux,eps0))  
+      END IF     
       END IF
 
     END IF
 
     if(.not. monolithique) dt_loc =  2._prec
     
-    dt = min(CFL*dx/(REAL(2*order_x-1,prec)*max_dflux), tmax-time, dt_loc)
+    dt = min(CFL*dx/max(REAL(2*order_x-1,prec)*max_dflux,eps0), tmax-time, dt_loc)
     IF(exact_time) dt = min(dt, Time_stemp(n_imp+1)-time)
 
     IF((order_x .GT. order_t).AND. convergence ) THEN
@@ -332,6 +340,7 @@ CONTAINS
       CALL Emergency_stop
     END IF
 
+    ! write(*,*) "dt calculated"
 
   END SUBROUTINE dt_calc
 
@@ -351,7 +360,6 @@ CONTAINS
     IF(present(switch)) THEN; force = switch
     ELSE; force = .FALSE.
     END IF
-
     err1 = 0._prec; err2 =0._prec; errLi = 0._prec;entropy=0._prec
     IF(modulo(n_time,500) == 0)  THEN
       write(*,fmt='("---------------",i7,1x,f10.6,1x,e12.6,2x,f6.2, "% --------------")') n_time, time, dt, (time*100._prec)/tmax 
@@ -371,6 +379,23 @@ CONTAINS
           DO j=1,nb_subcell; 
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
+
+            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
+            write(unit=numfile_sol,    fmt=save_format, advance="no") xi,out !, Ref_to_loc(i,x_subcell(j))
+            IF(TRIM(flux_name)== "Euler" ) THEN
+            ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
+            ! p_max = max(pression_, p_max); p_min = min(pression_,p_min)
+            write(unit=numfile_sol, fmt= '(1x,e12.6)') pression(out)
+            ELSE;
+               write(unit=numfile_sol,   fmt= '(1x)')
+               write(unit=numfile_solex, fmt= '(1x)')
+            END IF
+
+          END DO
+          IF(error_calc) THEN;          
+          DO j=1,nb_nodes
+            xi = Ref_to_loc(i,x_quad(j))
+
             IF(TRIM(flux_name) == "advection") THEN       
               out_ex =Q_init(xi - time*vit_adv,0,nb_var)
 
@@ -385,8 +410,11 @@ CONTAINS
 
             END IF
 
-            write(unit=numfile_sol,    fmt=save_format,  advance="no") xi,out
-            IF(error_calc) write(unit=numfile_solex,  fmt=save_format,  advance="no") xi,out_ex
+            errLi = max(errLi , (abs(sol(i)%val_quad(j,1)-out_ex(1))))
+            err1 = err1 + (abs(sol(i)%val_quad(j,1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
+            err2 = err2 + (((sol(i)%val_quad(j,1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
+
+            write(unit=numfile_solex,  fmt=save_format) xi,out_ex
 
             IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); 
@@ -399,6 +427,7 @@ CONTAINS
             END IF
 
           END DO 
+          END IF
 
           IF(entropie_rule .GT. 0) THEN
           DO j=1,size_base
@@ -435,7 +464,7 @@ CONTAINS
             err1 = err1 + (abs(out(1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + (((out(1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
-            IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out)*cell_size(i)/2 *w_quad(j) 
+            IF(entropie_rule .GT. 0) entropy = entropy + entropie_numerique(out(1))*cell_size(i)/2 *w_quad(j) 
 
             IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); 

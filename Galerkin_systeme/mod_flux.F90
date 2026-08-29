@@ -15,13 +15,10 @@ CONTAINS
     SELECT CASE (TRIM(flux_name))
     CASE("advection")
       flux = vit_adv*u
-    CASE("burgers_SCL")
+    CASE("burgers")
       flux = 0.5_prec * u**2 
     CASE("Buckley")
       flux = 4._prec*u**2/((4._prec*u**2)+ (1._prec-u)**2 )
-    CASE("burgers")
-      flux(1) = 0.5_prec * u(1)**2 
-      flux(2) = u(1)*u(2)
     CASE("Shallow")
       flux(1) = u(2)
       flux(2) = u(1)*u(2) + (u(1)**2)/2._prec
@@ -32,7 +29,7 @@ CONTAINS
     CASE DEFAULT
       WRITE(*,*) "flux non reconnu _flux",flux_name
       flux = 0._prec
-      STOP
+      STOP "flux"
     END SELECT
   END FUNCTION flux
 
@@ -64,9 +61,11 @@ CONTAINS
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(in) :: u
     REAL(prec) :: p
-
+    ! print *,u
     p = (gamma_iso-1._prec)*(U(3) - 0.5_prec*(U(2)*U(2))/U(1))
     ! if(p .LT. eps0) STOP " negative pressure"
+
+    ! IF(p .LT. -eps0) STOP "negative pressure"
 
   END FUNCTION pression
 
@@ -94,8 +93,6 @@ CONTAINS
       gamma_calc = abs(vit_adv)
     CASE("burgers") 
       gamma_calc = max(abs(u(1)), abs(v(1)))
-    CASE("burgers_SCL") 
-      gamma_calc = max(abs(u(1)), abs(v(1)))
       
     CASE("Shallow") 
       gamma_calc = max(abs(u(2)/u(1)), abs(v(2)/v(1)))
@@ -122,7 +119,7 @@ CONTAINS
     CASE DEFAULT
       WRITE(*,*) "flux non reconnu _gamma ",flux_name
       gamma_calc = 0._prec
-      STOP
+      STOP "gamma calc"
     END SELECT
 
   END FUNCTION gamma_calc
@@ -135,7 +132,7 @@ CONTAINS
     SELECT CASE (TRIM(flux_name))
     CASE("advection")
       flux_d = vit_adv
-    CASE("burgers_SCL")
+    CASE("burgers")
       flux_d = u  
     CASE("Buckley")
       IF((abs(u) .GT. eps0) .and. (abs(u-1._prec) .GT. eps0) )THEN
@@ -148,7 +145,7 @@ CONTAINS
     CASE DEFAULT
       WRITE(*,*) "flux_d non reconnu  _dflux",flux_name
       flux_d = 0._prec
-      STOP
+      STOP "flux_d"
     END SELECT
 
   END FUNCTION flux_d
@@ -163,7 +160,15 @@ CONTAINS
     REAL(prec) :: ke = 1.00001_prec
     REAL(prec) :: epsi = 0.25_prec
 
-    entropie_numerique = 0._prec
+  entropie_numerique = 0.5_prec * u(1)**2
+
+    ! IF(nb_var == 1) THEN
+    !   IF(entropie_num == 0) entropie_numerique = 0.5_prec * u(1)**2
+    !   IF(entropie_num == 1) entropie_numerique = (abs(u(1)-ke)**(1+epsi) )/(1+epsi)
+    !   RETURN
+    ! END IF
+
+    ! print *,"entrop :",entropie_numerique
 
     IF(nb_var == 1) THEN
       IF(entropie_num == 0) entropie_numerique = 0.5_prec * u(1)**2
@@ -174,24 +179,14 @@ CONTAINS
 
   FUNCTION Flux_entrop(u)
     IMPLICIT NONE
+    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u
     REAL(prec) :: Flux_entrop
-    REAL(prec), DIMENSION(nb_var) :: u
-    REAL(prec) :: ke = -0.00001_prec
-    REAL(prec) :: epsi = 0.25_prec
-
-    Flux_entrop = 0._prec
 
     IF(nb_var == 1) THEN
       IF(flux_name == "advection" .AND. entropie_num == 0) Flux_entrop = vit_adv *0.5_prec * u(1)**2
       IF(flux_name == "burgers_SCL" .AND. entropie_num == 0) Flux_entrop = u(1)**3 /3._prec
-
-      IF(flux_name == "advection" .AND. entropie_num == 1) THEN
-        IF(u(1) .GT. ke) Flux_entrop =  vit_adv * abs(u(1)-ke)**epsi
-        IF(u(1) .LT. ke) Flux_entrop = -vit_adv * abs(u(1)-ke)**epsi
-      END IF
-
-      RETURN
     END IF
+
   END FUNCTION Flux_entrop
 
   FUNCTION Flux_entrop_VF(ul,ur)
@@ -219,12 +214,12 @@ CONTAINS
     Var_entrop = u
   END FUNCTION Var_entrop
 
-  FUNCTION entrop_pot_flux(u)
-    IMPLICIT NONE
-    REAL(prec) :: entrop_pot_flux
-    REAL(prec),DIMENSION(nb_var) ::u
+  ! FUNCTION entrop_pot_flux(u)
+  !   IMPLICIT NONE
+  !   REAL(prec) :: entrop_pot_flux
+  !   REAL(prec), DIMENSION(nb_var), INTENT(IN) ::u
     
-    entrop_pot_flux = DOT_PRODUCT(Var_entrop(u),Flux(u)) - Flux_entrop(u)
+  !   entrop_pot_flux = (Var_entrop(u)*u(1)) - Flux_entrop(u)
 
-  END FUNCTION entrop_pot_flux
+  ! END FUNCTION entrop_pot_flux
 END MODULE mod_flux

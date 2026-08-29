@@ -7,7 +7,6 @@ CONTAINS
 
 
 SUBROUTINE update_RF_entropie
-    ! on suppose ici que v_m^c(x) = v(u_h^c(x))
     ! u_h^c est scalaire
     IMPLICIT NONE
     INTEGER :: ni,n_sub,kk

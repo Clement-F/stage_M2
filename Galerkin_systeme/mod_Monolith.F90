@@ -66,7 +66,7 @@ CONTAINS
     
     u_Riemann = (ug+ud)/2._prec - (Flux(ud)-Flux(ug))/(2._prec*gamma_mp)
 
-    theta = min(1._prec, THETA_pos(u_Riemann,gamma_mp,DF),THETA_max(mc,pv, u_Riemann,gamma_mp,DF), THETA_ent(ug,ud,DF,gamma_mp))
+    theta = min(1._prec, THETA_pos(u_Riemann,gamma_mp,DF),THETA_max(mc,pv, u_Riemann,gamma_mp,DF))!, THETA_ent(ug,ud,DF,gamma_mp))
     theta = max(theta, 0._prec)
     IF(ISNAN(theta(1)))  STOP "theta nan"
 
@@ -107,8 +107,8 @@ CONTAINS
         THETA_pos = theta_temp(1)* theta_temp(2) 
 
       ELSE IF(positivity == 2) THEN  
-        A = (theta_temp(1)/(gamma_mp))**2  *(0.5_prec*abs(DF(2))**2 - DF(1)*DF(3))
-        B = theta_temp(1)/(gamma_mp)        *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1))
+        A = (1._prec/(gamma_mp))**2  *(0.5_prec*abs(DF(2))**2 - DF(1)*DF(3))
+        B = 1._prec/(gamma_mp)        *(u_Riemann(2)*DF(2) - u_Riemann(1)*DF(3) - u_Riemann(3)*DF(1))
         M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2
 
         ! IF(M .LT. -eps0) print *,"bug"
@@ -268,7 +268,25 @@ CONTAINS
 
         param = min(beta - u_Riemann(ii), u_Riemann(ii)- alpha)
         
-        THETA_max =max(min(THETA_max, abs(gamma_mp/DF(ii)) * param),0._prec);       
+        THETA_max =max(min(1._prec, abs(gamma_mp/DF(1)) * param),0._prec); 
+        
+        IF(max_rule == 3) THEN 
+          IF((abs(DF(3))) < eps0) return
+
+          IF(DF(3) .LT. -eps0) THEN
+            beta = minmax_loc(mc,"max",nvar=3)
+            alpha= minmax_loc(pv,"min",nvar=3)
+
+          ELSE IF(DF(3) .GT. eps0) THEN
+            beta = minmax_loc(pv,"max",nvar=3)
+            alpha= minmax_loc(mc,"min",nvar=3)
+          END IF
+          param = min(beta - u_Riemann(3), u_Riemann(3)- alpha)
+          
+          THETA_max =min(THETA_max, max(min(1._prec, abs(gamma_mp/DF(3)) * param),0._prec)); 
+          ! print *,"aaa"
+
+        END IF
       END DO
     END IF
 
@@ -280,6 +298,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: ug,ud,DF
     REAL(prec), INTENT(IN) :: gamma_mp
     REAL(prec), DIMENSION(nb_var) :: vg, vd
+
     LOGICAL :: extrema
 
     THETA_ent = 1._prec
@@ -294,26 +313,54 @@ CONTAINS
       ELSEIF(entropie_rule==2) THEN 
 
         vg = Var_entrop(ug); vd = Var_entrop(ud)
-        ! IF((((vd(1)-vg(1))* DF(1))) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - &
-        !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) / &
+        ! IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp*(ud-ug)))/2._prec  -Flux_entrop(ug) - &
+        !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp*(ud-ug)))/2._prec  -Flux_entrop(ud)) / &
         !                                                 & (DOT_PRODUCT((vd-vg), DF))
 
-        IF( (vd(1)-vg(1))* DF(1) .GT. eps0) THETA_ent =  ( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(Flux_FV(ug,ud) ,(vd-vg))) / (DOT_PRODUCT((vd-vg), DF))
-        ! print *,'a'
+        IF(DOT_PRODUCT(vd-vg,DF) .GT. eps0) THETA_ent = ((entrop_pot_flux(ud)-entrop_pot_flux(ug)) - DOT_PRODUCT(Flux_FV(ug,ud),vd-vg))/DOT_PRODUCT(vd-vg,DF)
+
           ! print *,"------------------------"
         ! write(*,fmt='(f10.6, f10.6, f10.6, f10.6)') vg, vd, vd-vg, DF
-        ! write(*,fmt='(f10.6, f10.6, f10.6)')(entrop_pot_flux(ud)-entrop_pot_flux(ug)), -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)),(DOT_PRODUCT((vd-vg), DF))
+        ! ! write(*,fmt='(f10.6, f10.6, f10.6)')(entrop_pot_flux(ud)-entrop_pot_flux(ug)), -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)),(DOT_PRODUCT((vd-vg), DF))
         ! write(*,fmt='(f10.6)')(DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) 
         ! ! write(*,fmt='(f10.6)') ( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))
         ! ! write(*,fmt='(f10.6)')( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg))) / (DOT_PRODUCT((vd-vg), DF))
-        ! write(*,fmt='(f10.6)') theta_temp
+        ! write(*,fmt='(f10.6)') THETA_ent
 
+        ! print *, THETA_ent                                                
         THETA_ent = max(min(1._prec,THETA_ent),0._prec)
-        ! print *,((entrop_pot_flux(ud)-entrop_pot_flux(ug))-DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))/(DOT_PRODUCT((vd-vg), DF))
-
+        ! print *,((entrop_pot_flux(ud)-entrop_pot_flux(ug))-DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)))/(DOT_PRODUCT((vd-vg), DF))       
       END IF
     END IF
   END FUNCTION THETA_ent
+
+  ! SUBROUTINE ENTROPI_CELL(ni)
+  !   INTEGER, INTENT(IN) :: ni
+  !   INTEGER, DIMENSION(2) :: voi_L,voi_R
+  !   REAL(prec),DIMENSION(nb_var) :: vd,vg,ud,ug
+  !   REAL(prec),DIMENSION(nb_subcell,nb_var) :: u_moy,v_moy
+  !   REAL(prec),DIMENSION(size_base, nb_var):: poly_ent
+  !   REAL(prec) :: D_c
+  !   REAL(prec), DIMENSION(nb_subcell+1) :: Cell_c
+  !   INTEGER :: ii,jj
+
+
+  !   ! mettre vh_c le polynome entropie sur c
+  !   u_moy = sol_step(ni)%val_subcells(:,:)
+  !   DO ii =1,nb_subcell; v_moy(ii,:) = Var_entrop(u_moy(ii,:)); END DO
+  !   poly_ent = MATMUL(Projection_VF_inv(:,:), v_moy)
+
+
+  !   DO ii=1,nb_subcell
+  !     voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
+  !     voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
+
+  !     vd = Var_entrop(ud); vg = Var_entrop(ug)
+  !     D_c = entrop_pot_flux(vd)      
+
+  !   END DO
+
+  ! END SUBROUTINE ENTROPI_CELL
 
   SUBROUTINE extrema_detect 
     IMPLICIT NONE
@@ -408,7 +455,9 @@ CONTAINS
     INTEGER :: ni, jj
 
     extrema = .FALSE. 
-    theta_ = 1._prec;  
+    IF(coeff_smooth ==0 .OR. coeff_smooth == 1)    subcells_(:,:)%theta = 1._prec 
+    IF(coeff_smooth ==2)                           subcells_(:,:)%theta = 0._prec 
+    theta_(:,:) = 1._prec;  
     
     
     IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
@@ -437,7 +486,7 @@ CONTAINS
       IF(flux_num == 0) gamma_mp = max_dflux
       IF(flux_num == 1) gamma_mp = gamma_calc(ug,ud)
 
-      flux_h(ni)%flux_vf(jj,:) = (flux(ug) + flux(ud) - gamma_mp*(ud-ug))  * 0.5_prec
+      flux_h(ni)%flux_vf(jj,:) = Flux_FV(ug,ud)
       
       DF = ( flux_h(ni)%flux_subcells(jj,:)- flux_h(ni)%flux_vf(jj,:))
 

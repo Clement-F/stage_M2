@@ -242,6 +242,7 @@ CONTAINS
 
         IF (order_x.GT.9) THEN
         WRITE(*,*) "PROBLEM IN init_coef_legendre"
+        WRITE(*,*) "THE order_x IS TOO HIGH"
         STOP "THE order_x IS TOO HIGH"
         END IF
         
@@ -668,7 +669,6 @@ CONTAINS
         fct_h = MATMUL(Masse_inv,f_prod)
 
     END SUBROUTINE Projection_Pk
-
     SUBROUTINE Projection_Soli(soli, sol ,LOC ,ni ,sol_val)
         IMPLICIT NONE
 
@@ -679,41 +679,47 @@ CONTAINS
 
         CHARACTER (len=8),  INTENT(IN) :: LOC
         REAL(prec) :: YY
-        INTEGER :: jj, kk
+        INTEGER :: ii,jj, kk
 
             INTERFACE
-            FUNCTION soli(YY,ni,nb_var)
+            FUNCTION soli(YY,ni,nvar)
                 USE precis
                 IMPLICIT NONE
-                INTEGER,    INTENT(IN) :: ni,nb_var
+                INTEGER,    INTENT(IN) :: ni,nvar
                 REAL(prec), INTENT(IN) :: YY
-                REAL(prec), DIMENSION(nb_var) :: soli
+                REAL(prec), DIMENSION(nvar) :: soli
             END FUNCTION soli
             END INTERFACE
 
         solh =  0._prec
         IF(.not. present(sol_val)) THEN
         DO jj =size_base,1,-1
-            DO kk =1,nb_nodes
+            DO kk =1,nb_nodes;
+            ! DO ii = 1,nb_var
 
                 IF(TRIM(LOC) == "Loc") YY = Ref_to_loc(ni,x_quad(kk))
                 IF(TRIM(LOC) == "Ref") YY = x_quad(kk)
 
                 solh(jj,:) = solh(jj,:) + soli(YY,ni,nb_var)*sig_quad(jj,kk)*w_quad(kk)
-            END DO
+                ! print *,"solh",solh(jj,:)
+            ! END DO
+        END DO
         END DO
 
         ELSEIF(  present(sol_val)) THEN
         DO jj =size_base,1,-1
             DO kk =1,nb_nodes
-                solh(jj,:) = solh(jj,:) + sol_val(kk,:)*sig_quad(jj,kk)*w_quad(kk)
+        DO ii =1,nb_var
+                solh(jj,ii) = solh(jj,ii) + sol_val(kk,ii)*sig_quad(jj,kk)*w_quad(kk)
             END DO
+        END DO
         END DO
         END IF
 
         sol = MATMUL(Masse_inv,solh)
 
     END SUBROUTINE Projection_Soli
+
 
     SUBROUTINE Matrice_Masse_init
         IMPLICIT NONE

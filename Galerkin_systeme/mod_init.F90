@@ -32,8 +32,6 @@ CONTAINS
             max_dflux = abs(vit_adv)
             nb_var=1
         Case("burgers") 
-            nb_var=2
-        Case("burgers_SCL") 
             nb_var=1
         Case("Buckley") 
             nb_var=1
@@ -78,7 +76,6 @@ CONTAINS
         dt = 10._prec**(-8)
         theta_ = 1._prec
 
-
         CALL init_Adj
         CALL Coeff_quad_init
         CALL Coeff_DG_init
@@ -98,7 +95,15 @@ CONTAINS
 
         DO ni=1,nb_cell
             IF(subcell_use) THEN
-                DO j =1,nb_subcell; DO kk =1,nb_nodes
+
+                ! DO ii=1,nb_var
+                ! CALL Projection_Soli(Q_init,sol(ni)%base_poly(:,:), LOC=LLoc, ni= ni)
+                ! END DO
+                ! print *,sol(ni)%base_poly(1,:)
+
+                ! sol(ni)%val_subcells(:,:) = MATMUL(Projection_VF(:,:), sol(ni)%base_poly(:,:))
+
+                DO j =1,nb_subcell; DO kk =nb_nodes,1,-1
                     YY = Ref_to_loc(ni=ni, XX=Refsub_to_Ref(ZZ=x_quad(kk),n_sub =j))
                     sol(ni)%val_subcells(j,:) = sol(ni)%val_subcells(j,:) + Q_init(YY,ni,nb_var)*w_quad(kk)/2._prec
                 END DO; END DO
@@ -145,6 +150,8 @@ CONTAINS
             min_glob = eps0; max_glob = 1000._prec
         CASE("isentropique")
             min_glob = eps0; max_glob = 1000._prec
+        CASE("Riemann_Buckley")
+            min_glob = -3._prec; max_glob = 3._prec
         CASE("acoustic_wave")
             min_glob = eps0; max_glob = 1000._prec
         CASE("Blast")

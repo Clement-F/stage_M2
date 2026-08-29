@@ -25,7 +25,7 @@ MODULE mod_declaration
   Type subcells
     INTEGER :: index_m, index_s
     INTEGER,    DIMENSION(2) :: L, LL, R, RR
-    REAL(prec), DIMENSION(3) :: theta     !<- TEMP 
+    REAL(prec), DIMENSION(:),POINTER :: theta     !<- TEMP 
     ! REAL(prec), DIMENSION(1) :: theta     !<- TEMP 
     LOGICAL :: extrema
   END TYPE subcells
@@ -76,7 +76,7 @@ MODULE mod_declaration
   REAL(prec), parameter :: pi = acos(-1._prec)
   REAL(prec), parameter :: eps0=0.1_prec**(2*prec-3)
   REAL(prec) :: vit_adv, gamma_iso 
-  REAL(prec) :: err_L1, err_L2, err_Li
+  REAL(prec) :: err_L1, err_L2, err_Li, entropie_t
 
   CHARACTER(Len=8) :: LRef = "Ref", LLoc = "Loc", LSub = "SubRef" 
 
@@ -93,7 +93,7 @@ MODULE mod_declaration
   SUBROUTINE ALLOCATE_all
     IMPLICIT NONE
 
-    INTEGER :: i
+    INTEGER :: i,j
 
     ALLOCATE( sol(nb_cell), sol_step(nb_cell), flux_h(nb_cell+1), sol_exa(nb_cell))
     ALLOCATE( g(nb_cell +1, nb_var))
@@ -109,6 +109,7 @@ MODULE mod_declaration
     ALLOCATE( sig_1(size_base), sig_2(size_base), sig_quad(size_base,nb_nodes))
     ALLOCATE( coeff_DG(size_base, size_base) ) 
 
+    ALLOCATE( vc_star(nb_cell), alpha_entr(nb_cell), beta_entr(nb_subcell))
     ALLOCATE( coeff_Taylor(10,10), coeff_legendre(10,10) )
     ALLOCATE( RK_alpha(order_t,2), RK_beta(order_t), RK_time(order_t) )
     ALLOCATE( Time_stemp(print_rule+2))
@@ -132,6 +133,9 @@ MODULE mod_declaration
       ALLOCATE(flux_h(i)%flux_tilde(nb_subcell+1,nb_var));ALLOCATE(flux_h(i)%flux_VF(nb_subcell+1,nb_var)); ALLOCATE(flux_h(i)%flux_subcells(nb_subcell+1,nb_var));  
     
       ALLOCATE(sol_step(i)%deriv(size_base, nb_var))
+      DO j=1,nb_subcell
+      ALLOCATE(subcells_(i,j)%theta(nb_subcell))
+      END DO
     END DO
     
 
