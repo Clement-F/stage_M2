@@ -1,6 +1,5 @@
 MODULE mod_Monolith
     use mod_flux
-    use mod_Abgrall
   IMPLICIT NONE
 
 CONTAINS
@@ -79,7 +78,9 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: DF
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann
     REAL(prec), DIMENSION(nb_var) :: theta_temp
-    REAL(prec) :: A,B,C,M, E,U,rho
+    REAL(prec) :: A,B,C,M, E,U,rho, B_e,B_u,B_r,A_r
+
+    INTEGER :: pm
 
     THETA_pos = 1._prec
     theta_temp = 1._prec
@@ -124,68 +125,109 @@ CONTAINS
         C = DF(3)*u_Riemann(1)/gamma_mp - theta_temp(1)*sign(1._prec,DF(1))*u_Riemann(1)*DF(3)/gamma_mp 
         
         M = u_Riemann(1)*u_Riemann(3) - 0.5_prec * abs(u_Riemann(2))**2 !- max(A,eps0)
-        print *,theta_temp(1)
-        print *,"M", M
+        ! print *,theta_temp(1)
+        ! print *,"M", M
         A = abs(A); B= abs(B); C= abs(C)
         IF(M .LT. eps0) STOP "M"
 
         CALL Knapsack_greedy(THETA_pos,(/A,B,C /),M,(/THETA_pos(1),1._prec,1._prec/),3)
 
       ELSE IF(positivity == 4) THEN 
-        ! print *,"---------------"
-        ! critère pour rho^+ 
-        rho = u_Riemann(1) + theta_temp(1)*DF(1); 
-        E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
-        B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
-        A = 0.5_prec* (DF(2)/(gamma_mp*rho))**2
-        M = E - 0.5_prec *(U**2)
+        M   = u_Riemann(1)* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+        B_r = u_Riemann(1)*DF(3)/gamma_mp
+        IF(theta_temp(1) .GT. M/max(B_r,eps0))THEN 
+          Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
+        ELSE 
+          Theta_pos(2:3)= flat_positivity_criteria(0._prec,u_Riemann,gamma_mp,DF)
+          
+          B_u = abs(DF(2)*u_Riemann(2))/(gamma_mp)
+          B_e = abs(DF(3)*u_Riemann(1))/(gamma_mp)
+          A   = DF(2)**2/(2._prec* gamma_mp**2)
+          A_r = abs(DF(1)*DF(3)/gamma_mp**2)
 
-        ! if(M .LT. -eps0) print *,"neg M 1" ,M
-        theta_temp(2) = min(1._prec,M/max(A-B,eps0))
-        ! CALL Knapsack_greedy(theta_temp(2:3),(/A        ! critère pour rho^- 
-        rho = u_Riemann(1) - theta_temp(1)*DF(1)
-        E   = u_Riemann(3)/rho; U = u_Riemann(2)/rho
-        B = DF(3)/(gamma_mp*rho) + DF(2)/(gamma_mp*rho)*U  
-        A = 0.5_prec*(DF(2)/(gamma_mp*rho))**2
-        M = E - 0.5_prec *(U**2)
-
-        ! if(M .LT. -eps0) print *,"neg M 2" ,M
-        theta_temp(3) = min(1._prec,M/max(A+B,eps0))
+          THETA_pos(1)  = min((M-B_u*Theta_pos(2)- B_e*THETA_pos(3)-A*Theta_pos(2)**2)/max(B_r+A_r*Theta_pos(3),eps0) ,1._prec)
+        END IF
         
-        theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
-        THETA_pos(1:3)= minval(theta_temp(1:3))
-        ! THETA_pos(1) = theta_temp(1)
 
-      ELSE IF(positivity == 5) THEN 
-        ! print *,"---------------"
-        ! critère pour rho^+ 
-        rho = u_Riemann(1) + theta_temp(1)*DF(1); 
-        U = u_Riemann(2)/rho
-        B = (-DF(3) + DF(2)*U)/gamma_mp
-        A = DF(2)**2 /(2._prec*rho* gamma_mp**2)
-        M = u_Riemann(3) - (u_Riemann(2)**2)/(2._prec*rho)
-        ! print *,M, A+B
-        theta_temp(2) = 1._prec
-        if(M .GT. eps0) theta_temp(2) = max(min(1._prec,M/max(A+B,eps0)),0._prec)
-        ! critère pour rho^- 
-        rho = u_Riemann(1) - theta_temp(1)*DF(1); 
-        U = u_Riemann(2)/rho
-        B = (DF(3) - DF(2)*U)/gamma_mp
-        A = DF(2)**2 /(2._prec*rho* gamma_mp**2)
-        M = u_Riemann(3) - (u_Riemann(2)**2)/(2._prec*rho)
-        ! print *,M, A+B
-        theta_temp(3) = 1._prec
-        if(M .GT. eps0) theta_temp(3) = max(min(1._prec,M/max(A+B,eps0)),0._prec)
-
-        ! theta_temp(3) = min(1._prec,M/max(A+B,eps0))
         
-        theta_temp(2:3) = max(minval(theta_temp(2:3)),0._prec)
-        THETA_pos(2:3)= minval(theta_temp(2:3))
-        THETA_pos(1) = theta_temp(1)
+      
+      ELSE IF(positivity == 7) THEN
+        ! heuristique
 
+        Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
+
+        rho = u_Riemann(1) - theta_temp(1)*abs(DF(1))/gamma_mp; 
+        M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+        if(M .LT. eps0) Theta_pos(1) = 0._prec
+        
+        return
       END IF
     END IF
   END FUNCTION THETA_pos
+
+  FUNCTION flat_positivity_criteria(Theta_rho,u_Riemann,gamma_mp,DF) result(Theta)
+    IMPLICIT NONE
+    Real(prec), DIMENSION(2) :: Theta
+    REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann,DF
+    REAL(prec), INTENT(IN) :: Theta_rho, gamma_mp
+    REAL(prec) :: rho,M,B_u,B_e,A
+    INTEGER :: pm
+    
+        
+    DO pm = 0,1
+
+      if(pm == 0)  rho = u_Riemann(1) + Theta_rho*DF(1)/gamma_mp; 
+      if(pm == 1)  rho = u_Riemann(1) - Theta_rho*DF(1)/gamma_mp; 
+
+      IF(rho .LT. 0) print *,"rho<0",rho,DF(1),Theta_rho, u_Riemann(1)
+
+      M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+
+      IF(M .LT. eps0) THEN; Theta =0._prec;  return; END IF;
+
+      if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
+      if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
+
+      if(pm == 0) B_e = -(DF(3)/gamma_mp) * rho
+      if(pm == 1) B_e =  (DF(3)/gamma_mp) * rho
+        
+      A   = DF(2)**2/(2._prec* gamma_mp**2)
+
+      IF(M .LT. 0 .AND. pm ==1) return
+
+      
+      IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
+      
+      IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
+        Theta(1) = min(1._prec,Theta(1))
+        Theta(2) = min(1._prec,Theta(2))
+        return
+      END IF
+
+      IF(B_e .LT. eps0) THEN
+        Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e)))/(2._prec*A) )
+        Theta(2) = min(1._prec,Theta(2))
+      END IF
+
+      IF(B_u .LT. -A) THEN
+        Theta(1) = min(1._prec,Theta(1))
+        Theta(2) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), Theta(2))
+      END IF
+
+      IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
+        ! IF(M .LT. 0) print *,"M",M
+        IF(B_e .LT. 0) print *,"Be",B_e
+        IF(B_u .LT. -A) print *,"Bu",B_u
+        IF(A .LT. 0) print *,"A",A
+        
+        Theta(2) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(2))
+        Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e*Theta(2))))/(2._prec*A) )
+      END IF
+    END DO
+
+
+
+  END FUNCTION flat_positivity_criteria
 
   FUNCTION THETA_max(mc,pv, u_Riemann,gamma_mp,DF)
     IMPLICIT NONE
@@ -204,7 +246,7 @@ CONTAINS
     extrema = subcells_(mc(1),mc(2))%extrema .AND.  subcells_(pv(1),pv(2))%extrema 
 
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
-      DO ii = 2,3
+      DO ii = 1,1
         IF(max_rule==1) THEN; 
           alpha= 1.01_prec*(min_glob+eps0); 
           beta = 0.99_prec*(max_glob-eps0);
@@ -251,10 +293,12 @@ CONTAINS
       ELSEIF(entropie_rule==2) THEN 
 
         vg = Var_entrop(ug); vd = Var_entrop(ud)
-        IF((DOT_PRODUCT(vd-vg, DF)) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - &
-                                                        & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) / &
-                                                        & (DOT_PRODUCT((vd-vg), DF))
+        ! IF((((vd(1)-vg(1))* DF(1))) .GT. eps0) THETA_ent = (DOT_PRODUCT(vg,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ug) - &
+        !                                                 & DOT_PRODUCT(vd,(flux(ug)-flux(ud)+gamma_mp/2._prec *(ud-ug))) -Flux_entrop(ud)) / &
+        !                                                 & (DOT_PRODUCT((vd-vg), DF))
 
+        IF( (vd(1)-vg(1))* DF(1) .GT. eps0) THETA_ent =  ( (entrop_pot_flux(ud)-entrop_pot_flux(ug)) -DOT_PRODUCT(Flux_FV(ug,ud) ,(vd-vg))) / (DOT_PRODUCT((vd-vg), DF))
+        ! print *,'a'
           ! print *,"------------------------"
         ! write(*,fmt='(f10.6, f10.6, f10.6, f10.6)') vg, vd, vd-vg, DF
         ! write(*,fmt='(f10.6, f10.6, f10.6)')(entrop_pot_flux(ud)-entrop_pot_flux(ug)), -DOT_PRODUCT(flux_h(ni)%flux_vf(jj,:),(vd-vg)),(DOT_PRODUCT((vd-vg), DF))
@@ -357,7 +401,7 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var) :: DF,pos, LMP, ent,out1
     REAL(prec) :: gamma_mp
     REAL(prec) :: xi
-    Character(len=64) theta_outstring
+    Character(len=128) theta_outstring
 
     LOGICAL :: extrema
     INTEGER :: ni, jj
@@ -368,7 +412,7 @@ CONTAINS
     
     IF((mesh_out .AND. (time +dt .GE.  Time_stemp(n_imp+1)-eps0)).AND. outed_mesh ==0)  THEN
       write(unit=numfile_meshout, fmt='("---------",f10.6,"---------------")' ) time
-      theta_outstring = '(f7.4,1x,3(f5.3,1x),1x,3(f5.3,1x),1x,3(f5.3,1x),1x,l1)'
+      theta_outstring  = "(f7.4,1x"//Repeat(",f5.3,1x",nb_var)//",1x"//Repeat(",f5.3,1x",nb_var)//",1x"//Repeat(",f5.3,1x",nb_var)//",1x,l1 )"
     END IF
 
     DO ni=1,nb_cell; DO jj=1,nb_subcell
@@ -414,6 +458,7 @@ CONTAINS
 
           ! positivité pour le pb  d'Euler
           pos = THETA_pos(u_Riemann,gamma_mp,DF)
+          ! if(minval(pos) .LT. 0) print *,pos
           theta_(ni,jj,:) = min(theta_(ni,jj,:), pos)
           
           ! check si l'interface se trouve entre deux sous-cellules qui captent un extrema
@@ -421,8 +466,8 @@ CONTAINS
           theta_(ni,jj,:) = min(theta_(ni,jj,:), LMP)
 
           ! Entropie 
-          ! ent = THETA_ent(ug,ud,DF,gamma_mp)
-          ! IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
+          ent = THETA_ent(ug,ud,DF,gamma_mp)
+          IF(.not. extrema )theta_(ni,jj,:) = min(theta_(ni,jj,:), ent)
             
 
           theta_(ni,jj,:) = min(max(theta_(ni,jj,:),0._prec),1._prec)
@@ -439,6 +484,7 @@ CONTAINS
       subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj,:)/2._prec + subcells_(voi_L(1),voi_L(2))%theta
       subcells_(voi_R(1),voi_R(2))%theta = theta_(ni,jj,:)/2._prec + subcells_(voi_R(1),voi_R(2))%theta
       ELSE IF(coeff_smooth == 0) THEN 
+      ! print *,voi_L
       subcells_(voi_L(1),voi_L(2))%theta = theta_(ni,jj,:)
       END IF
 
