@@ -27,8 +27,7 @@ La particularité de la méthode DG est le choix de l'espace d'approximation dan
 \end{wrapfigure}
 Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i,\, \omega_j$. D'où le nom de schéma de Galerkin \textit{Discontinue}. 
 Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$ dans \eqref{Formulation_Faible}, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque maille. 
-De plus par la théorie des formulations variationnelles \red{besoin d'une explication plus clair}, il est raisonnable de regarder si l'équation est vraie pour des fonctions tests dans $V_h$.
-
+Il est alors suffisant de prendre nos fonctions tests dasn $V_h$.
 
 \begin{equation}\label{Formulation_Variationnelle}
     \int_{\omega_i} \partial_t \mathbf{u_h} \phi dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \phi dx + \left[ \mathbf{f}(\mathbf{u_h})\,\phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall \phi \in \mathbb{P}^k
@@ -83,7 +82,7 @@ On se retrouve alors avec une équation régissant l'évolution des moments poly
 \paragraph{condition initiale}
 \begin{wrapfigure}{r}{0.4\textwidth} 
     \includegraphics[width =0.3\textwidth]{schema/polynome_init.png}
-    \caption{Projection d'une fonction sur $V_h$ avec peu de mailles. \red{mauvais titre}}
+    \caption{Projection d'une fonction sur $V_h$.}
 \end{wrapfigure}  
 Nous avons supposé précedemment que $u_h$ était dans $V_h$ en tout instant ce qui nous permettait d'étudier les changements de $\underline{{u}^i}_p(t)$. \\ 
 Cela laisse supposer que $u_0$ est dans $V_h$. Cette condition nous empêcherait de prendre des conditions initiales de Riemann (discontinuité en $\tilde{x}_0$ entre deux états constants) pour tout $x\in \mathbb{D}$.\\

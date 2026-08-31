@@ -11,7 +11,7 @@ nb_var = int(lines[0][10:16])
 orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
-space = orderx+1
+space = nb_sub
 nx = nb_cell *space
 
 #sm=100
@@ -119,7 +119,7 @@ for k in range(0,sm,1):
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
    # plt.ylim(m,M);plt.xlim(-0.,1.)
-    # plt.ylim(-.5, 1.5)
+    plt.ylim(-3.5, 3.5)
     plt.title("plot at time "+str([T[k]]))
     plt.legend()
     plt.show()    
@@ -154,12 +154,13 @@ if(False):
     #     if(i>0): plt.plot(X_cell[i],U_t[k,J-1,0],"b",marker="x")        
     #     plt.plot(X[J:J+orderx+1],U_t[k,J:J+orderx+1,0],'b-', marker='.')
     
-    plt.plot(X_B,U_B, 'r')
+    plt.plot(X_B,U_B, 'k',marker='None',label="sol exacte")
     
-    plt.plot(X,U_t[k],'b', marker=".")
+    plt.plot(X,U_t[k],'c', marker=".",label="LMP + Rel")
     #plt.plot(X,U_t2[k],'go')
     plt.ylim(-.4,1.2); plt.xlim(-1.,1.)
     #plt.show()     
+    plt.legend(loc=1)
     plt.savefig("endfig_save.png")    
 
 

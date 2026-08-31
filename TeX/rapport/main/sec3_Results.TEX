@@ -3,7 +3,7 @@ Durant toute cette section, sauf si explicité, nous utiliserons un flux numéri
 
 \subsection{Schéma RKDG avec flux reconstruit}
 Avant de passer au coeur du sujet, il s'agirait de savoir quel résultat attendre d'un schéma \emph{DG} sans corrections.
-Pour ce faire, nous allons regarder divers problème de conservation scalaire (LCS) et la solution d'un schéma DG à différents ordre.
+Pour ce faire, nous allons regarder divers problème de conservation scalaire (LCS) et la solution d'un schéma DG à différents ordre mais à degrée de liberté équivalents.
 
 \subsubsection{problème d'advection linéaire}
 Le problème d'advection définit par $f(u)=v\,u$, correspondant à une translation de la solution initiale $u_0$ à une vitesse $v \in \R$. 
@@ -11,24 +11,34 @@ En plus d'être un problème linéaire, ce problème possède une solution expli
 
 \paragraph{advection d'un signal sinusoidale}
 Nous commencerons par tester le schéma dans le cadre d'une solution régulière $u_0 =sin(2 \pi x)$ et nous regarderons comment les schéma à différents ordre déforme la solution. 
-
-% inserer images sinus à t=0, 0.5, 2., 10.
-% titre ~ comparaison de schéma à degrée de liberté équivalent.
+l'ordre 1 sera calculé sur 50 cellules, l'ordre 3 sur 15 cellules et l'ordre 9 sur 5 cellules.
+\begin{figure}
+    \centering
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/sinus/save_0.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/sinus/save_2.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/sinus/save_10.0.png}}
+    \caption{schéma DG d'ordre 1,3,9 avec 180 DoF}
+\end{figure}
 
 On peut voir que dans le cadre d'une solution régulière, le schéma à l'ordre 1 produit une très grande dissipation.
 Les deux autres schémas produisant des solutions similaire à la solution exacte.\\
 
 \paragraph{advection d'un signal composite}
 Le deuxième cas test est composé de 4 signaux différents : un signal gaussien, rectangulaire, triangulaire et un signal parabolique.
-
-% inserer images composite à t=0, 0.5, 2., 10.
-% titre ~ comparaison de schéma à degrée de liberté équivalent.
+l'ordre 1 sera calculé sur 180 cellules, l'ordre 3 sur 60 cellules et l'ordre 9 sur 20 cellules.
+\begin{figure}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/composite/save_0.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/composite/save_2.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/composite/save_10.0.png}}
+    \caption{schéma DG d'ordre 1,3,9 avec 180 DoF}
+\end{figure}
 
 On peut voir que comme dans le cas test précédent, le schéma à l'ordre 1 se dissipe très vite ce qui rends le signal original irreconnaissable.
 à contrario, les schémas à l'ordre 3 et 9 sont très proche de la solution exacte, le schéma à l'ordre 9 étant presque confondu avec la solution exacte. 
 On note cependant une petite dispersion du schéma à l'ordre 3 sur le signal gaussien et triangulaire.
 On remarque aussi de petite oscillations sur le signal rectangulaire pour le schéma à l'ordre 9.\\
 
+\noindent
 On voit donc aux travers de ces deux cas tests que pour le problème de l'advection linéaire, 
 à degrée de liberté égal, il vaut mieux prioriser un schéma à grand ordre pour éviter tous phénomènes de dissipation.
 
@@ -38,17 +48,29 @@ Ce problème est important à étudier car il n'est pas linéaire.
 En particulier, les intégrales volumiques ne sont plus exactes car $f(u_h)\sigma \in \mathbb{P}^{3k}$ là où nos méthodes de quadratures ont été calibrée pour intégrée de manière exactes des polynomes $\mathbb{P}^{2k}$.
 Il serait possible de changer la méthode de quadrature pour rendre les intégrales exactes mais il est plus intéressant de regarder ce qui se passe lorsqu'elles ne le sont plus exactes.
 
-% inserer images sinus burgers à t= 0.15,0.2,2.
-
-% inserer images shock burgers à t= 0.0,1.,3.2
+\begin{figure}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/sinus/save_0.0.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/sinus/save_0.1.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/sinus/save_0.2.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/sinus/save_1.0.png}}
+    \caption{schéma DG d'ordre 1,3,6 avec 120 DoF}
+\end{figure}
 
 On peut observer que dans le cas d'une solution initiale régulière, tout les schéma sont exactes à différents degrée de précision.
-Cependant, dès que l'on atteint le temps de singularité, \emph{i.e} l'instant où il n'exsite plus de solution forte mais que des solutions faibles, 
+Cependant, dès que l'on atteint le temps de singularité, \emph{i.e} l'instant où il n'existe plus de solution forte mais que des solutions faibles, 
 on détecte de fortes oscillations dans les schémas d'ordre élevée.\\
+
+\begin{figure}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/choc/save_0.0.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/choc/save_0.24.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/choc/save_0.8.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/burgers/choc/save_1.0.png}}
+    \caption{schéma DG d'ordre 1,3,6 avec 300 DoF}
+\end{figure}
 
 Nous avons le résultat inverse que dans le cas de l'advection linéaire. 
 Dans ce cas-ci, il est potentiellement préférable d'utiliser un schéma d'ordre faible, 
-si ce n'est d'ordre 1, pour éviter tout phénomène d'oscillations ou phénomène de Gibbs.
+si ce n'est d'ordre 1, pour éviter tout phénomène d'oscillations ou de Gibbs.
 
 \subsubsection{Problème de Buckley}
 Le flux de Buckley $f(u) = \frac{4u^2}{4u^2 + (1-u)^2}$ est un flux très intéressant à étudier 
@@ -57,10 +79,14 @@ Ce dernier point peut nous compliquer la vie lors du calcul de $\gamma$. Pour ce
 
 Nous traiterons deux cas tests pour ce flux, le premier est un signal rectangulaire, le deuxième est un problème de Riemann particulier.
 
-% inserer figures
+\begin{figure}[h!]
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/buckley/endfig_save.png}}
+    \subfigure[]{ \includegraphics[width=0.45\linewidth]{../../images/buckley/save_choc.png}}
+    \caption{schéma DG d'ordre 1,3,6 avec 360 DoF}
+\end{figure}
 
-On voit dans ces deux cas que le schéma DG d'ordre 3 produit de grandes osscillations tandis que le schéma VF se rapproche de la solution. \\
-
+On voit dans ces deux cas que le schéma DG d'ordre 3 et plus produisent de grandes osscillations 
+tandis que le schéma VF se rapproche de la solution. \\
 
 On peut au travers la motivation derrière le schéma monolithique, un schéma VF est trop dissipatif et d'ordre 1 
 tandis que les schémas DG produise trop d'oscillations mais sont très précis pour des solutions régulière.
@@ -79,8 +105,14 @@ nous allons présenter les résultats qu'il est possible d'obtenir avec un sché
 \paragraph{Advection d'un signal sinusoidale}
 Si l'on compare le profil des solutions pour quatres critères différents, 
 une solution où l'on impose le principe de maximum global (PMG), une où l'on impose le principe de maximum local (PML) une où l'on impose un principe de maximum local que l'on relaxe (PML + Rel) 
-que l'on compare à un schéma DG de même ordre qui nous servira de témoin.
+que l'on compare à un schéma DG de même ordre qui nous servira de témoin. Tout les schéma auront le même maillage de 15 cellules.
 
+\begin{figure}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/sinus/save_mon_0.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/sinus/save_mon_2.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/sinus/save_mon_10.0.png}}
+    \caption{schéma $\mathbb{P}^2$ DG/VF sur 15 cellules avec différents critères}
+\end{figure}
 % inserer image profils sinus + convergence
 
 On peut voir que la solution où l'on a imposé un PMG et celle où l'on a imposé un PML relaxé possède un profil similaire au témoin et à la solution exacte,
@@ -89,15 +121,30 @@ nous avons surcompensé et la solution obtenue ne suit plus la solution exacte.
 Cette tendance se suit sur le graphe de convergence où l'on peut voir que le schéma avec critère PML possède une convergence à l'ordre 2 et ce même si le schéma DG est d'ordre 4.\\
 On remarque que le schéma PMG possède un problème similaire car même si invisible à l'oeil nu, l'erreur causé par ce critère est d'ordre 2 et le fait donc converger à la même vitesse que le critère PML.
 
-% inserer maillage sur le côté
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{../../images/schema/convergence_sinus_adv.png}
+    \caption{convergence de l'erreur pour trois schéma monolithique d'ordre 4 avec trois critère différents}
+\end{figure}
 
-Une dernière remarque intéressante est que le schéma PML relaxé semble étrangement similaire au schéma témoin. Il s'agit en vérité du même \red{ref maillage}
+Une dernière remarque intéressante est que le schéma PML relaxé semble étrangement similaire au schéma témoin. Il s'agit en vérité du même
 En effet, si l'on regarde dans le détail, le critère PML n'influence en vérité que les extremas régulier de la solution. 
 La relaxation du critère PML va alors nous donner $\theta=1$ tout au long du schéma et de ce fait rendre ce schéma identique en tout point au schéma témoin.
 
+\begin{figure}[h!]
+    \subfigure[]{\includegraphics[width=0.45\linewidth]{../../images/schema/relax_mesh.png}}
+    \subfigure[]{\includegraphics[width=0.45\linewidth]{../../images/schema/LMP_mesh.png}}
+    \caption{activations des différents critères sur $t=[0,2],x=[-1,1]$ }
+\end{figure}
+
 \paragraph{Advection d'un signal composite}
 
-% inserer image profils comp
+\begin{figure}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/composite/save_mon_0.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/composite/save_mon_2.0.png}}
+    \subfigure[]{ \includegraphics[width=0.3\linewidth]{../../images/advection/composite/save_mon_10.0.png}}
+    \caption{schéma $\mathbb{P}^2$ DG/VF sur 60 cellules avec différents critères}
+\end{figure}
 
 Si l'on regarde maintenant le profil des solutions pour un signal composite, 
 on remarque tout d'abord que le profil de la solution avec PML semble être séparer des autres de manière signifiante. Cela peut être du aux changement très accentuer de la solution.
@@ -110,9 +157,11 @@ Ces phénomènes sont moins fréquent lorsque l'on utilise un tel schéma pour d
 
 \subsubsection{Problème de Buckley}
 
-\subsubsection{Problème de Buckley}
-
-% comparaison profils DG/LMP/LMP+Rel pour le creneau
+\begin{figure}
+    \subfigure[]{\includegraphics[width=0.45\linewidth]{../../images/schema/comp_buckley.png}}
+    \subfigure[]{\includegraphics[width=0.45\linewidth]{../../images/schema/comp_buckley_LMP.png}}
+    \caption{schéma $\mathbb{P}^2$ DG/VF sur 120 cellules avec différents critères}
+\end{figure}
 
 On peut voir ici deux types de solutions, les solutions DG/PMG et les solutions PML
 Nous voyons tout d'abord que l'oscillation à l'arrière du signal est propre au schéma DG et que même si le schéma GMP possède des oscillations similaires,
@@ -128,11 +177,15 @@ Cependant nous avons ici un système d'équations et le principe du maximum ne s
 Il est remplacé par un principe plus stricte, le principe de positivité, qui n'est plus relaxable.
 \paragraph{Tube de Sod modifié}
 
-Le cas test du tube de Sod, ici modifié comme dans \red{Ref ici}, 
+Le cas test du tube de Sod, ici modifié comme dans, 
 est un cas test important dans le domaine de la simulation des fluides et du système d'Euler en particulier.
 Il est très simple à mettre en place mais étant un problème de type Riemann, nous donne beaucoup d'informations sur le comportement de nos solutions.
 
-% inserer images  (pos, pos+LMP, pos+LMP+Rel)
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\linewidth]{../../images/schema/comp_Sod.png}
+\end{figure}
 
 Plusieurs remarques, tout d'abord, nous avons fait le choix de ne pas inclure de solutions DG dans ce schéma car à ordre équivalents, 
 soit la solution existe, mais l'ordre de la méthode est trop bas pour voir une quelconque différence entre les différentes méthodes,
@@ -142,29 +195,62 @@ Nous remplaçons cette solution par la solution avec critère de positivité (ab
 Si l'on ignore maintenant la solution pos, on peut voir que la solution PML et PML relaxé sont identique. 
 En effet, pour ce problème le détecteur d'extremas régulier apporte peu de contributions. 
 
-
 \paragraph{Flux isentropique régulier}
 
 Le cas test du flux isentropique régulier est un cas test semblable au cas test du sinus dans le problème de Burger, 
 dans le sens où l'on part d'une solution régulière où il est possible de trouver une solution exacte par dichotomie jusqu'à un temps de singularité ($t=0.2$).
 
-% inserer images (pos, pos+LMP, pos+LMP+Rel)
+\begin{figure}
+    \subfigure[]{\includegraphics[width=0.3\linewidth]{../../images/schema/comp_isent.png}}
+    \subfigure[]{\includegraphics[width=0.3\linewidth]{../../images/schema/comp_isent_zoom.png}}
+    \subfigure[]{\includegraphics[width=0.3\linewidth]{../../images/schema/comp_isent_post.png}}
+\end{figure}
 
 Au premiers abord, nous ne voyons pas ou peu de différences entre chaque solutions, il y a cependant deux point de différences majeurs. 
 Le premier étant l'extrema en $x=0.5$ et comment la solution le prends en compte. En effet, on peut voir que la solution pos+PML va applatire cette extrema contrairement aux solutions pos et pos+PML relaxé.
 Le deuxième point est le traitement de la discontinuité crée en $x=-0.5$ à $t=0.2$. 
 Il aurait été cette fois-ci possible de rajouter la solution DG pour comparer car le critère de positivité ne s'active peu ou pas avant le temps $t=0.2$.
-Cependant à mesure que l'on approche du temps de singularité, la solution DG oscille de plus en plus et crée une explosion du critère CFL, ce qui fait arrêter le code.
-
-% inserer convergence graphe
-\red{rajouter convergence}
-
-\paragraph{Problème d'Interaction de choc accoustique-onde}
+Cependant à mesure que l'on approche du temps de singularité, la solution DG oscille de plus en plus et crée une explosion du critère CFL, ce qui fait arrêter le code. 
+Nous obtenons le même phénomène si l'on ne prend que le critère PML.
 
 \paragraph{Interaction d'onde de choc}
 
 Le cas test de l'interaction d'onde de choc est le seul cas test où pour obtenir une solution d'ordre élevée, voir d'ordre supérieur à 1, 
 il est \emph{nécessaire} d'utiliser et le critère de positivité et le critère PML. 
-Si l'un des deux critère manque, il est presque garantie que l'on obtienne une pression négative.
+Si l'un des deux critère manque, il est presque garantie que l'on obtienne une pression négative.\\
+Ce cas test nous permettra de tester les deux critère de positivité que nous avons évoqué précédemment. 
+Pour alleger les notations, nous utiliserons "unif" pour décrire le premier critère qui donne un unique $\theta$ 
+et "conv" pour décrire le deuxième critère qui donne un $\theta$ dans un domaine convexe.
 
-Ce cas test nous permettra de tester les deux critère de positivité que nous avons évoqué précédemment.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{../../images/schema/comp_blast.png}
+    \caption{schéma $\mathbb{P}^2$ DG/VF sur 100 cellules avec PML et différents critère de positivité}
+\end{figure}
+
+Si l'on compare deux solutions obtenues avec les deux critères, on ne voit que très peu de différences. 
+Cela s'explique car le critère de positivité même si primordiale pour l'existence d'une solution pour ce cas test, 
+n'est appliquée que sur quelques cellules. Il est donc plus utile de comparer directement les $\theta$ obtenues pour ces deux critères.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{../../images/schema/theta_unif.png}
+    \caption{critère de positivité "unif": $\theta = \min(\theta^{\rho>0}, \theta^{p>0})$ }
+\end{figure}
+
+\begin{figure}
+    \subfigure[]{\includegraphics[width=0.3\linewidth]{../../images/schema/theta_rho.png}}
+    \subfigure[]{\includegraphics[width=0.3\linewidth]{../../images/schema/theta_rhou.png}}
+    \subfigure[]{\includegraphics[width=0.3\linewidth]{../../images/schema/theta_rhoe.png}}
+    \caption{critère de positivité "conv", (a) : $\theta_{\rho}$, (b) : $\theta_{\rho u}$, (c) : $\theta_{\rho e}$ }
+\end{figure}
+
+Plusieurs chose, tout d'abord, nous observons bien que le critère s'applique au mêmes endroit. 
+Si l'on supperpose les interfaces où les trois ($\theta_{\rho}$,$\theta_{\rho u}$,$\theta_{\rho e}$) sont inferieurs à $1$, on obtient bien la même forme triangulaire que pour le critère "unif".
+On note de plus que comme voulu $\theta_\rho^{\text{conv}} \geq \theta_\rho^{\text{unif}}$ et que les deux autres sont eux aussi en moyenne supérieur à leur contrepartie du critère "unif".
+Cela nous amène à avancer deux observations : 
+le critère "conv" est suffisament robuste pour des cas tests nécessitant un critère de positivité 
+et il est en moyenne meilleur que le critère "unif".\\
+Malheureusement nous n'avons pas pu explorer plus cette recherche sur d'autres cas tests du même accabi que l'intéraction d'onde de choc.
+

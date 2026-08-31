@@ -1,5 +1,5 @@
 \documentclass[16pt]{article}%Documentation de la class
-\usepackage[margin=2cm,a4paper]{geometry}
+\usepackage[margin=3cm,a4paper]{geometry}
 % \geometry{left=2.cm,right=2.cm,top=2.cm,bottom=2.cm}
 \input{../macro}
 \input{../tikz_figure.TEX}
@@ -19,32 +19,43 @@
 \title{  Mémoire \\
   \large sur un schéma monolithique DG/FV}
 \author{clement fontan\\
-\textit {mémoire encadré par Mr F. Vilar}}
+\textit {mémoire encadré par M. F. VILAR}}
 \date{Juin 2026}
 
 \begin{document}
 \maketitle
+\tableofcontents
 \section{Remerciements}
-\lipsum[1]
+\noindent
+Je souhaiterais tout d'abord remercier mon encadrant François VILAR qui m'a guidé durant ces 5 mois de stages. \\
+Je remercie aussi mes amis Assia CHTITAH, Arthur TIMBEAU, Vorobiov HEORHII qui m'ont épaulé durant mon stage et m'ont aidé pour la rédaction de mon rapport.\\
+Je remercie mes parents qui m'ont aidé à leurs insu à vulgariser mon sujet. \\
+Je remercie aussi ma famille qui m'ont supporté durant mes "vacances d'apprentissage" où j'ai été un peu plus distant qu'à mon habitude. \\
+Je remercie enfin tous les doctorants de l'IMAG qui ont su faire passer ces 5 mois à vitesse supraluminique.
+
 \section{Introduction}
 
-Ce rapport fait suite à un stage de 5 mois au sein de l'institut Montpelliérain Alexander Grothendieck supervisé par Mr Vilar François.
-Durant ce stage, j'ai pu apprendre différentes méthodes de résolution numérique d'équations hyperboliques parmis 
-lesquelles la méthode \emph{Volumes Finis} (\emph{VF}), la méthode \emph{Galerkin Discontinue} (\emph{DG}) et le schéma \emph{monolithique DG/VF} sur sous-mailles comme décrit par Vilar \cite{VILAR2025}.\\
+Pour résoudre des systèmes hyperboliques, il est souvent fait usage de méthode volumes finis comme le schéma de Godunov ou de Rusanov. 
+Il est possible d'augmenter leurs précisions par plusieurs méthodes. 
+L'une de ces méthodes étant la méthode de Galerkin discontinue qui au lieu de traiter la solution comme une constante par morceaux 
+lui donne la possibilité d'être polynomiale par morceaux. Cette amélioration cependant possède une contrepartie, celle des oscillations dit le phénomène de Gibbs.
+Une solution pour pallier à ce problème est de combiner les deux schéma VF et DG en fonction du besoin, il s'agit là d'un schéma monolithique. 
+Le schéma monolithique dont nous discuterons dans ce rapport est particulier, dans le sens où il fait usage d'un sous-maillage pour combiner les deux schémas.
 
-Les objectifs de ce stage étant tout d'abord de se familiarisé avec le Fortran 90 
-puis de comprendre les schémas DG pour des problèmes hyperboliques non-linéaires pour enfin
-étudier le fonctionnement du schéma monolithique 1D sur un problème scalaire tout comme sur un problème système
+Ce rapport fait suite à un stage de 5 mois au sein de l'institut Montpelliérain Alexander Grothendieck, supervisé par M. VILAR François.
+Les objectifs de ce stage étant tout d'abord de se familiariser avec le Fortran 90, 
+puis de comprendre les schémas DG pour des problèmes hyperboliques non-linéaires, pour enfin
+étudier le fonctionnement du schéma monolithique DG/VF 1D sur un problème scalaire tout comme sur un problème système,
 pour pouvoir par la suite l'implémenter dans un cadre multi-dimensionnel.  \\
 
 Nous ferons tout d'abord un rappel sur les équations hyperboliques et leurs types de solutions. 
-Nous enchainerons sur une mise en place de la formulation d'une semi-discrétisation par méthode \emph{Galerkin Discontinue} 
-et comment ce schéma peut se réecrire en considérant des sous-mailles
-suivie d'une partie sur les schémas \emph{Runge-Kutta Strong Stability Preserving} nous permettant d'obtenir un schéma entièrement discrétiser.
-Ceci sera suivie d'une partie détaillant comment obtenir le schéma \emph{monolithique DG/VF} sur sous-mailles à partie du schéma DG sur sous-mailles 
-ainsi que diverses propriétés qu'il est possible d'obtenir en utilisant un tel schéma 
-Nous finirons par une partie détaillant les résultats obtenues pour ces schémas sur différents cas tests de la litérature. 
-Tout d'abord sur les schémas DG puis sur le schéma monolithique.
+Nous enchainerons sur une mise en place d'une semi-discrétisation par méthode \emph{Galerkin Discontinue} 
+et comment cette méthode peut se réécrire en considérant des sous-mailles.
+Nous parlerons ensuite des schémas \emph{Runge-Kutta Strong Stability Preserving} nous permettant d'obtenir un schéma entièrement discrétisé.
+Ceci sera suivi d'une partie détaillant comment obtenir le schéma \emph{monolithique DG/VF} sur sous-mailles à partie du schéma DG sur sous-mailles 
+ainsi que diverses propriétés qu'il est possible d'obtenir en utilisant un tel schéma. 
+Nous finirons par une partie détaillant les résultats obtenus pour ces schémas sur différents cas tests de la littérature,
+tout d'abord sur les schémas DG puis sur le schéma monolithique.
 
 \newpage
 \input{sec0_Rappels.TEX}
@@ -52,8 +63,22 @@ Tout d'abord sur les schémas DG puis sur le schéma monolithique.
 \input{sec2_Monolith.TEX}
 \input{sec3_Results.TEX}
 \section{Conclusion}
-Au cours de ce rapport, nous avons pu voir comment il est possible de réecrire un schéma Galerkin Discontinue 
-en changeant la base de polynôme
+
+Au cours de ce rapport, nous avons pu voir comment il est possible de réécrire un schéma Galerkin discontinue comme un schéma volumes finis avec des flux reconstruits
+en passant les degrées de liberté du polynôme sur ses sous-valeurs moyennes et comment un schéma Runge-Kutta peut préserver la stabilité d'une solution.
+Nous avons ensuite expliqué comment mêler les deux schémas VF et DG en un seul schéma monolithique écrit sur les sous-mailles en utilisant un paramètre d'hybridation $\theta$
+puis comment choisir un $\theta$ en fonction de nos besoins.
+Nous avons enfin observé la précision de la méthode DG mais aussi le phénomène de Gibbs qui découle de sa précision. 
+Et comment le choix de différents $\theta$ peuvent affecter la solution de différentes manières.
+Nous avons aussi pu découvrir un nouveau critère sur $\theta$ nous permettant de garantir la positivité de $p$ pour le système de Euler.
+
+On fera mention d'une partie qui n'a pas pu être faite à temps pour la fin de ce rapport : 
+il était prévu que l'on s'attarde plus sur l'entropie au travers de deux choix de $\theta$, nous permettant de garantir une dissipation de l'entropie, détaillés dans \cite{VILAR2025},
+ainsi qu'une autre méthode de reconstruction de flux par méthode d'Abgrall, nous garantissant une conservation de l'entropie. 
+Nous avons cependant décidé d'enlever ces parties car nous n'avons pas eu le temps de vérifier numériquement la méthode de reconstruction de flux.
+
+Une suite possible est une extension 2D ou 3D du schéma monolithique comme détaillé dans \cite{VILAR2025}. 
+Il est aussi possible de rester en 1D et d'étudier le système de Navier-Stokes qui demande un traitement particulier car non hyperbolique.
 
 \input{annex.TEX}
 \newpage

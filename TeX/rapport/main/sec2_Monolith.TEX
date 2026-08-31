@@ -29,7 +29,7 @@ De manière générale, on dit que le sous-maillage est \textit{admissible} si e
 \end{wrapfigure}
 Pour avoir une équivalence au sens le plus strict possible, il nous faut $N_s = N_k$. 
 Dans le cas contraire ($N_s > N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  
-qui nous donnera les moments polynômiaux au sens des moindres carrés (voir \ref{moindre_carré}). \\
+qui nous donnera les moments polynômiaux au sens des moindres carrés. \\
 Il est alors simple de passer de la représentation polynômiale $\underline{U}$ à la représentation en sous-moyennes $\overline{U}$ ou inversement par ces relations: 
 \begin{equation}\label{passage_svf}
     \overline{U} = \mathcal{P}\underline{U} \qquad \underline{U} = \mathcal{R}\overline{U}
@@ -137,7 +137,7 @@ $n_{mp}= -n_{pm}$, et donc : $F^{\text{FV}}_{mp} = - F^{\text{FV}}_{pm}$, $\wide
 En posant $\theta_{pm} = \theta_{mp}$, on obtient : $\widetilde{{u}}_{pm}^- = \widetilde{{u}}_{mp}^+ = {u}_{mp}^{*,FV} + \theta_{mp} \frac{\Delta F_{mp}}{\gamma_{mp}}$, car $ {u}_{mp}^{*,FV} = {u}_{pm}^{*,FV}$ \\
 
 Si l'on souhaite que la solution soit dans un ensemble convexe $\Omega$, tant que $\overline{{U}}^{n} \in \Omega$, 
-il est toujours possible de trouver $\theta_{mp}$ pour que $\overline{{U}}^{n+1} \in \Omega$, car ${u}_{mp}^{*,FV}$ est combinaison convexe de $ \overline{{u}}_{mp}^{n}$ {\color{red} Voir et faire annexe}.
+il est toujours possible de trouver $\theta_{mp}$ pour que $\overline{{U}}^{n+1} \in \Omega$, car ${u}_{mp}^{*,FV}$ est combinaison convexe de $ \overline{{u}}_{mp}^{n}$.
 
 \subsection{Choix du paramètre d'hybridation $\theta_{mp}$}
 
@@ -162,7 +162,7 @@ on trouve la condition suffisante pour obtenir un schéma GMP :
 \paragraph{Local  Maximal Principle (LMP)}
 On sait que la solution entropique d'un problème scalaire suit le principe du maximum local \emph{i.e} : 
 \begin{equation}
-    \beta_i^n := \max_{j\in\{i-1,i+1\}} u_j^n \geq u_i^{n+1} \geq \min_{j\in\{i-1,i+1\}} u_j^n =: \alpha_i^n
+    \beta_i^n := \max_{j\in\{i-1,i,i+1\}} u_j^n \geq u_i^{n+1} \geq \min_{j\in\{i-1,i,i+1\}} u_j^n =: \alpha_i^n
 \end{equation}
 Il est possible d'imposer ce critère sur chaque sous-cellule d'une manière similaire qu'on impose le principe du maximum global,
 la différence principale est qu'on regarde $\widetilde{{u}}_{mp}^{-}$ et $\widetilde{{u}}_{mp}^{+}$ de manière différente car
@@ -243,12 +243,12 @@ En transposant cela dans l'écriture du schéma hybride, on cherche $\theta_{mp}
 \end{equation}
 Comme $\theta \in [0,1]$, on sait que $\theta^2 \leq \theta$. La condition s'écrit alors : 
 \begin{equation}
-\theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|} \min \left(\beta-{u}_{mp}^{*,FV},{u}_{mp}^{*,FV} - \alpha  \right)
-, \frac{M}{|B|+ min(A,0) } \right) 
+\theta_{mp} = \min \left(1, \theta_\rho^{\rho>0}, \frac{M}{|B|+ min(A,0) } \right) 
 \end{equation}
 où $M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2} = \rho^* \varepsilon^*>0 $, 
 $B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
-$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$.\\
+$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$ 
+et $\theta_\rho^{\rho>0} = \min \left(1, \frac{\gamma}{|\Delta F|}  {\rho}_{mp}^{*,FV} \right)$ \\
 
 Cette condition garantit à la fois que $\widetilde{\rho}^{\pm} >0$ mais aussi que $\widetilde{\varepsilon}^{\pm}>0$ 
 
