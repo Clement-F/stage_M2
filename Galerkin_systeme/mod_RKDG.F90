@@ -385,6 +385,7 @@ CONTAINS
             xi = Ref_to_loc(i,x_submiddle(j))
             out = sol(i)%val_subcells(j,:)
 
+            save_format = "(f10.6"//Repeat(",f16.6",nb_var)//", f10.6)"
             write(unit=numfile_sol,    fmt=save_format, advance="no") xi,out !, Ref_to_loc(i,x_subcell(j))
             IF(TRIM(flux_name)== "Euler" ) THEN
             ! u_ = sol(i)%val_quad(j,:); pression_ = pression(u_)
