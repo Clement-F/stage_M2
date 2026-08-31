@@ -26,7 +26,7 @@ La particularité de la méthode DG est le choix de l'espace d'approximation dan
     \caption{Projection $\mathbb{L}^2$ sur $V_h$.}
 \end{wrapfigure}
 Nous notons ici qu'il n'y a aucune condition de continuité entre deux mailles $\omega_i,\, \omega_j$. D'où le nom de schéma de Galerkin \textit{Discontinue}. 
-Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$ dans \eqref{Formulation_Faible}, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque mailles. 
+Si l'on substitue $\mathbf{u}$ par $\mathbf{u_h}$ dans \eqref{Formulation_Faible}, comme il n'y a pas de relation entre mailles, on peut séparer le problème sur chaque maille. 
 De plus par la théorie des formulations variationnelles \red{besoin d'une explication plus clair}, il est raisonnable de regarder si l'équation est vraie pour des fonctions tests dans $V_h$.
 
 
@@ -35,7 +35,7 @@ De plus par la théorie des formulations variationnelles \red{besoin d'une expli
 \end{equation}
 \noindent
 Remarque : en pratique, on se placera plus souvent sur une maille de référence $\omega=]-1,1[$ et l'on effectuera les calculs par un isomorphisme avec $\omega_i$,  $\mathfrak{R}^i$. \\
-On remarque très vite un problème dans cette écriture : $\mathbf{u_h}$ est continue sur $\omega_i$, mais il n'est pas défini en son bord : $ {x_{i\pm\frac{1}{2}}}$. 
+On remarque très vite un problème dans cette écriture : $\mathbf{u_h}$ est continue sur $\omega_i$, mais il est multivalué en son bord $ {x_{i\pm\frac{1}{2}}}$, cela pose un problème de conservation. 
 Pour contourner ce problème, nous remplaçons le terme surfacique par une approximation.
 \begin{equation}
 \left[ \mathcal{F}\, \phi \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}
@@ -43,13 +43,13 @@ Pour contourner ce problème, nous remplaçons le terme surfacique par une appro
 \end{equation}
 où l'on nomme $\mathcal{F}$ le flux numérique. Il est dit \textit{consistant} si l'on obtient la même solution dans le cas où $u_h$ est continue sur $\overline{w_i}$ : $\mathcal{F}(\mathbf{u},\mathbf{u}) =  \mathbf{f}(\mathbf{u})$.
 Dans notre cas, nous prendrons le flux numérique de Lax-Friedrich  $ \mathcal{F}(\mathbf{u},\mathbf{v}) = \frac{1}{2}(\mathbf{f}(\mathbf{u}) + \mathbf{f}(\mathbf{v}) - \gamma(\mathbf{v}-\mathbf{u}) )  $
-où $\gamma = \max_{\mathbf{w} \in I(u,v)} (|\mathbf{F'(\mathbf{w})}| )$, premièrement introduit dans \cite{LaxFriedrichFlux}.
+où $\gamma = \max_{\mathbf{w} \in I(u,v)} (|\mathbf{f'(\mathbf{w})}| )$, premièrement introduit dans \cite{LaxFriedrichFlux}.
 
 \paragraph{Écriture dans une base polynômiale \\}
 Soit $\{\sigma_p^i\}_{p=1,..,N_k}$ une base de $\mathbb{P}^k(\omega_i)$. Il est suffisant de vérifier l'équation pour tout $\sigma_p^i$.\\
-On appelera la décomposition de $u_h^i$ dans la base polynômiale $\{\underline{u^i}_p\}_p$ les \emph{moments} du polynôme $u_h^i$.
+On appellera la décomposition de $u_h^i$ dans la base polynômiale $\{\underline{u^i}_p\}_p$ les \emph{moments} du polynôme $u_h^i$.
 Comme l'écriture des autres variables de $\mathbf{u_h}$ dans la base polynômiale est indépendante de chaque autre variable. 
-Nous nous concentrerons sur l'écriture du problème scalaire en remarquant que la seule intéraction entre les variables est contenue dans le flux $\mathbf{f(u_h)}$.   
+Nous nous concentrerons sur l'écriture du problème scalaire en remarquant que la seule interaction entre les variables est contenue dans le flux $\mathbf{f(u_h)}$.   
 En regardant le premier terme, et en se rappelant que ${u_{h}}_{|\omega_i} \in \mathbb{P}^k(\omega_i)$, on a 
 
 \begin{equation}
@@ -65,17 +65,18 @@ Si on insère cette expression dans le premier terme de \eqref{Formulation_Varia
 Il est alors possible de regarder les moments du polynôme $\{\underline{u^i}_p\}_p$ comme un vecteur : $\underline{U^i} \in \R^{N_k}$ et de considérer $M^i_{p,q} = \int_{\omega_i} \sigma_p^i(x) \sigma_q^i(x) dx$, la matrice de masse de $\omega_i$.
 \footnote{Si $\sigma^i_p$ est de la forme $\sigma_p^i(x) = \sigma_p(\mathfrak{R}^i(x))$, on calculera plutôt $M_{p,q} = \int_{\omega} \sigma_p(x) \sigma_q(x) dx$, la matrice de masse sur le domaine de référence. 
 Cette dernière méthode est plus souvent utilisée car moins coûteuse en mémoire.}
-On peut voir le premier terme comme un calcul matrice-vecteur : $(\partial_t \underline{U^i} \cdot M^i)_q$\\
+On peut voir le premier terme comme un calcul matrice-vecteur : $(\partial_t \underline{U^i} \, M^i)_q$\\
 
 \noindent
 Le deuxième terme, dit \textit{volumique}, peut se calculer de deux manières : \\
 -utiliser une méthode de quadrature (Gauss-Lobatto, Gauss-Legendre, \dots).\\
 -projeter $\mathbf{f}(\mathbf{u_h})$ sur $ \left(\mathbb{P}^k(\omega_i)\right)^M$: $\mathbf{F}_h$, (voir \ref{projection} pour plus de détails) et l'on se ramène à un produit matrice vecteur avec cette fois ci la matrice de rigidité $K^i_{p,q} = \int_{\omega_i}  \sigma_p \sigma_q' dx $\\
 Nous utiliserons ici la seconde méthode. 
-En plus d'être exacte dans le cas où le flux est linéaire, elle permet d'économiser des évaluations de la solution dans le cas où la base polynômiale est nodale (car on a déjà évalué les solutions aux interfaces pour calculer le flux numérique).
+En plus d'être exacte dans le cas où le flux est linéaire, elle permet d'économiser des évaluations de la solution dans le cas où la base polynômiale est nodale 
+(car on a déjà évalué les solutions aux interfaces pour calculer le flux numérique).
 On se retrouve alors avec une équation régissant l'évolution des moments polynômiaux de la solution : 
 \begin{equation}
-    \partial_t \underline{U^i_m}= M^{i^{-1}} (F_{h,m} K + \mathcal{S}_m) \qquad \text{ où }  \mathcal{S}_m = \left\{ \left[ \mathcal{F}_m\, \sigma_q \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \right\}_q  
+    \partial_t \underline{U^i_m}= M^{i^{-1}} (F_{h,m} K - \mathcal{S}_m) \qquad \text{ où }  \mathcal{S}_m = \left\{ \left[ \mathcal{F}_m\, \sigma_q \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \right\}_q  
 \end{equation}
 
 
@@ -84,14 +85,14 @@ On se retrouve alors avec une équation régissant l'évolution des moments poly
     \includegraphics[width =0.3\textwidth]{schema/polynome_init.png}
     \caption{Projection d'une fonction sur $V_h$ avec peu de mailles. \red{mauvais titre}}
 \end{wrapfigure}  
-Nous avons supposer précedemment que $u_h$ était dans $V_h$ en tout instant ce qui nous permettait d'étudier les changement de $\underline{{u}^i}_p(t)$. \\ 
-Cela laisse supposer que $u_0$ est dans $V_h$. Cette condition nous empêcherais de prendre des conditions initiales de Riemann (discontinuité en $\tilde{x}_0$ entre deux états constants) pour tout $x\in \mathbb{D}$.\\
+Nous avons supposé précedemment que $u_h$ était dans $V_h$ en tout instant ce qui nous permettait d'étudier les changements de $\underline{{u}^i}_p(t)$. \\ 
+Cela laisse supposer que $u_0$ est dans $V_h$. Cette condition nous empêcherait de prendre des conditions initiales de Riemann (discontinuité en $\tilde{x}_0$ entre deux états constants) pour tout $x\in \mathbb{D}$.\\
 Il nous est alors nécessaire de faire une projection de $u_0$ dans $V_h$ (voir \ref{projection} pour plus de détails). 
 Il est donc possible de récupérer les moments polynômiaux $\underline{{U}}^{i,0}$ comme $M^{i^{-1}}\tilde{{U}}_0^i $ \\
 \noindent
 Une remarque importante est que même si la projection $\mathbb{L}^2$ est par définition égale en produit scalaire, elle n'est pas égale en tout point.
-En particulier, il n'y a rien qui contrindique, et il presque inévitable, qu'il existe un $x\in \mathcal{D}$ telle que $\mathbf{u_h}(x,0) \notin \Omega$.
-\subsection{Discretisation en temps et schéma RK SSP}
+En particulier, il est presque garantie qu'il existe un $x\in \mathcal{D}$ tel que $\mathbf{u_h}(x,0) \notin \Omega$.
+\subsection{Discrétisation en temps et schéma RK SSP}
 
 \paragraph{Rappel sur les schémas Runge-Kutta}
 Soit l'équation d'évolution 
@@ -119,7 +120,7 @@ Les paramètres $\alpha_{i,j},\beta_{i,j}$ et $d_i$ vont définir la méthode et
 
 Si l'on prend $L=1$, $\alpha_{1,0}=1$, $\beta_{1,0}=1$, $d_1=0$, on retrouve le schéma d’Euler explicite. 
 Ce schéma, à défaut d’être d'un ordre élevé, possède beaucoup de propriétés très intéressantes, 
-comme la conservation de la positivité et la stabilité entropique. 
+comme la conservation de la positivité et la stabilité entropique sous condition CFL. 
 Il est naturel de souhaiter avoir les mêmes propriétés pour des schémas d’ordre plus élevé.
 
 \paragraph{Schéma RK SSP \\}

@@ -26,7 +26,7 @@ SUBROUTINE update_RF_entropie
             vh(n_sub) = vh(n_sub) + v_temp(1)*w_quad(kk)/2._prec
         END DO;                     END DO
 
-        ! vh(:) = sol_step(ni)%val_subcells(:,1) 
+        vh(:) = sol_step(ni)%val_subcells(:,1)*subcell_size(:) 
 
 
         vc =0._prec

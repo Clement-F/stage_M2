@@ -144,19 +144,19 @@ CONTAINS
         CASE("creneau")
             min_glob =  eps0; max_glob = 1._prec
         CASE("composite")
-            min_glob = eps0; max_glob = 1.1_prec
+            min_glob = eps0; max_glob = 1._prec
         CASE("Burgers_choc")
             min_glob = -1._prec; max_glob = 0.5_prec
+        CASE("Riemann_Buckley")
+            min_glob = -3._prec; max_glob = 3._prec
         CASE("Sod")
             min_glob = eps0; max_glob = 1000._prec
         CASE("isentropique")
-            min_glob = eps0; max_glob = 1000._prec
-        CASE("Riemann_Buckley")
-            min_glob = -3._prec; max_glob = 3._prec
+            min_glob = eps0; max_glob = 10000._prec
         CASE("acoustic_wave")
-            min_glob = eps0; max_glob = 1000._prec
+            min_glob = eps0; max_glob = 10000._prec
         CASE("Blast")
-            min_glob = eps0; max_glob = 1000._prec
+            min_glob = eps0; max_glob = 10000._prec
         CASE DEFAULT
         WRITE(*,*) " solution non reconnue "
         STOP

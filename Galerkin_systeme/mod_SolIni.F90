@@ -147,11 +147,24 @@ CONTAINS
     END FUNCTION Blast
 
 
-    FUNCTION Q_init(x,ni,nb_var)
+    FUNCTION Q_init(x_,ni,nb_var)
         IMPLICIT NONE
-        REAL(prec), INTENT(IN) :: x
+        REAL(prec), INTENT(IN) :: x_
         INTEGER,    INTENT(IN) :: ni, nb_var
         REAL(prec), DIMENSION(nb_var) :: Q_init
+        REAL(prec) :: x
+
+        x = x_
+
+        IF(bdry_cond =="period") THEN 
+            DO while (x .GT. xR) 
+                 x= x - (xr-xl)
+            END DO
+
+            DO while (x .LT. xL) 
+                 x= x + (xr-xl)
+            END DO
+        END IF
 
         SELECT CASE(TRIM(sol_ini_name))
         CASE("sinus")

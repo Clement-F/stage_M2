@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-40              | noeuds du maillage 
--10D-1           | xd
+50              | noeuds du maillage 
+-00D-1           | xd
 10D-1            | xf
-20D-1            | T
+38D-3            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -21,12 +21,12 @@ True            | Monolithique      (True, False)
 0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
-4               | nb subcellules du sous maillage
+6              | nb subcellules du sous maillage
 Lobatto         | repartition des noeuds(Unif, Lobatto)
 =================================================
     Paramètres DG
 =================================================
-3               | ordre espace
+5               | ordre espace
 3               | ordre temps
 Lobatto        | polynomes   (Legendre,Lobatto)
 Lobatto        | quadrature (Legendre,Lobatto)
@@ -38,13 +38,13 @@ False           | Convergence   (True, False)
 False           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-100              | print rule
+20              | print rule
 True            | exact time
-solSub          | nom file_sol
+sol          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-composite    | solution initiale :
+sinus    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc, Riemann_Buckley
                     Euler : Sod, isentropique,acoustic_wave, Blast
 advection           | problème (advection, burgers, Buckley, Shallow, Euler)

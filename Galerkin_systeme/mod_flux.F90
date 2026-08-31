@@ -57,6 +57,23 @@ CONTAINS
 
   END SUBROUTINE Projection_Flux
 
+  FUNCTION flux_uh(x,ni, nvar)
+    IMPLICIT NONE
+    INTEGER, INTENT(IN) :: ni,nvar
+    REAL(prec), INTENT(IN) :: x
+    REAL(prec) :: flux_uh
+    REAL(prec), DIMENSION(nb_var) :: U, flux_temp
+    INTEGER :: i
+
+    ! DO i=1,nb_var
+      U = eval_step(x,ni=ni, LOC=LLoc)
+    ! END DO
+
+    flux_temp = flux(U)
+    flux_uh = flux_temp(nvar)
+
+  END FUNCTION flux_uh
+
   FUNCTION pression(u) result(p)
     IMPLICIT NONE
     REAL(prec), DIMENSION(nb_var), INTENT(in) :: u

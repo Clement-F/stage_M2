@@ -1,8 +1,8 @@
 
 \section{Schéma Monolithique (DG/FV)}
-La méthode se repose sur deux détails clés : une réécriture du schéma DG utilisant des sous-mailles et 
+La méthode repose sur deux détails clés : une réécriture du schéma DG utilisant des sous-mailles et 
 un flux hybride entre le flux DG du schéma réécrit et un flux Volume Fini (VF) entre sous-mailles.
-\subsection{Réecriture du schéma DG comme schéma sur sous-mailles.}
+\subsection{Réécriture du schéma DG comme schéma sur sous-mailles.}
 \paragraph{Sous-maillage \\}
 
 On dote chaque maille $\omega_i$ d'un sous-maillage : $\{S_m^i\}_m = ]\tilde{x}^i_{m-1/2}, \tilde{x}^i_{m+1/2}[$ 
@@ -12,13 +12,13 @@ On cherchera à faire un changement de base entre $\underline{\sigma}_p^i$ une b
 et $\phi_m^i$ la projection $\mathbb{L}^2$ de $\mathbb{1}_{S_m^i}$ sur $\mathbb{P}^k(\omega_i)$.
 De sorte à pouvoir écrire 
 \begin{equation}
-    u_h^i = \sum_{m=1}^{N_S^i}\overline{u}_m^i \phi_m^i,\qquad \overline{u}_m^i = \frac{1}{|S_m^i|} \int_{S^i_m} u_h^i dx
+    u_h^i = \sum_{m=1}^{N_S^i}\overline{u}_m^i \phi_m^i,\qquad \overline{u}_m^i = \int_{S^i_m} u_h^i dx
 \end{equation}
 Pour ce faire, on définit la matrice $\mathcal{P}_{m,p}$ comme 
 \begin{equation}
     \mathcal{P}_{m,p} =  \frac{1}{|S_m^i|} \int_{\omega_i} \phi_m^i(x) \sigma_p^i(x) dx = \frac{1}{|S_m^i|}  \int_{S_m^i} \sigma_p^i(x) dx
 \end{equation}
-On fera attention que la seconde intégrale n'est exacte que si l'ont utilise une méthode de quadrature sur $S_m^i$ et non sur $\omega_i$.
+On fera attention que la seconde intégrale n'est exacte que si l'on utilise une méthode de quadrature sur $S_m^i$ et non sur $\omega_i$.
 Pour que le passage des moments polynomiaux $\left\{ \underline{\sigma}_p \right\}_p$ aux sous-volumes finis soit injectif, il nous faut $N_s \geq N_k$. 
 De manière générale, on dit que le sous-maillage est \textit{admissible} si et seulement si la matrice $\mathcal{P}^t\,\mathcal{P}$ est inversible.
 
@@ -28,7 +28,7 @@ De manière générale, on dit que le sous-maillage est \textit{admissible} si e
     \caption{Comparaison entre $\underline{U}$ et $\overline{U}$.}
 \end{wrapfigure}
 Pour avoir une équivalence au sens le plus strict possible, il nous faut $N_s = N_k$. 
-Dans le cas échéant ($N_s > N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  
+Dans le cas contraire ($N_s > N_k$), on utilisera un opérateur de reconstruction $\mathcal{R} = \left(\mathcal{P}^t\,\mathcal{P}\right)^{-1} \mathcal{P}^t$  
 qui nous donnera les moments polynômiaux au sens des moindres carrés (voir \ref{moindre_carré}). \\
 Il est alors simple de passer de la représentation polynômiale $\underline{U}$ à la représentation en sous-moyennes $\overline{U}$ ou inversement par ces relations: 
 \begin{equation}\label{passage_svf}
@@ -37,9 +37,10 @@ Il est alors simple de passer de la représentation polynômiale $\underline{U}$
 
 \paragraph{initialisation de $\overline{U}$}
 Il est important de noter que contrairement à la méthode DG "classique", il est possible et grandement utile de changer la méthode d'initialisation.\\
-En effet, si l'on prend naivement les sous-moyennes des polynômes que l'on a calculé comme projection $\mathbb{L}^2$ de $u_0$, on peut avoir $\overline{U} \notin \Omega$.
-Ainsi, il préférable d'initialiser $\overline{U}$ comme sous-moyennes de $U_0$ et de définir $\underline{U}$ à partir de $\overline{U}$ par moindres carrés \eqref{passage_svf} 
-\paragraph{ Construction des flux reconstruit \red{nom à changer} \\}
+En effet, si l'on prend naïvement les sous-moyennes des polynômes que l'on a calculés comme projection $\mathbb{L}^2$ de $u_0$, on peut avoir $\overline{U} \notin \Omega$.
+Ainsi, il est préférable d'initialiser $\overline{U}$ comme sous-moyennes de $U_0$ et de définir $\underline{U}$ à partir de $\overline{U}$ par moindres carrés \eqref{passage_svf}. 
+Cela nous garantie alors que $\overline{U} \in \Omega$. 
+\paragraph{ Construction des flux reconstruits\\}
 
 En reprenant la formulation variationnelle \eqref{Formulation_Variationnelle}, si l'on projette ${f}({u_h})$ sur $\mathbb{P}^k(\omega_i)$ : ${F}_h$, on obtient une formulation équivalente : 
 $$\int_{\omega_i} \partial_t {u_h} \sigma dx - \int_{\omega_i} {F}_h^i \partial_x \sigma dx 
@@ -48,7 +49,7 @@ Alors par le biais d'une intégration par partie, on obtient la forme \textit{fo
 $$\int_{\omega_i} \partial_t {u_h} \sigma dx = \int_{\omega_i} \partial_x {F}_h^i  \sigma dx 
 - \left[ ( {F}_h^i - \mathcal{F} )\, \sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad \forall  \sigma \in \mathbb{P}^k(\omega_i) $$  
 
-Comme cette équation est vraie pour tout polynôme de $\mathbb{P}^k(\omega_i)$, elle est en particulier vrai pour $\phi_m^i$. Cela nous amène presque à un flux ne dépendant que de $S_m^i$ : 
+Comme cette équation est vraie pour tout polynôme de $\mathbb{P}^k(\omega_i)$, elle est en particulier vraie pour $\phi_m^i$. Cela nous amène presque à un flux ne dépendant que de $S_m^i$ : 
 \begin{equation}
     \int_{S_m^i} \partial_t {u_h} dx = - \left(\int_{S_m^i}  \partial_x {F}_h^i dx - \left[ ( {F}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\right) \qquad \forall m\in \{ 1, \dots, N_s\}
 \end{equation}
@@ -59,7 +60,7 @@ Soit $\widehat{{F}^i}_{m+1/2}$ ces flux reconstruits posés tels que :
 &\widehat{{F}^i}_{m+1/2} - \widehat{{F}^i}_{m-1/2} =  -  \left[{F}_h^i\right]_{\tilde{x}^i_{m-1/2}}^{\tilde{x}^i_{m+1/2}}  - \left[ ( {F}_h^i - \mathcal{F} )\, \phi_m \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} \qquad \forall m\in \{ 1, \dots, N_s\} \\
 & \text{où l'on impose  } \widehat{{F}^i}_{1/2} = \mathcal{F}_{i-1/2} \text{ et } \widehat{{F}^i}_{ N_s + 1/2} = \mathcal{F}_{i+1/2}
 \end{align}
-Il est possible d'obtenir une forme close de $\widehat{F^i}_{m+1/2}$: 
+Il est possible d'obtenir une forme fermée de $\widehat{F^i}_{m+1/2}$: 
 \begin{align}
     &\widehat{{F}^i}_{m+1/2} = {F}_h^i(\tilde{x}^i_{m+1/2}) 
     -C^{i-1/2}_{m+1/2} ( {F}_h^i(x_{i-1/2}) - \mathcal{F}_{i-1/2}) 
@@ -80,7 +81,7 @@ dépend uniquement des sous-cellules voisines à $S_m^i$,
 il faut rappeler que $\widehat{{F}^i}_{m+1/2}$ dépend non seulement des sous-cellules voisines, 
 mais aussi des cellules voisines $\omega_{i\pm1}$ par le biais du flux numérique évalué aux interfaces des cellules $x_{i\pm1/2}$ \\
 Les flux $\widehat{{F}^i}_{m+1/2}$ pouvant se trouver entre deux sous-cellules appartenant à la même maille ou à deux mailles différentes, 
-On écrira, par soucis de clarté  $\widehat{{F}_{mp}}$ le flux allant de la sous-cellule $S_m^i$ à la sous-cellule $S_p^j$ pour $j\in \{i-1,i,i+1\}$ 
+On écrira, par souci de clarté  $\widehat{{F}_{mp}}$ le flux allant de la sous-cellule $S_m^i$ à la sous-cellule $S_p^j$ pour $j\in \{i-1,i,i+1\}$ 
 
 \subsection{Flux hybride (DG/FV)}
 \noindent
@@ -166,7 +167,7 @@ On sait que la solution entropique d'un problème scalaire suit le principe du m
 Il est possible d'imposer ce critère sur chaque sous-cellule d'une manière similaire qu'on impose le principe du maximum global,
 la différence principale est qu'on regarde $\widetilde{{u}}_{mp}^{-}$ et $\widetilde{{u}}_{mp}^{+}$ de manière différente car
 $\widetilde{{u}}_{mp}^{-} \in \left[\alpha_m^n, \beta_m^n \right]$, tandis que $\widetilde{{u}}_{mp}^{+} \in \left[\alpha_p^n, \beta_p^n \right]$
-en suivant un raisonnement similaire à la preuve du schéma GMP, et en pretant attention au signe de $\Delta F$, on obtient la condition suffisante : 
+en suivant un raisonnement similaire à la preuve du schéma GMP, et en prêtant attention au signe de $\Delta F$, on obtient la condition suffisante : 
 \begin{equation}
 \theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|}  \left\{
     \begin{aligned}
@@ -176,44 +177,11 @@ en suivant un raisonnement similaire à la preuve du schéma GMP, et en pretant 
     \right)
 \end{equation}  
 
-\paragraph{Positivité d'un schéma sur le problème de la dynamique des gaz \\}
-On donne $\Omega \subset R^3$ l'espace des phases d'un gaz comme :  
-\begin{equation}
-    \Omega = \{(\rho,\rho v,\rho e)\quad | \quad \rho >0, \quad \varepsilon= \rho e - \rho \frac{|v|^2}{2} >0\}
-\end{equation}
-Là où il est facile de vérifier $\rho >0$ en reprenant la condition du maximum global. Il est moins facile d'obtenir une condition pour la positivité de $\varepsilon$. 
-Il n'est cependant pas impossible d'imposer un tel critère, en suivant une preuve inspiré de  \cite{VILAR2025}  \cite{Rueda-Ramírez2024} \cite{Kuzmin2020}. En supposant $\rho >0$, on cherche un critère pour obtenir $\rho \varepsilon =  \rho \,\rho e - \frac{|\rho v|^2}{2} >0$.\\
-En transposant cela dans l'écriture du schéma hybride, on cherche $\theta_{mp}$ tel que : $\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2} >0$
-\begin{align*}
-    &\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2}  \geq 0 \\
-    &\left( \rho^*   \pm \theta_{mp}\frac{\Delta F^{\rho  } }{\gamma} \right) \, \left(\rho e^* \pm \theta_{mp}\frac{\Delta F^{\rho e} }{\gamma} \right) - 
-     \frac{|\rho v^* \pm \theta_{mp}\frac{\Delta F^{\rho v} }{\gamma}|^2}{2}  \geq 0 \\
-    &\rho^* \, \rho e^* - \frac{|\rho v|^2}{2}
-    +\theta_{mp}\left(\frac{\pm\Delta F^{\rho  } }{\gamma}\rho e^*  \right)
-    +\theta_{mp}\left(\frac{\pm\Delta F^{\rho e} }{\gamma}\rho^*    \right)
-    -\theta_{mp}\left(\frac{\pm\Delta F^{\rho v} }{\gamma}\rho v^*    \right)
-    +\theta_{mp}^2\left(\frac{\Delta F^{\rho e}\Delta F^{\rho}}{\gamma^2} \right)
-    -\theta_{mp}^2\left(\frac{|\Delta F^{\rho v}|^2}{2\gamma^2} \right) \geq 0 \\
-    &\rho^* \, \rho e^* - \frac{|\rho v|^2}{2} \geq 
-    \mp \theta_{mp} \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]
-    + \theta_{mp}^2 \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]
-\end{align*}
-Comme $\theta \in [0,1]$, on sait que $\theta^2 \leq \theta$. La condition s'écrit alors : 
-\begin{equation}
-\theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|} \min \left(\beta-{u}_{mp}^{*,FV},{u}_{mp}^{*,FV} - \alpha  \right)
-, \frac{M}{|B|+ min(A,0) } \right) 
-\end{equation}
-où $M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2} = \rho^* \varepsilon^*>0 $, 
-$B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
-$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$.\\
-
-Cette condition garantie à la fois que $\widetilde{\rho}^{\pm} >0$ mais aussi que $\widetilde{\varepsilon}^{\pm}>0$ 
-
-\paragraph{Détections d'extrema locaux}
+\paragraph{Détections d'extrema régulier}
 Un des problèmes de ce schéma est qu'il est très facile de se retrouver avec une convergence à l'ordre 1 
 car on applique des critères GMP/LMP sur des zones où la solution est régulière. Il serait donc judicieux de conserver cette régularité au plus possible. \\
 Il nous faut une méthode pour repérer les zones régulières de la solution. Nous allons utiliser une méthode basée sur une idée de Van Leer \cite{VANLEER1979101}, généralisée dans \cite{BURBEAU2001111} et appliquée à notre cadre dans \cite{VILAR2025}.
-Le détecteur regarde la régularité de la dérivée première en regardant si sa linérairisée se trouve entre la moyenne de ses voisins. \\
+Le détecteur regarde la régularité de la dérivée première en regardant si sa linérarisée se trouve entre la moyenne de ses voisins. \\
 \begin{wrapfigure}{r}{0.4\textwidth} 
     \usebox{\detectextrema} 
     \caption{visuel du détecteur}
@@ -232,12 +200,12 @@ Le détecteur regarde la régularité de la dérivée première en regardant si 
 Le critère ci-dessus tient pour les cellules, mais il est plus intéressant de l'utiliser sur des sous-cellules dans notre cas.
 En pratique, il est possible d'obtenir la dérivée de $u_h$ à partir de la matrice de masse et la matrice de rigidité. \\
 \noindent
-La première méthode consiste à comparer deux écriture de la dérivée d'un polynôme dans la base polynômiale : 
+La première méthode consiste à comparer deux écritures de la dérivée d'un polynôme dans la base polynômiale : 
 $$  \partial_xg_h(x) = \sum_p^{N_k} g_h  \partial_x \sigma_p(x) = \sum_p^{N_k} g_h' \sigma_p(x) $$
 Et en observant que l'on doit avoir une égalité par produit scalaire avec tout polynôme de la base $\sigma_q$, on obtient une égalité de produit matrice vecteurs : 
 $$ G_h K = G_h' M$$
-Il est alors possible de récupérer les coordonnées $G_h'$ en inversant la matrice de massse :$G_h' = M^{-1}G_h K$.\\
-À partir des coordonées de la dérivée du polynôme, il est possible d'obtenir sa moyenne par un passage similaire à \eqref{passage_svf}.
+Il est alors possible de récupérer les coordonnées $G_h'$ en inversant la matrice de masse :$G_h' = M^{-1}G_h K$.\\
+À partir des coordonnées de la dérivée du polynôme, il est possible d'obtenir sa moyenne par un passage similaire à \eqref{passage_svf}.
 La deuxième méthode consiste à passer ces deux étapes en une seule opération en calculant un opérateur de projection utilisant les dérivées des polynômes de base $\{\sigma_p'\}$: $\mathcal{P}'$ et $\mathcal{P}''$
 $$\partial_x \overline{g_h}^m = \frac{1}{|S_m^i|} \int_{S_m^i}\partial_x g_h =\frac{1}{|S_m^i|}\int_{S_m^i} \sum_p^{N_k} g_p \partial_x \sigma_p(x)dx = \sum_p^{N_k}g_p \frac{1}{|S_m^i|}\int_{S_m^i} \partial_x \sigma_p(x)dx   $$
 \begin{equation}
@@ -246,6 +214,68 @@ $$\partial_x \overline{g_h}^m = \frac{1}{|S_m^i|} \int_{S_m^i}\partial_x g_h =\f
 \begin{equation}
     \partial_{xx} \overline{g_h}^m = (\mathcal{P}''G_h)_m\qquad \mathcal{P}''_{mp} =  \frac{1}{|S_m^i|}\int_{S_m^i} \partial_{xx} \sigma_p(x)dx = \frac{\partial_x \sigma_p(\tilde{x}^i_{m+1/2}) - \partial_x \sigma_p(\tilde{x}^i_{m-1/2})}{|S_m^i|}
 \end{equation}
+
+
+\subsection{Positivité d'un schéma sur le problème de la dynamique des gaz}
+\paragraph{critère de positivité linéaire}
+On donne $\Omega \subset R^3$ l'espace des phases d'un gaz comme :  
+\begin{equation}
+    \Omega = \{(\rho,\rho v,\rho e)\quad | \quad \rho >0, \quad \varepsilon= \rho e - \rho \frac{|v|^2}{2} >0\}
+\end{equation}
+Là où il est facile de vérifier $\rho >0$ en reprenant la condition du maximum global. Il est moins facile d'obtenir une condition pour la positivité de $\varepsilon$. 
+Il n'est cependant pas impossible d'imposer un tel critère, en suivant une preuve inspirée de  \cite{VILAR2025}  \cite{Rueda-Ramírez2024} \cite{Kuzmin2020}. En supposant $\rho >0$, on cherche un critère pour obtenir $\rho \varepsilon =  \rho \,\rho e - \frac{|\rho v|^2}{2} >0$.\\
+En transposant cela dans l'écriture du schéma hybride, on cherche $\theta_{mp}$ tel que : $\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2} >0$
+\begin{align*}
+    &\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2}  \geq 0 \\
+    &\left( \rho^*   \pm \theta_{mp}\frac{\Delta F^{\rho  } }{\gamma} \right) \, \left(\rho e^* \pm \theta_{mp}\frac{\Delta F^{\rho e} }{\gamma} \right) - 
+     \frac{|\rho v^* \pm \theta_{mp}\frac{\Delta F^{\rho v} }{\gamma}|^2}{2}  \geq 0 \\
+    &\rho^* \, \rho e^* - \frac{|\rho v|^2}{2}
+    +\theta_{mp}\left(\frac{\pm\Delta F^{\rho  } }{\gamma}\rho e^*  \right)
+    +\theta_{mp}\left(\frac{\pm\Delta F^{\rho e} }{\gamma}\rho^*    \right)
+    -\theta_{mp}\left(\frac{\pm\Delta F^{\rho v} }{\gamma}\rho v^*    \right)
+    +\theta_{mp}^2\left(\frac{\Delta F^{\rho e}\Delta F^{\rho}}{\gamma^2} \right)
+    -\theta_{mp}^2\left(\frac{|\Delta F^{\rho v}|^2}{2\gamma^2} \right) \geq 0
+\end{align*}
+\begin{equation}\label{positivity_eq}
+    \rho^* \, \rho e^* - \frac{|\rho v|^2}{2} \geq 
+    \mp \theta_{mp} \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]
+    + \theta_{mp}^2 \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]
+\end{equation}
+Comme $\theta \in [0,1]$, on sait que $\theta^2 \leq \theta$. La condition s'écrit alors : 
+\begin{equation}
+\theta_{mp} = \min \left(1, \frac{\gamma}{|\Delta F|} \min \left(\beta-{u}_{mp}^{*,FV},{u}_{mp}^{*,FV} - \alpha  \right)
+, \frac{M}{|B|+ min(A,0) } \right) 
+\end{equation}
+où $M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2} = \rho^* \varepsilon^*>0 $, 
+$B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
+$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$.\\
+
+Cette condition garantit à la fois que $\widetilde{\rho}^{\pm} >0$ mais aussi que $\widetilde{\varepsilon}^{\pm}>0$ 
+
+\paragraph{critère de positivité}
+Durant ce stage, nous avons élaboré un deuxième critère de positivité sur un principe similaire au précédent en séparant les conditions sur chaque variables, 
+\emph{i.e} en utilisant trois $\theta$ sur les trois différentes variables au lieu d'un seul. 
+En prenant cela en compte, si l'on regarde l'équation nous donnant la positivité \eqref{positivity_eq}, on obtient : 
+\begin{equation}
+    M \geq B^\rho \theta_\rho + B^{\rho u}\theta_{\rho u} + B^{\rho e} \theta_{\rho e} + A^{\rho u} \theta_{\rho u}^2 + A^{\rho \,\rho e}\theta_\rho \theta_{\rho e}
+\end{equation}
+Où l'on essaye de maximiser ($\theta_{\rho},\theta_{\rho u},\theta_{\rho e}$) selon un certain critère, on peut voir ce problème comme un problème d'optimisation dans un domaine non convexe 3D.
+Nous nous intéressont ici à des solutions rapidement calculable car le critère de positivité même si primordiale dans le bon fonctionnement de notre schéma, ne va que très peu souvent réduire $\theta$.
+
+La manière dont nous avons choisi de résoudre ce problème est de considérer que même si les signes de plusieurs paramètres sont inconnues, nous savons que $A^{\rho u},M>0$.
+Cela signifie que à $\theta_\rho$ fixé, nous pouvons nous ramener à un problème convexe 2D en passant tout les termes dépendant de $\theta_\rho$ de l'autre côté de l'équation.
+Problème étant que même si $M>0$, nous ne savons pas si $M-B^\rho \theta_\rho-A^{\rho \,\rho e}\theta_\rho \theta_{\rho e}\geq 0$.
+
+Le choix ici est de présupposer que le critère de positivité ne devrait pas affecter $\rho$ sauf si nécessaire. 
+Heureusement pour nous, nous savons que au minimum $\theta_\rho \leq \theta_\rho^{\rho>0}$ pour avoir la positivité de $\rho$ 
+et $M-B^\rho \theta_\rho-A^{\rho \,\rho e}\theta_\rho \theta_{\rho e}\geq 0$ si $\theta_\rho \leq \overline{\theta_\rho} := \frac{M}{B^\rho}$.\\
+
+L'algorithme du critère de positivité est alors le suivant : si $\overline{\theta_\rho} > \theta_\rho^{\rho>0}$, alors on résoud le problème 2D avec $\theta_\rho = \theta_\rho^{\rho>0}$.
+sinon, on résoud le problème 2D avec $\theta_\rho = 0$ et une fois $\theta_{\rho u},\theta_{\rho e}$ obtenue, nous posons 
+$$\theta_\rho = min(\theta_\rho^{\rho>0}, \frac{M-B^{\rho e}\theta_{\rho e}-B^{\rho u}\theta_{\rho u}-A^{\rho u}\theta_{\rho u}^2}{B^\rho + A^{\rho \, \rho e}\theta_{\rho e}})$$
+Cela nous garantie la positivité de $\widetilde{\rho}^{\pm}$ et $\widetilde{\varepsilon}^{\pm}$ à moindre coût. 
+En pratique il est possible de remplacer $\theta_\rho^{\rho>0}$ par $\min(\theta_\rho^{PML},\theta_\rho^{\rho>0})$ car la majorité du temps, $\theta_\rho^{\rho>0} \geq \theta_\rho^{PML}$
+
 
 % \subsubsection{conservation de l'entropie}
 % \paragraph{critère d'ordre 1}

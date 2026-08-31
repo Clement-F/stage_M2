@@ -5,6 +5,7 @@
 \input{../tikz_figure.TEX}
 
 \usepackage[backend=biber,style=numeric,sortcites,sorting=none,backref,natbib,hyperref]{biblatex}
+\usepackage{hyperref} % pour les liens. En règle générale il doit être le dernier package chargé.
 
 \addbibresource{../ref.bib}
 \graphicspath{{../../images}}
@@ -14,6 +15,7 @@
 \usepackage{ragged2e}
 \usepackage{csquotes}
 
+
 \title{  Mémoire \\
   \large sur un schéma monolithique DG/FV}
 \author{clement fontan\\
@@ -22,22 +24,42 @@
 
 \begin{document}
 \maketitle
-\section{Remerciement}
+\section{Remerciements}
 \lipsum[1]
 \section{Introduction}
-\lipsum[1-3]
+
+Ce rapport fait suite à un stage de 5 mois au sein de l'institut Montpelliérain Alexander Grothendieck supervisé par Mr Vilar François.
+Durant ce stage, j'ai pu apprendre différentes méthodes de résolution numérique d'équations hyperboliques parmis 
+lesquelles la méthode \emph{Volumes Finis} (\emph{VF}), la méthode \emph{Galerkin Discontinue} (\emph{DG}) et le schéma \emph{monolithique DG/VF} sur sous-mailles comme décrit par Vilar \cite{VILAR2025}.\\
+
+Les objectifs de ce stage étant tout d'abord de se familiarisé avec le Fortran 90 
+puis de comprendre les schémas DG pour des problèmes hyperboliques non-linéaires pour enfin
+étudier le fonctionnement du schéma monolithique 1D sur un problème scalaire tout comme sur un problème système
+pour pouvoir par la suite l'implémenter dans un cadre multi-dimensionnel.  \\
+
+Nous ferons tout d'abord un rappel sur les équations hyperboliques et leurs types de solutions. 
+Nous enchainerons sur une mise en place de la formulation d'une semi-discrétisation par méthode \emph{Galerkin Discontinue} 
+et comment ce schéma peut se réecrire en considérant des sous-mailles
+suivie d'une partie sur les schémas \emph{Runge-Kutta Strong Stability Preserving} nous permettant d'obtenir un schéma entièrement discrétiser.
+Ceci sera suivie d'une partie détaillant comment obtenir le schéma \emph{monolithique DG/VF} sur sous-mailles à partie du schéma DG sur sous-mailles 
+ainsi que diverses propriétés qu'il est possible d'obtenir en utilisant un tel schéma 
+Nous finirons par une partie détaillant les résultats obtenues pour ces schémas sur différents cas tests de la litérature. 
+Tout d'abord sur les schémas DG puis sur le schéma monolithique.
+
 \newpage
 \input{sec0_Rappels.TEX}
 \input{sec1_methDG.TEX}
 \input{sec2_Monolith.TEX}
-% \input{sec3_Results.TEX}
+\input{sec3_Results.TEX}
 \section{Conclusion}
-\lipsum[1-4]
+Au cours de ce rapport, nous avons pu voir comment il est possible de réecrire un schéma Galerkin Discontinue 
+en changeant la base de polynôme
+
 \input{annex.TEX}
 \newpage
 \printbibliography[
 heading=bibintoc,
-title={Bibliography}
+title={Bibliographie}
 ] %Prints the entire used bibliography with the title "Whole bibliography"
 
 

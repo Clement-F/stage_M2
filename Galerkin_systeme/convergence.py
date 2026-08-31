@@ -10,8 +10,6 @@ ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
 nx = nb_cell * nb_sub
 
-sm = int(lines[5][5:11]) -1
-
 with open('convergence_err.txt') as f:
     lines = f.readlines()
 
@@ -41,15 +39,20 @@ for k in range(0,int(size/7)):
       
 
 
+
 plt.loglog(nx,ord1,linestyle ='-.', color='lightgray')
 plt.loglog(nx,ord2,linestyle ='-.', color='lightgray')
 plt.loglog(nx,ord3,linestyle ='-.', color='lightgray')
 plt.loglog(nx,ord4,linestyle ='-.', color='lightgray')
-plt.loglog(nx,err_L1,linestyle ='-',marker='x', label="err_L1")
-plt.loglog(nx,err_L2,linestyle ='-',marker='x', label="err_L2")
-plt.loglog(nx,err_Li,linestyle ='-',marker='x', label="err_Linf")
-
-title = "convergence de la méthode DG avec P^"+str(orderx-1)+" et RK SSP d'ordre "+str(ordert)
+# plt.loglog(nx,err_L1,linestyle ='-',marker='x', label="err_L1")
+plt.loglog(nx[0:5],err_L2[0:5],linestyle ='-',marker='x', label="err_L2")
+plt.loglog(nx[5:10],err_L2[5:10],linestyle ='-',marker='x', label="LMP")
+plt.loglog(nx[10:15],err_L2[10:15],linestyle ='-',marker='x', label="LMP + Relax")
+# plt.loglog(nx[18:],err_L2[18:],linestyle ='-',marker='x', label="GMP")
+# plt.loglog(nx,err_Li,linestyle ='-',marker='x', label="err_Linf")
+plt.ylabel("erreur")
+plt.xlabel("DoF")
+title = "convergence de schéma monolithique d'ordre "+str(orderx)
 
 plt.title(title)
 

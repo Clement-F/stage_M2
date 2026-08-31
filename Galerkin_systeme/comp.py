@@ -4,15 +4,24 @@ p = lambda U:  2.*(U[2] - 0.5*(U[1])**2 /U[0] )
 
 nb_comp = 3
 nb_var = []; 
-orderx = np.zeros(nb_comp)  ;ordert =np.zeros(nb_comp);
+orderx = [] ;ordert = []
 nb_cell = [] ;nb_sub = [];
 nx = []     ;sm = [];
 
 lines = []
-data_name   = ['file_data.txt','sol_ex/file_blast.txt','blast/conv_data.txt']
-sol_name    = ['solSub.txt','sol_ex/blast.dat','blast/conv_sol.txt']
-color       = ['b-','r-','g-']
 
+data_name   = ['pos_data.txt','LMP_data.txt','LMP_Rel_pos_data.txt']
+sol_name    = ['sol_pos.txt','sol_LMP.txt','sol_LMP_Rel_pos.txt']
+
+
+# data_name   = ['file_data.txt','sol_ex/file_blast.txt','blast/conv_data.txt']
+# sol_name    = ['solSub.txt','sol_ex/blast.dat','blast/conv_sol.txt']
+color       = ['b','r','g','y','k']
+markers     = ['.','.','.','.','None']
+linestyle   = ['None','-','-','-','-.']
+
+# legend      = ['ordre 1','ordre 3', 'ordre 9','sol exacte']
+legend      = ['pos','PML','PML+Rel+pos','exacte']
 
 U_t = []
 P   = []
@@ -20,14 +29,16 @@ X   = []
 
 
 for k in range(0,nb_comp,1):
+    print(sol_name[k])
     lines= []
     with open(data_name[k])  as f:
         lines.append(f.readlines())
         
     nb_var.append(int(lines[0][0][10:16]))
-    orderx[k] = int(lines[0][1][10:16]);   ordert[k] = int(lines[0][2][10:16])
+    orderx.append(int(lines[0][1][10:16]));    ordert.append( int(lines[0][2][10:16]))
     nb_cell.append(int(lines[0][3][10:16]));   nb_sub.append( int(lines[0][4][13:19]))
     sm.append( int(lines[0][5][5:11]))
+    
     nx.append( int(nb_cell[k] *(nb_sub[k])))
     
     # sm=100
@@ -63,76 +74,18 @@ for i in range(0,sm[k],1):
         
         u_ar[:,:] = np.array(U_t[k][i])
         pixar[:]  = np.array(X[k][i])
-        
-        plt.plot(pixar,u_ar[:,0] ,color[k])
+              
+        plt.plot(pixar,u_ar[:,0] ,color[k], marker=markers[k], markersize=3, linestyle=linestyle[k], label=legend[k])
         # if(nb_var[k] >1) :
         #     plt.plot(X,U_t[i,:,1] ,'b-')
         # if(nb_var[k] >2) :
         #     plt.plot(X,U_t[i,:,2] ,'b-')
+        
+        # if(k==0): plt.plot(pixar,np.zeros((nx[0])),color='k',linestyle='--')  
+    plt.ylim(-.2,1.2)
+    plt.legend()
+    # plt.axis('off')
     plt.show()
               
     
 
-
-
-if(False):
-    with open('sol_ex/buckley.dat') as f:
-        lines = f.readlines()
-        
-    X_B   = np.zeros(30000)
-    U_B   = np.zeros(30000)
-    for i in range(0,30000):
-        X_B[i] = lines[i][0:16]
-        U_B[i] = lines[i][17:32]
-        
-    for i in range(0,nb_cell+1): 
-        1+1
-        #plt.plot([X_cell[i],X_cell[i]],[-1,2],linestyle='--', color='gray')
-    plt.plot(X_B,U_B, 'r')
-    
-    plt.plot(X,U_t[k],'b', marker=".")
-    #plt.plot(X,U_t2[k],'go')
-    plt.ylim(-.2,1.2); plt.xlim(-1.,1.)
-    #plt.show()     
-    plt.savefig("endfig_save.png")    
-
-
-if(False):
-    with open('sol_ex/sod_modif_den.dat') as f:
-        lines = f.readlines()
-    
-    rho_ex = np.zeros(5000)
-    
-    X_ex   = np.zeros(5000)
-    rho_ex = np.zeros(5000)
-    Xvel_ex= np.zeros(9998)
-    vel_ex = np.zeros(9998)
-    pre_ex = np.zeros(5000)
-    
-    for i in range(0,5000):
-        X_ex[i] = lines[i][0:18]
-        rho_ex[i] = lines[i][17:32]
-    
-    with open('sol_ex/sod_modif_vel.dat') as f:
-        lines = f.readlines()
-        
-    for i in range(0,9998):
-        Xvel_ex[i] = lines[i][0:17]
-        vel_ex[i] = lines[i][17:32]
-    
-    with open('sol_ex/sod_modif_pre.dat') as f:
-        lines = f.readlines()
-        
-    for i in range(0,5000):
-        pre_ex[i] = lines[i][17:32]
-        
-    plt.plot(X,U_t[k,:,0],'b', marker='.')
-    plt.plot(X_ex,rho_ex,'b')
-    # plt.plot(Xvel_ex,vel_ex,'r')
-    # plt.plot(X,U_t[k,:,1]/U_t[k,:,0],'r', marker='.')
-    # plt.plot(X_ex,pre_ex,'k')
-    # plt.plot(X,P_[k,:],'k', marker='.')
-    
-    plt.savefig("endfig_save.png")    
-
-    

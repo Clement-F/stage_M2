@@ -86,7 +86,7 @@ CONTAINS
     INTEGER :: pm
 
     THETA_pos = 1._prec
-    theta_temp = theta_inc
+    theta_temp = 1._prec
 
     IF(TRIM(flux_name)=="Euler" .AND. positivity .GT. 0) THEN 
       ! positivité de rho

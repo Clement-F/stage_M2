@@ -52,7 +52,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-5.; xR=5.
+xL=-1.; xR=1.
 
 for i in range(0,nb_var):
     plt.pcolormesh(X, T, theta_[:,:,i], shading='auto', cmap='viridis')

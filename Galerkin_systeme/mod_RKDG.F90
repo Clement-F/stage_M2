@@ -63,7 +63,6 @@ CONTAINS
     ! print *,"projected"
     
     IF(subcell_use) THEN
-      
     DO ni = 1,nb_cell; DO ii = 1,nb_var
       ! flux_h(ni)%flux_subcells(:,:)= 0._prec
       ! F(uh(x)) .ne. Fh(x)
@@ -77,7 +76,6 @@ CONTAINS
                                         & - C_p(jj)*(fh_R-g(ni+1,ii))
       END DO
     END DO; END DO
-
     IF(entropie_rule == 4) CALL update_RF_entropie
     
     IF(monolithique) THEN 
@@ -103,16 +101,7 @@ CONTAINS
       IF(coeff_smooth == 2)theta_mp = Min(theta_(ni,jj,:), Min(      subcells_(voi_L(1),voi_L(2))%theta,  subcells_(voi_R(1),voi_R(2))%theta)  )
 
       flux_h(ni)%flux_subcells(jj,:) = flux_h(ni)%flux_vf(jj,:) +theta_mp*DF
-
-      ! print *,"-------------"
-      ! print *,ni,jj
-      ! print *,voi_L,voi_R
-
-    END DO;
-    ! print *,"=========="
-    ! print *,flux_h(voi_L(1))%flux_subcells(voi_L(2),:)
-    ! print *,flux_h(voi_R(1))%flux_subcells(voi_R(2),:)
-    END DO
+    END DO; END DO
 
     END IF
     END IF
@@ -127,16 +116,19 @@ CONTAINS
     INTEGER :: ii,jj
     REAL(prec), DIMENSION(size_base,nb_var) :: V_B, S_B, BB,L_step
 
+
     DO ni=1,nb_cell
       sol_step(ni)%base_poly  = sol(ni)%base_poly
       sol_step(ni)%val_quad  = sol(ni)%val_quad
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
+      
+    ! print *,"-----------------"
 
     DO tni =1,order_t
       
-      print *,"========================="
       CALL flux_numerique
+      ! print *,"========================="
       ! TO CHANGE
       DO ni =1,nb_cell;     
 
@@ -151,20 +143,22 @@ CONTAINS
                                     &+ RK_alpha(tni,2) * sol_step(ni)%base_poly(:,:) &
                                     &+ RK_beta(tni)    * dt * L_step
                           
-        DO jj=1,nb_nodes
-          sol_step(ni)%val_quad(jj,:)  = eval_step(x_quad(jj),ni=ni, kk=jj, LOC= LRef)
+        DO ii=1,nb_nodes          
+          sol_step(ni)%val_quad(ii,:)  = eval_step(x_quad(ii),ni=ni,kk= ii,LOC= LRef )
         END DO
-        
+
         IF(TRIM(quad_meth)=="Lobatto") THEN
-          sol_step(ni)%inter(1,:)      = sol_step(ni)%val_quad(1       ,:)
-          sol_step(ni)%inter(2,:)      = sol_step(ni)%val_quad(nb_nodes,:)
+          sol_step(ni)%inter(1,:)      = sol_step(ni)%val_quad(1,jj)
+          sol_step(ni)%inter(2,:)      = sol_step(ni)%val_quad(nb_nodes,jj)
         ELSE 
-          sol_step(ni)%inter(1,:)      = eval_step(x_cell(ni),   ni=ni,LOC= LLoc)
-          sol_step(ni)%inter(2,:)      = eval_step(x_cell(ni+1), ni=ni,LOC= LLoc)
+          sol_step(ni)%inter(1,:)      = eval_step(x_cell(ni),  ni=ni, LOC= LLoc)
+          sol_step(ni)%inter(2,:)      = eval_step(x_cell(ni+1),ni=ni, LOC= LLoc)
         END IF
 
       END DO
     END DO
+
+    ! print *,"---------------------"
 
     DO ni=1,nb_cell
         sol(ni)%base_poly  = sol_step(ni)%base_poly
@@ -181,6 +175,7 @@ CONTAINS
           sol(ni)%inter(2,:)      = eval_sol(x_cell(ni+1),ni=ni,LOC=LLoc)
         END IF
     END DO
+
 
   END SUBROUTINE Time_step
 
@@ -200,6 +195,7 @@ CONTAINS
       sol_step(ni)%inter      = sol(ni)%inter
     END DO
 
+    ! print *,"==========="
     DO ii=1,order_t
       ! print *,"------------------"
       CALL flux_numerique
@@ -207,6 +203,7 @@ CONTAINS
       DO ni = 1,nb_cell;DO jj =1,nb_subcell
           
           L = (flux_h(ni)%flux_subcells(jj+1,:)- flux_h(ni)%flux_subcells(jj,:))
+
           sol_step(ni)%val_subcells(jj,:)=  RK_alpha(ii,1) * sol(ni)     %val_subcells(jj,:) &
                                         &  + RK_alpha(ii,2) * sol_step(ni)%val_subcells(jj,:) &
                                         &  - L*RK_beta(ii)  *(2._prec *dt/(cell_size(ni)* subcell_size(jj)))
@@ -241,6 +238,8 @@ CONTAINS
       sol(ni)%val_subcells = sol_step(ni)%val_subcells
       sol(ni)%inter        = sol_step(ni)%inter
     END DO
+
+
 
   END SUBROUTINE Time_step_subcell
 
@@ -419,15 +418,6 @@ CONTAINS
             err2 = err2 + (((sol(i)%val_quad(j,1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
             write(unit=numfile_solex,  fmt=save_format) xi,out_ex
-
-            IF(TRIM(flux_name)== "Euler" ) THEN
-            ! u_ = sol(i)%val_quad(j,:); 
-            pression_ = pression(sol(i)%val_subcells(j,:) )
-            p_max = max(pression_, p_max); p_min = min(pression_,p_min)
-            write(unit=numfile_sol, fmt= '(2x,f10.6)') pression_
-            ELSE;
-               write(unit=numfile_sol,   fmt= '(1x)')
-            END IF
 
           END DO 
           END IF
@@ -647,6 +637,7 @@ CONTAINS
 
     STOP "EMERGENCY STOP"
   END SUBROUTINE Emergency_stop
+
 
   SUBROUTINE Error_check
     IMPLICIT NONE
