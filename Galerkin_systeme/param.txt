@@ -1,10 +1,10 @@
 =================================================
     Paramètres du domaine (temps x espace)
 =================================================
-100              | noeuds du maillage 
--00D-1           | xd
+50              | noeuds du maillage 
+-10D-1           | xd
 10D-1            | xf
-38D-3            | T
+20D-1            | T
 =================================================
     Paramètres Monolithique // (DG/FV)
 =================================================
@@ -14,39 +14,39 @@
 True            | sous maillage     (True, False)
 True            | Monolithique      (True, False)
 --------------------------------------------------
-2               | Maximum Principle : Null(0), GMP(1),  LMP(2)
-4               | Positivity Rule   : Null(0), prod(1), min(2), convex(4), linear(5)
-0               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
+0               | Maximum Principle : Null(0), GMP(1),  LMP(2)
+0               | Positivity Rule   : Null(0), prod(1), min(2), convex(4), linear(5)
+4               | Entropie   Rule   : Null(0), discrete(1), semi(2), cell(3)
 --------------------------------------------------
 0               | Smooth extrema detection (0: False, 1: cell, 2: subcell)
 0               | coefficient smoothening : Null(0), min(1), mean(2)
 --------------------------------------------------
 4              | nb subcellules du sous maillage
-Lobatto         | repartition des noeuds(Unif, Lobatto)
+Unif         | repartition des noeuds(Unif, Lobatto)
 =================================================
     Paramètres DG
 =================================================
-4               | ordre espace
+2               | ordre espace
 3               | ordre temps
-Lobatto        | polynomes   (Legendre,Lobatto)
-Lobatto        | quadrature (Legendre,Lobatto)
+Legendre        | polynomes   (Legendre,Lobatto)
+Legendre        | quadrature (Legendre,Lobatto)
 =================================================
     Paramètres de Sauvegarde
 =================================================
-0.8             | cfl
+0.6             | cfl
 False           | Convergence   (True, False)
 False           | Error calc    (True, False)
 True            | Mesh out      (True, False)
 0               | max-rule check    (0,1,2) (only works on subcell use)
-500              | print rule
-True            | exact time
+2000              | print rule
+False            | exact time
 sol          | nom file_sol
 =================================================
     Paramètres du problème
 =================================================
-Blast    | solution initiale :
+Riemann    | solution initiale :
                     SCL   : sinus, unit, Riemann, creneau, composite, Burgers_choc, Riemann_Buckley
                     Euler : Sod, isentropique,acoustic_wave, Blast
-Euler           | problème (advection, burgers, Buckley, Shallow, Euler)
+advection           | problème (advection, burgers, Buckley, Shallow, Euler)
 1D0             | vitesse advection (si pb = advection)
-Solid          | condition au bord (period, Sym, Solid)
+period          | condition au bord (period, Sym, Solid)

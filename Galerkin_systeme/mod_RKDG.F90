@@ -228,7 +228,7 @@ CONTAINS
 
       END DO
 
-      ! IF(max_check .GT. 0) CALL Error_check
+      CALL calc_entrop(ii)
 
     END DO
 

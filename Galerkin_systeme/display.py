@@ -45,7 +45,7 @@ dec = 0
 X_cell[-1]=1.
 
 
-for k in range(0,sm,1):
+for k in range(0,sm,10):
     for i in range(0,nx): 
         X[i] = lines1[k*(nx+1) + i][0:10]
         U_t[k][i][0]         = lines1[k*(nx+1) +i][10:27]
@@ -93,7 +93,7 @@ for k in range(0,sm,1):
     # plt.plot(X_cell[-1],U_t[k,-1,0],"b",marker="x")        
     
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
-    #plt.plot(X,U_t[0,:,0],'g-')
+    plt.plot(X,U_t[0,:,0],'g-')
     plt.plot(X,U_t[k,:,0],'b-',label="polynome")
     plt.plot(X,U_ex[k,:,0],'g-',label="exacte")
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
@@ -119,7 +119,7 @@ for k in range(0,sm,1):
     
     #plt.ylim(3.8,4.8); plt.xlim(0.2,0.8)
    # plt.ylim(m,M);plt.xlim(-0.,1.)
-    plt.ylim(-3.5, 3.5)
+    # plt.ylim(-1.5, 1.5)
     plt.title("plot at time "+str([T[k]]))
     plt.legend()
     plt.show()    
