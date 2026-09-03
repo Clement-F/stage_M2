@@ -14,7 +14,7 @@ nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
 space = nb_sub
 nx = nb_cell *space
 
-#sm=100
+# sm=100
 sm = int(lines[5][5:11])
 
 T=[]
@@ -93,9 +93,9 @@ for k in range(0,sm,10):
     # plt.plot(X_cell[-1],U_t[k,-1,0],"b",marker="x")        
     
     #plt.plot(X_midcell,U_cell[k,:,0], marker='.')
-    plt.plot(X,U_t[0,:,0],'g-')
+    #plt.plot(X,U_t[0,:,0],'g-')
     plt.plot(X,U_t[k,:,0],'b-',label="polynome")
-    plt.plot(X,U_ex[k,:,0],'g-',label="exacte")
+    # plt.plot(X,U_ex[k,:,0],'g-',label="exacte")
     #plt.plot(X,abs(U_t[k,:,0]-U_ex[k,:,0]),'k-')
     #print(max(abs(U_t[k,:,0]-U_ex[k,:,0])))
     #print(sum(U_t[k,:,0]))

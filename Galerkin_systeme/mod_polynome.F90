@@ -189,6 +189,25 @@ CONTAINS
 
     END FUNCTION Lagrange_basis
 
+
+    FUNCTION sub_basis(XX,ii)
+        IMPLICIT NONE
+        REAL(prec), INTENT(IN) :: XX 
+        INTEGER,    INTENT(IN) :: ii
+        INTEGER :: jj 
+        REAL(prec) :: sub_basis
+        REAL(prec), DIMENSION(size_base) :: sig
+        REAL(prec), DIMENSION(nb_subcell):: sub_base_full
+
+        DO jj=1,size_base
+            sig = DG_base(XX,jj,LRef,1)
+        END DO
+
+        sub_base_full = MATMUL(MATMUL(Masse_inv,Projection_VF),sig)
+        sub_basis = sub_base_full(ii)*subcell_size(ii)/2._prec
+
+    END FUNCTION sub_basis
+
     SUBROUTINE print_mat(Mat,t1,t2)
         IMPLICIT NONE
         INTEGER, INTENT(IN) :: t1,t2

@@ -53,7 +53,7 @@ CONTAINS
         ud = sol_step(ni)  %inter(1,:)
       END IF
 
-      g(ni,:) = (flux(ug) + flux(ud) - max_dflux*(ud-ug))  * 0.5_prec
+      g(ni,:) = Flux_FV(ug,ud)
 
 
     END DO
