@@ -1,0 +1,137 @@
+
+\section{Introduction}
+
+\begin{frame}{maillage}
+
+\begin{block}{Loi de conservation scalaire}
+\begin{equation}
+\left\{
+\begin{aligned}
+    &\partial_t u + \partial_x f(u) = 0\qquad \forall (x,t) \in \mathbb{D} \times \R^+ \\
+    & u : \mathbb{D} \times \R^+ \to \Omega \subset R^M
+\end{aligned}    
+\right.
+\end{equation}
+\end{block}
+
+\begin{columns}
+\begin{column}{0.45\textwidth}
+\begin{block}{critères d'un maillage de $\mathbb{D}$}
+\begin{itemize}
+    \item $\mathbb{D} = \bigcup_i \omega_i$ \qquad $\omega_i \neq \emptyset $\\
+    \item $\omega_i \cap \omega_j = \emptyset$ si $i\neq j$\\
+    \item $\omega_i$ est convexe 
+\end{itemize}
+\end{block}
+\end{column}
+
+\begin{column}{0.45\textwidth}
+\begin{block}{maillage 1D}
+\begin{itemize}
+    \item $\omega_i = [x_{i-1/2},x_{i+1/2}]$ \\
+    \item si $\mathbb{D} = [a,b]$, $x_{1/2}=a$ et $x_{N_x+1/2} =b$
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{block}{Critère CFL}
+\begin{tabular}{p{6cm}c}
+\begin{equation}
+    \Delta t \leq \frac{\Delta x}{2 \gamma}\qquad \gamma = \max_u |f'(u)|
+\end{equation}
+&
+\raisebox{-15mm}{\usebox{\Riemann}}
+\end{tabular}   
+\end{block}
+
+\end{frame}
+
+% ---------------------------------------------------------
+% ---------------------------------------------------------
+
+\begin{frame}{Solveurs de Riemann approchée}
+
+\begin{block}{Loi de conservation scalaire}
+\begin{equation}
+\left\{
+\begin{aligned}
+    &\partial_t u + \partial_x f(u) = 0\qquad \forall (x,t) \in \R \times \R^+ \\
+    & u : \R \times \R^+ \to \Omega \subset R^M
+\end{aligned}    
+\right.
+\end{equation}
+\end{block}
+
+
+\begin{block}{Solveur de Godunov}
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        &\mathcal{F}(u,v) = \frac{f(u)+f(v)}{2} - \frac{\gamma_L}{2}(u^*-u_L) -\frac{\gamma_R}{2}(u_R-u^*)  \\
+        &u^* = \frac{\gamma_R\,u_R-\gamma_L\,u_L }{\gamma_R - \gamma_L} -\frac{1}{\gamma_R - \gamma_L}(f(u_R)-f(u_L))
+    \end{aligned}
+    \right.
+\end{equation}
+\end{block}
+
+
+\begin{block}{Solveur de Rusanov/Lax}
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        &\mathcal{F}(u,v) = \frac{f(u)+f(v)}{2} - \frac{\gamma}{2}(v-u) \\
+        &u^* = \frac{u_L +u_R}{2} -\frac{1}{2\gamma}(f(u_R)-f(u_L))
+    \end{aligned}
+    \right.
+\end{equation}
+\end{block}
+
+\end{frame}
+% ==========================================================================
+% ==========================================================================
+\section{Schéma Volumes Finis}
+
+\begin{frame}{Schéma Volumes Finis}
+
+\begin{block}{Loi de conservation scalaire}
+\begin{equation}
+\left\{
+\begin{aligned}
+    &\partial_t u + \partial_x f(u) = 0\qquad \forall (x,t) \in \R \times \R^+ \\
+    & u : \R \times \R^+ \to \Omega \subset R^M
+\end{aligned}    
+\right.
+\end{equation}
+\end{block}
+
+\begin{block}{Schéma semi-discrétisé}
+\begin{align}    
+    & \partial_t \overline{u_j} = \frac{-1}{|\omega_j|} (\mathcal{F}_{j+1/2}-\mathcal{F}_{j-1/2})\\
+    & \overline{u}_j^n = \int_{\omega_j} u(x,t^n)dx \qquad \mathcal{F}_{j+1/2} = \mathcal{F}(u_j,u_{j+1})
+\end{align}
+\end{block}
+
+
+\begin{block}{Schéma discrétisé par Euler Explicite}
+\begin{equation}  
+    \overline{u_j}^{n+1} = \overline{u_j}^n - \frac{\Delta_t}{|\omega_j|} (\mathcal{F}_{j+1/2}-\mathcal{F}_{j-1/2})
+\end{equation}
+\end{block}
+
+
+
+
+\end{frame}
+
+% ---------------------------------------------------------
+% ---------------------------------------------------------
+
+\begin{frame}{Problème : dissipation de la solution}
+
+
+\red{insert results: }\\
+\red{left : sinus advection, sinus burgers (bon comportement)}\\
+\red{right: rectangulaire advection, composite advection(dissipation)}
+
+\end{frame}

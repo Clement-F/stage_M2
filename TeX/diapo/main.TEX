@@ -1,0 +1,53 @@
+\documentclass[11pt,french]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+% \usepackage{animate}
+\usepackage{ragged2e}
+
+\usepackage{csquotes}
+\usepackage{tikz}
+\usepackage{fourier}
+\usepackage{babel}
+\usepackage{microtype}
+\usepackage{wrapfig}
+\usepackage{marvosym }
+\usepackage{graphicx}
+\usepackage{multirow}
+\pdfcompresslevel=0
+\pdfobjcompresslevel=0
+
+\usepackage[backend=biber,style=authoryear,sortcites,sorting=nty,backref,natbib,hyperref]{biblatex}
+\addbibresource{ref.bib}
+
+
+\input{macro}
+\input{tikz_figure}
+
+\usetheme{Madrid}
+\usefonttheme{serif}
+\title{Développement de schémas
+monolithiques GD/FV pour de futur développement sur la dynamique des gaz
+compressibles en 2D}
+\subtitle{Soutenance de M2}
+\author{Clément Fontan\\
+\textit{encadré par M. F. VILAR}}
+\date{10 Septembre 2026}
+\institute{Institut Montpelliérain Alexander Grothendieck, Université de Montpellier, France}
+\setbeamercovered{dynamic}
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+\tableofcontents
+\end{frame}
+
+\include{Finite_Vol}
+\include{DG}
+\include{Monolith}
+\include{Conclusion}
+
+
+\end{document}

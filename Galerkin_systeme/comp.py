@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 p = lambda U:  2.*(U[2] - 0.5*(U[1])**2 /U[0] )
 
-nb_comp = 1
+nb_comp = 2
 nb_var = []; 
 orderx = [] ;ordert = []
 nb_cell = [] ;nb_sub = [];
@@ -17,8 +17,8 @@ lines = []
 # data_name   = ['pos_data.txt','LMP_pos_data.txt','LMP_pos_Rel_data.txt','solex_data.txt']
 # sol_name    = ['sol_pos.txt','sol_LMP_pos.txt','sol_LMP_pos_Rel.txt','solex.txt']
 
-data_name   = ['blast_data.txt','unif_data.txt','blast_data.txt']
-sol_name    = ['blast_file.txt','sol_unif.txt','blast_file.txt']
+data_name   = ['high_data.txt','un_data.txt']
+sol_name    = ['sol_high.txt','sol_un.txt']
 
 
 

@@ -137,21 +137,40 @@ CONTAINS
 
       ELSE IF(positivity == 4) THEN 
         M   = u_Riemann(1)* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
+        IF(M .LT. -eps0) STOP 'M<0'
         B_r = u_Riemann(1)*DF(3)/gamma_mp
-        IF(theta_temp(1) .GT. M/max(B_r,eps0))THEN 
+        IF(theta_temp(1) .LT. M/(B_r+eps0))THEN 
+          print *,"cas 1"
           Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
+          theta_pos(1) = theta_temp(1)
         ELSE 
-          Theta_pos(2:3)= flat_positivity_criteria(0._prec,u_Riemann,gamma_mp,DF)
-          
-          B_u = abs(DF(2)*u_Riemann(2))/(gamma_mp)
-          B_e = abs(DF(3)*u_Riemann(1))/(gamma_mp)
+          print *,"cas 2"
+          B_u = (DF(2)*u_Riemann(2))/(gamma_mp)
+          B_e = (DF(3)*u_Riemann(1))/(gamma_mp)
           A   = DF(2)**2/(2._prec* gamma_mp**2)
-          A_r = abs(DF(1)*DF(3)/gamma_mp**2)
+          A_r = (DF(1)*DF(3)/gamma_mp**2)
+          
+          Theta_pos(2:3)= flat_positivity_criteria(0._prec,u_Riemann,gamma_mp,DF)
 
-          THETA_pos(1)  = min((M-B_u*Theta_pos(2)- B_e*THETA_pos(3)-A*Theta_pos(2)**2)/max(B_r+A_r*Theta_pos(3),eps0) ,1._prec)
-        END IF       
-      
-      ELSE IF(positivity == 5) THEN
+          THETA_pos(1)  = min(theta_temp(1), (M-B_u*Theta_pos(2)- B_e*THETA_pos(3)-A*Theta_pos(2)**2)/(B_r+A_r*Theta_pos(3)+eps0) ,1._prec)
+          THETA_pos(1)  = min(theta_temp(1), (M+B_u*Theta_pos(2)+ B_e*THETA_pos(3)+A*Theta_pos(2)**2)/(-B_r-A_r*Theta_pos(3)+eps0) ,1._prec)
+          THETA_pos = max(0._prec,THETA_pos)
+        END IF     
+        B_u = (DF(2)*u_Riemann(2))/(gamma_mp)
+        B_e = (DF(3)*u_Riemann(1))/(gamma_mp)
+        A   = DF(2)**2/(2._prec* gamma_mp**2)
+        A_r = (DF(1)*DF(3)/gamma_mp**2)
+
+        
+        IF( M+B_u*Theta_pos(2)+ B_e*THETA_pos(3)+A*Theta_pos(2)**2 + theta_pos(1)*(B_r+A_r*Theta_pos(3)) .LT. -eps0) THEN;
+        print *,M+B_u*Theta_pos(2)+ B_e*THETA_pos(3)+A*Theta_pos(2)**2 - theta_pos(1)*(B_r+A_r*Theta_pos(3))
+        print *,(M-B_u*Theta_pos(2)- B_e*THETA_pos(3)-A*Theta_pos(2)**2) + theta_pos(1)*(B_r+A_r*Theta_pos(3))
+        print *, THETA_pos
+
+        STOP "criteria"
+      END IF
+
+       ELSE IF(positivity == 5) THEN
         ! heuristique
 
         Theta_pos(2:3)= flat_positivity_criteria(theta_temp(1),u_Riemann,gamma_mp,DF)
@@ -171,58 +190,88 @@ CONTAINS
     REAL(prec), DIMENSION(nb_var), INTENT(IN) :: u_Riemann,DF
     REAL(prec), INTENT(IN) :: Theta_rho, gamma_mp
     REAL(prec) :: rho,M,B_u,B_e,A
+    REAL(prec) :: x_root,y_root
     INTEGER :: pm
     
         
-    DO pm = 0,1
+    DO pm = -1,1,2
 
-      if(pm == 0)  rho = u_Riemann(1) + Theta_rho*DF(1)/gamma_mp; 
-      if(pm == 1)  rho = u_Riemann(1) - Theta_rho*DF(1)/gamma_mp; 
+      rho = u_Riemann(1) +Real(pm,prec)*Theta_rho*DF(1)/gamma_mp; 
+
 
       IF(rho .LT. 0) print *,"rho<0",rho,DF(1),Theta_rho, u_Riemann(1)
 
       M   = rho* u_Riemann(3) - u_Riemann(2)**2 /(2._prec)
-
-      IF(M .LT. eps0) THEN; Theta =0._prec;  return; END IF;
-
-      if(pm == 0) B_u = DF(2)*u_Riemann(2)/(gamma_mp)
-      if(pm == 1) B_u = -DF(2)*u_Riemann(2)/(gamma_mp)
-
-      if(pm == 0) B_e = -(DF(3)/gamma_mp) * rho
-      if(pm == 1) B_e =  (DF(3)/gamma_mp) * rho
-        
+      B_u = Real(pm,prec)*DF(2)*u_Riemann(2)/(gamma_mp)
+      B_e = -Real(pm,prec)*(DF(3)/gamma_mp) * rho        
       A   = DF(2)**2/(2._prec* gamma_mp**2)
 
-      IF(M .LT. 0 .AND. pm ==1) return
+      ! IF(B_e .LT. -eps0) THEN 
+
+      !   x_root = -B_u/2*A
+      !   y_root = -(1._prec/B_e) *(B_u*x_root + A*x_root**2 -M)
+      !   IF(y_root .GT. 1._prec+eps0) THEN; Theta = 0._prec; return; END IF;
+      !   IF(x_root .LT. eps0) THEN
+      !     IF(M .GT. B_e) THEN 
+      !     Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e)))/(2._prec*A) )
+      !     Theta(2) = min(1._prec,Theta(2))
+      !     ELSE;  Theta = 0._prec; return;
+      !     END IF
+      !   ELSE IF(x_root .GT. 1._prec +eps0) THEN 
+      !     IF(M .GT. B_u +A) THEN
+      !     Theta(1) = min(1._prec,Theta(1))
+      !     Theta(2) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), Theta(2))
+      !     ELSE 
+      !       Theta = 0._prec; return;
+      !     END IF
+      !   ELSE 
+      !     Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e)))/(2._prec*A) )
+      !     theta(2) = 1._prec          
+      !   END IF
+        
 
       
+      
+      ! ELSE
+
+      IF(M .LT. -eps0 ) THEN;
+        print *,"M<0",theta_rho,M  
+        print *,u_Riemann(1)- rho  
+      END IF    
       IF(A .LT. 0) print *,"A<0", A, gamma_mp, DF(2)
       
       IF(B_e .LT. eps0 .AND. B_u .LT. -A) THEN 
+        print *,'a'
         Theta(1) = min(1._prec,Theta(1))
         Theta(2) = min(1._prec,Theta(2))
         return
       END IF
 
       IF(B_e .LT. eps0) THEN
+        print*,'b'
         Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e)))/(2._prec*A) )
         Theta(2) = min(1._prec,Theta(2))
       END IF
 
       IF(B_u .LT. -A) THEN
+        print*,'c'
         Theta(1) = min(1._prec,Theta(1))
         Theta(2) = min(1._prec,(M-B_u-A)/(max(B_e,eps0)), Theta(2))
       END IF
 
       IF(B_e .GT. eps0 .AND. B_u .GT. -A) THEN 
-        ! IF(M .LT. 0) print *,"M",M
-        IF(B_e .LT. 0) print *,"Be",B_e
-        IF(B_u .LT. -A) print *,"Bu",B_u
-        IF(A .LT. 0) print *,"A",A
-        
-        Theta(2) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(2))
-        Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e*Theta(2))))/(2._prec*A) )
+      print*,"d"
+      ! IF(M .LT. 0) print *,"M",M
+      IF(B_e .LT. 0) print *,"Be",B_e
+      IF(B_u .LT. -A) print *,"Bu",B_u
+      IF(A .LT. 0) print *,"A",A
+      
+      Theta(2) = min(1._prec,M*    B_e/max(max(B_e,eps0)**2 + max(B_u+A,eps0)**2,eps0),Theta(2))
+      Theta(1) = min(1._prec, (-B_u + sqrt(B_u**2 +4._prec*A*(M-B_e*Theta(2))))/(2._prec*A) )
       END IF
+
+      ! END IF
+
     END DO
 
 
@@ -335,34 +384,6 @@ CONTAINS
       END IF
     END IF
   END FUNCTION THETA_ent
-
-  ! SUBROUTINE ENTROPI_CELL(ni)
-  !   INTEGER, INTENT(IN) :: ni
-  !   INTEGER, DIMENSION(2) :: voi_L,voi_R
-  !   REAL(prec),DIMENSION(nb_var) :: vd,vg,ud,ug
-  !   REAL(prec),DIMENSION(nb_subcell,nb_var) :: u_moy,v_moy
-  !   REAL(prec),DIMENSION(size_base, nb_var):: poly_ent
-  !   REAL(prec) :: D_c
-  !   REAL(prec), DIMENSION(nb_subcell+1) :: Cell_c
-  !   INTEGER :: ii,jj
-
-
-  !   ! mettre vh_c le polynome entropie sur c
-  !   u_moy = sol_step(ni)%val_subcells(:,:)
-  !   DO ii =1,nb_subcell; v_moy(ii,:) = Var_entrop(u_moy(ii,:)); END DO
-  !   poly_ent = MATMUL(Projection_VF_inv(:,:), v_moy)
-
-
-  !   DO ii=1,nb_subcell
-  !     voi_L = Voisin_Face(ni,jj,'L'); ug = sol_step(voi_L(1))%val_subcells(voi_L(2),:)
-  !     voi_R = Voisin_Face(ni,jj,'R'); ud = sol_step(voi_R(1))%val_subcells(voi_R(2),:)
-
-  !     vd = Var_entrop(ud); vg = Var_entrop(ug)
-  !     D_c = entrop_pot_flux(vd)      
-
-  !   END DO
-
-  ! END SUBROUTINE ENTROPI_CELL
 
   SUBROUTINE extrema_detect 
     IMPLICIT NONE

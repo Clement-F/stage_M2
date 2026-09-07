@@ -1,0 +1,117 @@
+\section{schéma Galerkin Discontinue et sa reformulation}
+
+\begin{frame}{Espace de solution polynomiale \red{à changer}}
+\begin{block}{Espace polynomiale par morceaux : $V_h$}
+\begin{equation}
+    V_h = \left\{ \mathbf{u_h} \in \mathbb{P}^k(\omega_i) \quad \forall x\in \omega_i \right\} \subset L^\infty(\mathbb{D})\cap BV(\mathbb{D})
+\end{equation}
+\end{block}
+
+\begin{columns}
+\begin{column}{0.45\textwidth}
+\begin{block}{base polynomiale $\sigma_p$}
+    \begin{itemize}
+        \item base de Gauss-Legendre
+        \item base de Gauss-Lobatto
+        \item base de Taylor
+    \end{itemize}
+\end{block}
+\end{column}
+
+\begin{column}{0.45\textwidth}
+\begin{block}{Expression de $\mathbf{u_h}$ }
+\begin{equation}
+    \mathbf{u_h}(x) = \sum_p^{N_k} \underline{\mathbf{u}}_p \sigma_p(x)
+\end{equation}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{block}{Formulation variationnelle}
+\begin{equation}\label{Formulation_Variationnelle}
+    \int_{\omega_i} \partial_t \mathbf{u_h} \sigma_p dx - \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \sigma_p dx + \left[\mathcal{F} \,\sigma_p \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \qquad p=1,\dots,N_k 
+\end{equation}
+\end{block}
+\end{frame}
+
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
+
+
+\begin{frame}{Sous-maillage $S_m^i$ et sous-base de résolution $\phi_m^i$}
+
+\begin{block}{sous-maillage $S_m^i$}
+\begin{tabular}{p{6cm}c}
+On munit $\omega_i$ d'un sous maillage $\{S_m^i\}_{m=1,\dots,N_s}$ où $S_m^i = ]\hat{x}_{m-1/2}^i,\hat{x}_{m+1/2}^i[$ 
+et $\hat{x}^i_{1/2} = x_{i-1/2}$, $\hat{x}^i_{N_s+1/2} = x_{i+1/2}$ 
+&
+\raisebox{-10mm}{\usebox{\smaillage}}
+\end{tabular}   
+\end{block}
+
+\begin{columns}
+
+\begin{column}{0.45\textwidth}
+\begin{block}{sous-base $\phi_m^i$}
+$\phi_m^i$ la projection de $\mathbb{1}_{S_m^i}$ sur $\mathbb{P}^k(\omega_i)$.
+$\int_{\omega_i} \phi_m^i \sigma(x)dx = \int_{S_m^i} \sigma(x)dx$
+\end{block}
+
+\begin{block}{Matrice de Projection $\mathcal{P}$}
+$\mathcal{P}_{mp} = \frac{1}{|S_m^i|}\int_{S_m^i} \sigma_p(x)dx$
+\end{block}
+
+\end{column}
+
+\begin{column}{0.45\textwidth}
+\begin{block}{sous-valeurs finis $\overline{u}$}
+\begin{equation}
+    \begin{aligned}
+    \overline{u}_m^i =&\frac{1}{|S_m^i|} \int_{S_m^i}u_h(x)dx  \\
+    =&\sum_{p}^{N_k} \underline{u}^i_p \frac{1}{|S_m^i|} \int_{S_m^i} \sigma_p(x)dx
+    \end{aligned}
+\end{equation}
+\begin{equation}
+    \overline{U}^i = \mathcal{P}\underline{U}^i
+\end{equation}
+\end{block}
+\end{column}
+
+\end{columns}
+
+\end{frame}
+
+
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
+
+
+
+\begin{frame}{Reformulation du schéma GD comme schéma VF}
+
+\begin{block}{Flux reconstruit $\widehat{F}$}
+On souhaite avoir une semi discrétisation sous la forme :
+\begin{equation}
+    \partial_t \overline{u}^i_m = \frac{-1}{|S_m^i|} (\widehat{F}^i_{m+1/2}-\widehat{F}^i_{m-1/2})
+\end{equation}
+\end{block}
+On réecrit la formulation variationnelle par projection sur $V_h$ et IPP:
+\begin{align*}
+\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx &= \int_{\omega_i} \mathbf{f}(\mathbf{u_h}) \partial_x \sigma  dx - \left[\mathcal{F} \,\sigma \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \\
+\int_{\omega_i} \partial_t \mathbf{u_h} \sigma dx &= -\int_{\omega_i}\partial_x F_h^i \sigma  dx + \left[(F_h^i-\mathcal{F}) \,\sigma  \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}} = 0 \\
+\end{align*}
+On remplace $\sigma$ par $\phi_m^i$
+\begin{equation}
+|S_m^i|\partial_t \overline{\mathbf{u}}_m^i = -\left(\left[F_h^i \right]_{\hat{x}_{m-\frac{1}{2}}}^{\hat{x}_{m+\frac{1}{2}}} - \left[(F_h^i-\mathcal{F}) \,\phi_m^i  \right]_{x_{i-\frac{1}{2}}}^{x_{i+\frac{1}{2}}}\right) = -\left(\widehat{F}_{m+1/2}- \widehat{F}_{m-1/2}\right)                                          
+\end{equation}
+
+\end{frame}
+
+
+\begin{frame}{Problème : Phénomène de Gibbs}
+
+\red{insert results here}\\
+\red{left : convergence sinus advection et sinus burgers }\\
+\red{right: rectangle burgers et buckley }
+
+\end{frame}

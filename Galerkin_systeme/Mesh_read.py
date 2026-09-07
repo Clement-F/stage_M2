@@ -36,7 +36,7 @@ for k in range(0,sm):
         p+=1
         for j in range(nb_var):
             # print(p)
-            if(line[p:p+6] != '***** ') :pos[k,i,j] = float(line[p:p+6])
+            if(line[p:p+6] != '***** ') :pos[k,i,j] = max(float(line[p:p+6]),0)
             p +=6
         p+=1
             
@@ -52,7 +52,7 @@ for k in range(0,sm):
     # plt.plot(X,theta_[k],'b-')
     # plt.show()
 
-xL=-1.; xR=1.
+xL=-0.; xR=1.
 
 for i in range(0,nb_var):
     plt.pcolormesh(X, T, theta_[:,:,i], shading='auto', cmap='viridis')

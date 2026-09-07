@@ -1,0 +1,59 @@
+
+\section{Schéma Monolithique}
+
+\begin{frame}{Schéma Monolithique}
+
+\begin{block}{Flux hybrides :$\widetilde{F}$}
+On change les flux reconstruit par de nouveaux flux : $\widetilde{F}$
+\begin{equation*}
+\begin{aligned}
+\widetilde{F}_{m+\frac{1}{2}} &=  F^{FV}_{m+\frac{1}{2}} + \theta_{m+\frac{1}{2}} (\widehat{F}_{m+\frac{1}{2}} -F^{FV}_{m+\frac{1}{2}})\\
+&=  F^{FV}_{m+\frac{1}{2}} + \theta_{m+\frac{1}{2}} \Delta F_{m+\frac{1}{2}} 
+\end{aligned}
+\implies
+\partial_t \overline{u}^i_m = \frac{-1}{|S_m^i|} (\widetilde{F}^i_{m+\frac{1}{2}}-\widetilde{F}^i_{m-\frac{1}{2}})
+\end{equation*}
+\end{block}
+
+\begin{block}{critère CFL et solutions de Riemann hybrides}
+% Si l'on discrétise en temps par la méthode d'Euler Explicite : 
+\begin{tabular}{p{8.5cm}c}
+\multirow{4}{9cm}{
+$\overline{u}^{i,n+1}_m = \overline{u}^i_m -\frac{\Delta t}{|S_m^i|} (\widetilde{F}^i_{m+\frac{1}{2}}-\widetilde{F}^i_{m-\frac{1}{2}})$\\
+$\overline{u}^{i,n+1}_m = \left( 1-  \Delta t_n\frac{\gamma_{m+\frac{1}{2}}+\gamma_{m-\frac{1}{2}} }{|S_m^i|}\right) \overline{{u}_m}^{i,n} + \left(\Delta t_n\frac{\gamma_{m+\frac{1}{2}}+\gamma_{m-\frac{1}{2}} }{|S_m^i|} \right) \widetilde{{u}}_{m+\frac{1}{2}}^-$\\
+où $\widetilde{{u}}_{m+\frac{1}{2}}^- = {u}_{m+\frac{1}{2}}^{*,FV} - \theta_{m+\frac{1}{2}} \frac{\Delta F_{m+\frac{1}{2}}}{\gamma_{m+\frac{1}{2}}}$\\
+et $\Delta t_n\frac{\gamma_{m+\frac{1}{2}}+\gamma_{m-\frac{1}{2}} }{|S_m^i|} \leq 1$ ce qui nous donne : $\Delta t_n \leq \frac{|S_m^i|}{\gamma_{m+\frac{1}{2}}+\gamma_{m-\frac{1}{2}} }$
+}
+&
+\raisebox{-30mm}{\usebox{\SRiemann}}
+\end{tabular}   
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Exemple de critères : Principe du maximum global/local}
+
+\begin{block}{Principe Maximum global}
+$u(\cdot,0.)\in [\alpha,\beta] \implies u(\cdot,t^n)\in [\alpha,\beta]$
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}{défaut des critères : \red{erreur induite}, relaxation des critères}
+
+
+
+\end{frame}
+
+\begin{frame}{Exemple de critère : critère de positivité}
+
+
+
+\end{frame}
+
+\begin{frame}{Exemple de critère : deuxième critère de positivité (Bonus)}
+
+
+
+\end{frame}

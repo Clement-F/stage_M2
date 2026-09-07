@@ -1,0 +1,5 @@
+\babel@toc {french}{}\relax 
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{Schéma Volumes Finis}{5}{0}{2}
+\beamer@sectionintoc {3}{schéma Galerkin Discontinue et sa reformulation}{7}{0}{3}
+\beamer@sectionintoc {4}{Schéma Monolithique}{11}{0}{4}

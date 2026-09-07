@@ -228,7 +228,7 @@ CONTAINS
 
       END DO
 
-      CALL calc_entrop(ii)
+      ! CALL calc_entrop(ii)
 
     END DO
 
@@ -417,7 +417,7 @@ CONTAINS
             err1 = err1 + (abs(sol(i)%val_quad(j,1)-out_ex(1)))*w_quad(j)    *cell_size(i)/2
             err2 = err2 + (((sol(i)%val_quad(j,1)-out_ex(1))*w_quad(j))**2)  *cell_size(i)/2
 
-            write(unit=numfile_solex,  fmt=save_format) xi,out_ex
+            if(error_calc)write(unit=numfile_solex,  fmt=save_format) xi,out_ex
 
           END DO 
           END IF
@@ -466,7 +466,7 @@ CONTAINS
             write(unit=numfile_sol, fmt= '(f10.6)') pression_
             ELSE;
                write(unit=numfile_sol,   fmt= '(1x)')
-               write(unit=numfile_solex, fmt= '(1x)')
+               if(error_calc)write(unit=numfile_solex, fmt= '(1x)')
             END IF
 
           END DO
@@ -614,7 +614,8 @@ CONTAINS
         write(unit= numfile_data, fmt='("time ",i5," = ",f16.6)') i, Time_stemp(i)
     END DO
 
-    close(unit=numfile_sol);    close(unit=numfile_solex)
+    close(unit=numfile_sol);    
+    if(error_calc)close(unit=numfile_solex)
 
     
     close(unit=numfile_data)
@@ -757,7 +758,7 @@ CONTAINS
       Time_stemp(n_imp) = time    
       END IF
       write(unit=numfile_sol  , fmt='("----------",f10.6,"--------------")' ) time
-      write(unit=numfile_solex  , fmt='("----------",f10.6,"--------------")' ) time
+      if(error_calc)write(unit=numfile_solex  , fmt='("----------",f10.6,"--------------")' ) time
     END IF
   END SUBROUTINE writout_dense
   
