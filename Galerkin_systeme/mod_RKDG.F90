@@ -492,7 +492,7 @@ CONTAINS
       DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") maxval(theta_(:,:,i));        END DO
       write(*, fmt ='(1x)')
 
-      write(*, fmt ='("max theta = ")',advance = "no")  
+      write(*, fmt ='("min theta = ")',advance = "no")  
       DO i=1,nb_var; write(*, fmt ='(f10.6)',advance ="no") minval(theta_(:,:,i));        END DO
       write(*, fmt ='(1x)')
 

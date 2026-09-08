@@ -162,6 +162,8 @@ CONTAINS
         STOP
         END SELECT
 
+        min_glob = min_glob - 1D-3
+        max_glob = max_glob + 1D-3
 
         err_L1 = 0._prec; err_L2 =0._prec;  err_Li=0._prec
         print *,"end init"

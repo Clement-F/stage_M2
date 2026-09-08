@@ -301,8 +301,8 @@ CONTAINS
     IF(.not. extrema .AND. max_rule .GT. 0) THEN
       DO ii = 1,maxi
         IF(max_rule==1) THEN; 
-          alpha= 1.01_prec*(min_glob+eps0); 
-          beta = 0.99_prec*(max_glob-eps0);
+          alpha= (min_glob+eps0); 
+          beta = (max_glob-eps0);
 
         ELSEIF(max_rule ==2) THEN
           IF((abs(DF(ii))) < eps0) THEN; THETA_max = 1._prec; return; END IF
