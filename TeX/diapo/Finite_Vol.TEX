@@ -3,6 +3,9 @@
 
 \begin{frame}{maillage}
 
+\begin{columns}
+\begin{column}{0.45 \textwidth}
+
 \begin{block}{Loi de conservation scalaire}
 \begin{equation}
 \left\{
@@ -13,6 +16,17 @@
 \right.
 \end{equation}
 \end{block}
+\end{column}
+
+\begin{column}{0.5 \textwidth}
+\begin{align*}
+    f(u) &= c\,u            & \text{advection}\\
+    f(u) &= \frac{4u^2}{4u^2 +(1-u)^2}  &\text{Buckley}\\
+    f(u) &= (\rho v,\,\, \rho v^2 + p, \,\,\rho e\, v+ p\, v ) &\text{Euler}
+\end{align*}
+\end{column}
+
+\end{columns}
 
 \begin{columns}
 \begin{column}{0.45\textwidth}
@@ -35,7 +49,8 @@
 \end{column}
 \end{columns}
 
-\begin{block}{Critère CFL}
+\begin{block}{Condition de Courant–Friedrichs–Lewy }
+Condition régissant le maillage espace-temps dépendant de la solution et de sa vitesse de déplacement dans le maillage espace
 \begin{tabular}{p{6cm}c}
 \begin{equation}
     \Delta t \leq \frac{\Delta x}{2 \gamma}\qquad \gamma = \max_u |f'(u)|
@@ -52,30 +67,25 @@
 
 \begin{frame}{Solveurs de Riemann approchée}
 
-\begin{block}{Loi de conservation scalaire}
+\begin{block}{Solveur de Riemann Approchée}
+On approche ${u_r}(\frac{x}{t},u_L,u_R)$ solution d'un porblème de Riemann par $\widetilde{u}_r$.\\
+le SRA sera consitent au sens de la moyenne si : $\Delta t,\, \Delta x$ respectent la condition CFL et :
+\begin{tabular}{p{2.5cm}| p{7cm}}
 \begin{equation}
-\left\{
-\begin{aligned}
-    &\partial_t u + \partial_x f(u) = 0\qquad \forall (x,t) \in \R \times \R^+ \\
-    & u : \R \times \R^+ \to \Omega \subset R^M
-\end{aligned}    
-\right.
+    \widetilde{u}_r(\frac{x}{t},u,u)=u 
 \end{equation}
+&
+\hspace{1cm}
+\begin{equation}
+    \frac{1}{\Delta x}\int_{-\Delta x/2}^{\Delta x/2} \widetilde{u}_r(\frac{x}{\Delta t},u_L,u_R) dx
+    = \frac{u_L + u_R}{2} -\frac{\Delta t}{2\Delta x}\left(f(u_R)-f(u_L)\right)
+\end{equation}
+\end{tabular}
 \end{block}
 
+\begin{columns}
 
-\begin{block}{Solveur de Godunov}
-\begin{equation}
-    \left\{
-    \begin{aligned}
-        &\mathcal{F}(u,v) = \frac{f(u)+f(v)}{2} - \frac{\gamma_L}{2}(u^*-u_L) -\frac{\gamma_R}{2}(u_R-u^*)  \\
-        &u^* = \frac{\gamma_R\,u_R-\gamma_L\,u_L }{\gamma_R - \gamma_L} -\frac{1}{\gamma_R - \gamma_L}(f(u_R)-f(u_L))
-    \end{aligned}
-    \right.
-\end{equation}
-\end{block}
-
-
+\begin{column}{0.4 \textwidth}
 \begin{block}{Solveur de Rusanov/Lax}
 \begin{equation}
     \left\{
@@ -86,6 +96,22 @@
     \right.
 \end{equation}
 \end{block}
+\end{column}
+
+\begin{column}{0.55 \textwidth}
+\begin{block}{Solveur de Godunov}
+\begin{equation}
+    \left\{
+    \begin{aligned}
+        &\mathcal{F}(u,v) = \frac{f(u)+f(v)}{2} - \frac{\gamma_L}{2}(u^*-u_L) -\frac{\gamma_R}{2}(u_R-u^*)  \\
+        &u^* = \frac{\gamma_R\,u_R-\gamma_L\,u_L }{\gamma_R - \gamma_L} -\frac{1}{\gamma_R - \gamma_L}(f(u_R)-f(u_L))
+    \end{aligned}
+    \right.
+\end{equation}
+\end{block}
+\end{column}
+
+\end{columns}
 
 \end{frame}
 % ==========================================================================
@@ -94,31 +120,47 @@
 
 \begin{frame}{Schéma Volumes Finis}
 
-\begin{block}{Loi de conservation scalaire}
-\begin{equation}
-\left\{
-\begin{aligned}
-    &\partial_t u + \partial_x f(u) = 0\qquad \forall (x,t) \in \R \times \R^+ \\
-    & u : \R \times \R^+ \to \Omega \subset R^M
-\end{aligned}    
-\right.
-\end{equation}
+\begin{block}{SRA entropique}
+On dit que le SRA est entropique si il respecte cette condition supplémentaire.
+\begin{tabular}{p{2cm}| p{7cm}}
+\begin{align*}
+\partial_t S(u) + \partial_x G(u) \leq 0 \\ \forall (x,t) \in \R \times \R^+
+\end{align*}
+&
+\begin{align*}
+    \frac{1}{\Delta x}\int_{-\Delta x/2}^{\Delta x/2} S(\widetilde{u}_r(\frac{x}{\Delta t},u_L,u_R)) dx 
+   = \frac{S(u_L) + S(u_R)}{2}-  \frac{\Delta t}{2\Delta x}\left(G(u_R)-G(u_L)\right)
+\end{align*}
+\end{tabular}
 \end{block}
-
+\begin{columns}
+\begin{column}{0.35 \textwidth}
 \begin{block}{Schéma semi-discrétisé}
 \begin{align}    
     & \partial_t \overline{u_j} = \frac{-1}{|\omega_j|} (\mathcal{F}_{j+1/2}-\mathcal{F}_{j-1/2})\\
-    & \overline{u}_j^n = \int_{\omega_j} u(x,t^n)dx \qquad \mathcal{F}_{j+1/2} = \mathcal{F}(u_j,u_{j+1})
+    & \overline{u}_j^n = \int_{\omega_j} u(x,t^n)dx \\
+    &\mathcal{F}_{j+1/2} = \mathcal{F}(u_j,u_{j+1})
 \end{align}
 \end{block}
+\end{column}
 
-
+\begin{column}{0.6 \textwidth}
 \begin{block}{Schéma discrétisé par Euler Explicite}
 \begin{equation}  
     \overline{u_j}^{n+1} = \overline{u_j}^n - \frac{\Delta_t}{|\omega_j|} (\mathcal{F}_{j+1/2}-\mathcal{F}_{j-1/2})
 \end{equation}
 \end{block}
 
+\begin{block}{Schéma RK-SSP}
+% \begin{align*}  
+    $u^1 = \hspace{1.5mm}u^0 + \hspace{5mm}\Delta t L(u^0)$ \\
+    $u^2 = \alpha u^0 +(1-\alpha)(u^1 + \Delta t L(u^1))$\hspace{.2cm} ordre 2 : $\alpha = \frac{1}{2}$ 
+    $u^3 = \beta u^0 +(1-\beta)(u^2 + \Delta t L(u^2))$\hspace{.2cm} ordre 3 : $\alpha = \frac{3}{4}$, $\beta = \frac{1}{3}$
+% \end{align*}
+\end{block}
+
+\end{column}
+\end{columns}
 
 
 

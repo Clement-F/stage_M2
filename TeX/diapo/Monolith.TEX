@@ -30,27 +30,158 @@ et $\Delta t_n\frac{\gamma_{m+\frac{1}{2}}+\gamma_{m-\frac{1}{2}} }{|S_m^i|} \le
 \end{block}
 
 \end{frame}
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
 
 \begin{frame}{Exemple de critères : Principe du maximum global/local}
-
+\begin{columns}
+\begin{column}{0.37\textwidth}
 \begin{block}{Principe Maximum global}
-$u(\cdot,0.)\in [\alpha,\beta] \implies u(\cdot,t^n)\in [\alpha,\beta]$
+\begin{equation}
+    u(\cdot,0.)\in [\alpha,\beta] \implies u(\cdot,t^n)\in [\alpha,\beta]
+\end{equation}
+\end{block}
+\end{column}
+
+\begin{column}{0.57\textwidth}
+\begin{block}{Principe Maximum Local}
+\begin{equation}
+    \beta_i^n := \max_{j\in\{i-1,i,i+1\}} u_j^n \geq u_i^{n+1} \geq \min_{j\in\{i-1,i,i+1\}} u_j^n =: \alpha_i^n
+\end{equation}
+\end{block}
+\end{column}
+
+\end{columns}
+
+
+\begin{block}{critère du Principe du Maximum Local}
+    \begin{equation}
+\theta_{m+\frac{1}{2}} = \min \left(1, \frac{\gamma}{|\Delta F|}  \left\{
+    \begin{aligned}
+    \min\left( \beta_{m+1}^n-{u}_{m+\frac{1}{2}}^{*,FV},{u}_{m+\frac{1}{2}}^{*,FV} - \alpha_{m}^n \right), &\text{ si }\Delta F >0  \\
+    \min\left( \beta_{m}^n-{u}_{m+\frac{1}{2}}^{*,FV},{u}_{m+\frac{1}{2}}^{*,FV} - \alpha_{m+1}^n \right), &\text{ si }\Delta F <0  
+    \end{aligned}\right.
+    \right)
+\end{equation}  
 \end{block}
 
+\begin{block}{cas tests de différents critères}
+\red{sinus advection} 
+\hspace{2cm}
+\red{choc burgers} 
+\hspace{2cm}
+\red{buckley}
+
+\end{block}
 
 \end{frame}
+
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
+
 
 \begin{frame}{défaut des critères : \red{erreur induite}, relaxation des critères}
 
+\begin{columns}
+\begin{column}{0.68 \textwidth}
+\begin{block}{relaxation d'extrema régulier}
+\begin{tabular}{p{3cm}c}
+\multirow{4}{4cm}{
+    $v_i(x) = \partial_x \overline{{u}_{i}} +(x-x_i) \partial_{xx} \overline{{u}_i}$\\
+    \vspace{0.1cm}
+    $v_{i-1/2}^M := \max(\partial_x\overline{{u}_{i-1}},\partial_x\overline{{u}_{i}})$\\
+    \vspace{0.1cm}
+    $v_{i-1/2}^m := \min(\partial_x\overline{{u}_{i-1}},\partial_x\overline{{u}_{i}})$\\
+    \vspace{0.3cm}
+    $v_{i-1/2}^m \leq v_i(x_{i-1/2}) \leq v_{i-1/2}^M$\\
+    \vspace{0.1cm}
+    $v_{i+1/2}^m \leq v_i(x_{i+1/2}) \leq v_{i+1/2}^M$
+}
+&
+\raisebox{-25mm}{\usebox{\detectextrema}}
+\end{tabular}   
+\end{block}
+\end{column}
+
+\begin{column}{0.3\textwidth}
+\begin{block}{convergence des critères}
+\red{sinus advection ou burgers}
+\end{block}
+
+\end{column}
+\end{columns}
+
+\begin{block}{comparaison avec/sans relaxation}
+\end{block}
+
+\red{sinus advection} 
+\hspace{2cm}
+\red{choc burgers} 
+\hspace{2cm}
+\red{buckley}
 
 
 \end{frame}
+
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
+
+\begin{frame}{Exemple de critère : critère de positivité}
+\begin{columns}
+
+\begin{column}{0.55 \textwidth}
+\begin{block}{Espace des solutions des gaz parfaits}
+\begin{equation}
+    \Omega = \left\{u=(\rho,\rho v,\rho e) \, \biggr \rvert \, \rho >0, \quad \varepsilon= \rho e - \rho \frac{|v|^2}{2} >0\right\}
+\end{equation}
+\end{block}
+\end{column}
+
+\begin{column}{0.35 \textwidth}
+\begin{block}{critère de positivité de $\widetilde{\rho}$}
+$\theta_{m+\frac{1}{2}}^{\rho>0} = \min \left(1, \frac{\gamma}{|\Delta F^{\rho|} } {\rho}_{m+\frac{1}{2}}^{*} \right)$
+\end{block}
+\end{column}
+
+\end{columns}
+
+\begin{block}{critère de positivité de $\widetilde{\varepsilon}$}
+\begin{tabular}{p{6.2cm} p{6cm}}
+$\widetilde{\rho}^{\pm} \widetilde{\rho e}^{\pm} - \frac{|\widetilde{\rho v}^{\pm}|^2}{2}  \geq 0 $ 
+\hspace{1cm}$\widetilde{\rho}^{\pm} = \rho^* \pm \theta_{m+\frac{1}{2}} \frac{\Delta F^\rho}{\gamma} $
+
+$\rho^* \, \rho e^* - \frac{|\rho v^* |^2}{2} \geq \mp \theta_{m+\frac{1}{2}} \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
+\vspace{0.1cm}
+\hspace{2cm}$+ \theta_{m+\frac{1}{2}}^2 \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$
+\\
+\begin{equation}
+\theta_{m+\frac{1}{2}} = \min \left(1, \theta_{m+\frac{1}{2}}^{\rho>0}, \frac{M}{|B|+ min(A,0) } \right)
+\end{equation}
+&
+\multirow{2}{6cm}{
+$M = \rho^* \, \rho e^* - \frac{|\rho v|^2}{2}>0 $, 
+$B= \frac{1}{\gamma}   \left[\Delta F^{\rho} \rho e^* + \Delta F^{\rho e} \rho^* - \Delta F^{\rho v} \rho v^* \right]$
+$A = \frac{1}{2\gamma^2}\left[2\Delta F^{\rho e}\Delta F^{\rho}- |\Delta F^{\rho v}|^2\right]$ 
+}
+\end{tabular}
+\end{block}
+
+\end{frame}
+
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
 
 \begin{frame}{Exemple de critère : critère de positivité}
 
-
+\red{Sod modifé}\hspace{4cm}\red{Choc-accoustique }\\
+\vspace{5cm}
+\red{Isentropique}\hspace{4cm}\red{Blast }\\
 
 \end{frame}
+
+% ------------------------------------------------------------------------------------
+% ------------------------------------------------------------------------------------
+
 
 \begin{frame}{Exemple de critère : deuxième critère de positivité (Bonus)}
 

@@ -11,7 +11,7 @@ nb_var = int(lines[0][10:16])
 orderx = int(lines[1][10:16])
 ordert = int(lines[2][10:16])
 nb_cell =int(lines[3][10:16]) ; nb_sub= int(lines[4][13:19])
-space = nb_sub
+space = orderx+1
 nx = nb_cell *space
 
 # sm=100
